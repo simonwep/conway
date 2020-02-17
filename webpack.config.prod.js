@@ -1,9 +1,11 @@
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
     mode: 'production',
@@ -31,10 +33,7 @@ module.exports = {
         minimizer: [
             new TerserPlugin({
                 terserOptions: {
-                    mangle: {
-                        toplevel: true,
-                        properties: true
-                    }
+                    mangle: true
                 }
             }),
 
@@ -57,6 +56,12 @@ module.exports = {
 
         new MiniCssExtractPlugin({
             filename: '[hash:8].css'
+        }),
+
+        new WasmPackPlugin({
+            crateDirectory: path.resolve(__dirname, 'crate'),
+            extraArgs: '--no-typescript',
+            forceMode: 'production'
         }),
 
         new CleanWebpackPlugin()

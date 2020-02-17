@@ -1,0 +1,20 @@
+{
+    "env": {
+        "browser": true,
+        "node": true,
+        "es6": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "simon"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+    },
+    "rules": {
+        "no-cond-assign": "off",
+        "no-console": "warn",
+        "eqeqeq": "error"
+    }
+}
