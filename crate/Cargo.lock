@@ -259,6 +259,7 @@ name = "wasm_conways_game_of_life"
 version = "0.0.0"
 dependencies = [
  "console_error_panic_hook",
+ "js-sys",
  "wasm-bindgen",
  "wasm-bindgen-test",
  "wee_alloc",
