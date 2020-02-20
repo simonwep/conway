@@ -22,56 +22,50 @@ const loop = () => {
     canvas.height = height;
     const rows = width / BLOCK;
     const cols = height / BLOCK;
-    const cellCount = rows * cols;
-    let cells = new Uint8Array(cellCount);
+    const cellCount = rows * cols + rows * 2 + cols * 2;
+    let source = new Uint8Array(cellCount);
+    let target = new Uint8Array(cellCount);
+    let swap = false;
 
     // Randomize cells
-    for (let i = 0; i < cells.length; i++) {
-        const neighbors = Math.floor(Math.random() * 4);
-        cells[i] = (neighbors << 1) + (Math.random() > 0.8 ? 1 : 0);
+    for (let row = 1; row < rows; row++) {
+        const offset = row * cols;
+
+        for (let col = 1; col < cols; col++) {
+            source[offset + col] = Math.random() > 0.8 ? 1 : 0;
+        }
     }
 
     // Draw grid
     const nextGen = () => {
-        const newCells = new Uint8Array(cellCount);
+        const [src, tar] = swap ? [target, source] : [source, target];
 
         // Clear rect
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, width, height);
         ctx.fillStyle = '#000';
 
-        for (let i = 0; i < rows; i++) {
-            const offset = i * cols;
-            const hasBottom = i < rows - 1;
-            const hasTop = offset !== 0;
+        for (let row = 1; row < rows; row++) {
+            const offset = row * cols;
+            const top = (row - 1) * cols;
+            const bottom = (row + 1) * cols;
 
-            for (let j = 0; j < cols; j++) {
-                const cellOffset = offset + j;
-                const hasLeft = j > 0;
-                const hasRight = j + 1 < cols;
-                let neighbors = 0;
+            for (let col = 1; col < cols; col++) {
+                const cellOffset = offset + col;
+                const bottomOffset = bottom + col;
+                const topOffset = top + col;
 
-                // Top row
-                if (hasTop) {
-                    const topMiddle = cellOffset - cols;
-                    neighbors += (cells[topMiddle] & 0b1) // TOP MIDDLE
-                        + (hasLeft ? cells[topMiddle - 1] & 0b1 : 0)  // TOP LEFT
-                        + (hasRight ? cells[topMiddle + 1] & 0b1 : 0); // TOP RIGHT
-                }
+                const neighbors = src[topOffset - 1] + // TL
+                    src[topOffset] + // TM
+                    src[topOffset + 1] + // TR
+                    src[cellOffset - 1] + // L
+                    src[cellOffset + 1] + // R
+                    src[bottomOffset - 1] + // BL
+                    src[bottomOffset] + // BM
+                    src[bottomOffset + 1]; // BR
 
-                // Left & Right
-                neighbors += (hasLeft ? cells[cellOffset - 1] & 0b1 : 0) // LEFT
-                    + (hasRight ? cells[cellOffset + 1] & 0b1 : 0); // RIGHT
-
-                // Bottom row
-                if (hasBottom) {
-                    const bottomMiddle = cellOffset + cols;
-                    neighbors += (cells[bottomMiddle] & 0b1) // BOTTOM MIDDLE
-                        + (hasLeft ? cells[bottomMiddle - 1] & 0b1 : 0)  // BOTTOM LEFT
-                        + (hasRight ? cells[bottomMiddle + 1] & 0b1 : 0); // BOTTOM RIGHT
-                }
-
-                const newState = (cells[cellOffset] & 0b1) === 1 ?
+                // console.log(` >>> ${neighbors}`);
+                const newState = src[cellOffset] ?
 
                     // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
                     // Any live cell with two or three live neighbours lives on to the next generation.
@@ -82,16 +76,16 @@ const loop = () => {
                     neighbors === 3;
 
                 // Save state
-                newCells[cellOffset] = (neighbors << 1) + newState;
+                tar[cellOffset] = newState ? 1 : 0;
 
                 // Draw pixel
                 if (newState) {
-                    ctx.fillRect(i * BLOCK, j * BLOCK, BLOCK_SIZE, BLOCK_SIZE);
+                    ctx.fillRect(row * BLOCK, col * BLOCK, BLOCK_SIZE, BLOCK_SIZE);
                 }
             }
         }
 
-        cells = newCells;
+        swap = !swap;
         if (!stopped) {
             requestAnimationFrame(nextGen);
         }
