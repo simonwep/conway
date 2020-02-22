@@ -13,8 +13,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub struct Universe {
-    cols: u32,
-    rows: u32,
+    cols: usize,
+    rows: usize,
     source: Vec<u8>,
     target: Vec<u8>,
     swap: bool,
@@ -23,20 +23,21 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     /// Creates a new game-of-life universe
-    pub fn new(cols: u32, rows: u32) -> Universe {
+    pub fn new(cols: usize, rows: usize) -> Universe {
         // Pad universe left and right, thus we don't need to
         // check corners.
         let total_cells = cols * rows + rows * 2 + cols * 2;
-        let source = (0..total_cells)
+        let target: Vec<u8> = (0..total_cells).map(|_| 0).collect();
+        let source: Vec<u8> = (0..total_cells)
             .map(|i| if js_sys::Math::random() > 0.75 { 1 } else { 0 })
             .collect();
 
         Universe {
+            swap: false,
             cols,
             rows,
             source,
-            target: (0..total_cells).map(|_| 0).collect(),
-            swap: false,
+            target,
         }
     }
 
@@ -63,9 +64,9 @@ impl Universe {
             let bottom = (row + 1) * self.cols;
 
             for col in 1..self.cols {
-                let cell_offset = (offset + col) as usize; // TODO: Incompatibility??
-                let bottom_offset = (bottom + col) as usize;
-                let top_offset = (top + col) as usize;
+                let cell_offset = offset + col;
+                let bottom_offset = bottom + col;
+                let top_offset = top + col;
 
                 let neighbors = src[top_offset - 1] + // Top Left
                     src[top_offset] + // Top Middle

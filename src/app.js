@@ -2,7 +2,7 @@ import {RustUniverse} from './modes/rust';
 import './styles.css';
 import {JSUniverse}   from './modes/javascript';
 
-const BLOCK_SIZE = 2;
+const BLOCK_SIZE = 1;
 const BLOCK_MARGIN = 1;
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d', {
@@ -35,7 +35,6 @@ const start = async (mode = RustUniverse) => {
 
     const renderLoop = () => {
         universe.nextGen();
-
         const cells = universe.cells();
 
         // Clear rect
@@ -43,15 +42,18 @@ const start = async (mode = RustUniverse) => {
         ctx.fillRect(0, 0, width, height);
         ctx.fillStyle = '#000';
 
+        ctx.beginPath();
         for (let row = 1; row < rows; row++) {
             const offset = row * cols;
 
             for (let col = 1; col < cols; col++) {
                 if (cells[offset + col] === 1) {
-                    ctx.fillRect(row * block, col * block, BLOCK_SIZE, BLOCK_SIZE);
+                    ctx.rect(row * block, col * block, BLOCK_SIZE, BLOCK_SIZE);
                 }
             }
         }
+
+        ctx.fill();
 
         if (!stopped) {
             requestAnimationFrame(renderLoop);
@@ -62,21 +64,25 @@ const start = async (mode = RustUniverse) => {
     return () => stopped = true;
 };
 
-let stop = null;
-window.addEventListener('keyup', async e => {
+(async () => {
+    let stop = await start();
 
-    if (stop) {
-        stop();
-    }
+    window.addEventListener('keyup', async e => {
 
-    switch (e.code) {
-        case 'KeyR' : {
-            stop = await start(RustUniverse);
-            break;
+        if (stop) {
+            stop();
         }
-        case  'KeyJ': {
-            stop = await start(JSUniverse);
-            break;
+
+        switch (e.code) {
+            case 'KeyR' : {
+                stop = await start(RustUniverse);
+                break;
+            }
+            case  'KeyJ': {
+                stop = await start(JSUniverse);
+                break;
+            }
         }
-    }
-});
+    });
+})();
+
