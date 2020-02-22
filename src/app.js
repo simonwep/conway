@@ -2,12 +2,12 @@ import {RustUniverse} from './modes/rust';
 import './styles.css';
 import {JSUniverse}   from './modes/javascript';
 
-const BLOCK_SIZE = 1;
-const BLOCK_MARGIN = 1;
+const BLOCK_SIZE = 2;
+const BLOCK_MARGIN = 0;
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d', {
     antialias: false,
-    alpha: false
+    alpha: true
 });
 
 const resizeCanvas = () => {
@@ -26,8 +26,8 @@ const resizeCanvas = () => {
     return {width, height, rows, cols, block};
 };
 
-const start = async (mode = RustUniverse) => {
-    const {width, height, rows, cols, block} = resizeCanvas();
+const start = async (mode = JSUniverse) => {
+    const {rows, cols, block} = resizeCanvas();
 
     // Construct the universe, and get its width and height.
     const universe = await mode.new(cols, rows);
@@ -38,17 +38,24 @@ const start = async (mode = RustUniverse) => {
         const cells = universe.cells();
 
         // Clear rect
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, width, height);
         ctx.fillStyle = '#000';
-
         ctx.beginPath();
+
         for (let row = 1; row < rows; row++) {
             const offset = row * cols;
 
             for (let col = 1; col < cols; col++) {
-                if (cells[offset + col] === 1) {
-                    ctx.rect(row * block, col * block, BLOCK_SIZE, BLOCK_SIZE);
+                const cell = cells[offset + col];
+
+                if (cell & 0b10) {
+                    const x = row * block;
+                    const y = col * block;
+
+                    if (cell & 0b01) {
+                        ctx.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+                    } else {
+                        ctx.clearRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+                    }
                 }
             }
         }

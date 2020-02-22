@@ -29,7 +29,7 @@ impl Universe {
         let total_cells = cols * rows + rows * 2 + cols * 2;
         let target: Vec<u8> = (0..total_cells).map(|_| 0).collect();
         let source: Vec<u8> = (0..total_cells)
-            .map(|i| if js_sys::Math::random() > 0.75 { 1 } else { 0 })
+            .map(|_| if js_sys::Math::random() > 0.75 { 3 } else { 0 })
             .collect();
 
         Universe {
@@ -68,16 +68,17 @@ impl Universe {
                 let bottom_offset = bottom + col;
                 let top_offset = top + col;
 
-                let neighbors = src[top_offset - 1] + // Top Left
-                    src[top_offset] + // Top Middle
-                    src[top_offset + 1] + // Top Right
-                    src[cell_offset - 1] + // Left
-                    src[cell_offset + 1] + // Right
-                    src[bottom_offset - 1] + // Bottom Left
-                    src[bottom_offset] + // Bottom Middle
-                    src[bottom_offset + 1]; // Bottom Right
+                let neighbors = (src[top_offset - 1] & 0b01) + // Top Left
+                    (src[top_offset] & 0b01) + // Top Middle
+                    (src[top_offset + 1] & 0b01) + // Top Right
+                    (src[cell_offset - 1] & 0b01) + // Left
+                    (src[cell_offset + 1] & 0b01) + // Right
+                    (src[bottom_offset - 1] & 0b01) + // Bottom Left
+                    (src[bottom_offset] & 0b01) + // Bottom Middle
+                    (src[bottom_offset + 1] & 0b01); // Bottom Right
 
-                let next_cell = if src[cell_offset] == 1 {
+                let current_state = src[cell_offset] & 0b01;
+                let next_state = if if current_state == 1 {
                     // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
                     // Any live cell with two or three live neighbours lives on to the next generation.
                     // Any live cell with more than three live neighbours dies, as if by overpopulation.
@@ -85,9 +86,13 @@ impl Universe {
                 } else {
                     // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
                     neighbors == 3
+                } {
+                    1
+                } else {
+                    0
                 };
 
-                tar[cell_offset] = if next_cell { 1 } else { 0 }
+                tar[cell_offset] = if current_state == next_state { 0 } else { 2 } + next_state
             }
         }
 
