@@ -47,7 +47,8 @@ module.exports = {
 
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, 'crate'),
-            extraArgs: '--no-typescript'
+            extraArgs: '--no-typescript --target browser --mode normal',
+            forceMode: 'production'
         })
     ]
 };

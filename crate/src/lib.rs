@@ -15,8 +15,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub struct Universe {
     cols: usize,
     rows: usize,
-    source: Vec<u8>,
-    target: Vec<u8>,
+    source: Vec<bool>,
+    target: Vec<bool>,
     swap: bool,
 }
 
@@ -27,9 +27,9 @@ impl Universe {
         // Pad universe left and right, thus we don't need to
         // check corners.
         let total_cells = cols * rows + rows * 2 + cols * 2;
-        let target: Vec<u8> = (0..total_cells).map(|_| 0).collect();
-        let source: Vec<u8> = (0..total_cells)
-            .map(|_| if js_sys::Math::random() > 0.75 { 3 } else { 0 })
+        let target: Vec<bool> = (0..total_cells).map(|_| false).collect();
+        let source: Vec<bool> = (0..total_cells)
+            .map(|_| js_sys::Math::random() > 0.75)
             .collect();
 
         Universe {
@@ -42,7 +42,7 @@ impl Universe {
     }
 
     /// Returns the current cell-list
-    pub fn cells(&self) -> *const u8 {
+    pub fn cells(&self) -> *const bool {
         if self.swap {
             self.source.as_ptr()
         } else {
@@ -60,25 +60,38 @@ impl Universe {
 
         for row in 1..self.rows {
             let offset = row * self.cols;
-            let top = (row - 1) * self.cols;
-            let bottom = (row + 1) * self.cols;
+            let top = (row - 1) * self.cols + 1;
+            let bottom = (row + 1) * self.cols + 1;
+
+            let mut mask = (if src[top - 1] { 32 } else { 0 })
+                + (if src[top] { 4 } else { 0 })
+                + (if src[offset - 1] { 16 } else { 0 })
+                + (if src[offset] { 2 } else { 0 })
+                + (if src[bottom - 1] { 8 } else { 0 })
+                + (if src[bottom] { 1 } else { 0 });
 
             for col in 1..self.cols {
-                let cell_offset = offset + col;
-                let bottom_offset = bottom + col;
-                let top_offset = top + col;
+                let middle = offset + col;
 
-                let neighbors = (src[top_offset - 1] & 0b01) + // Top Left
-                    (src[top_offset] & 0b01) + // Top Middle
-                    (src[top_offset + 1] & 0b01) + // Top Right
-                    (src[cell_offset - 1] & 0b01) + // Left
-                    (src[cell_offset + 1] & 0b01) + // Right
-                    (src[bottom_offset - 1] & 0b01) + // Bottom Left
-                    (src[bottom_offset] & 0b01) + // Bottom Middle
-                    (src[bottom_offset + 1] & 0b01); // Bottom Right
+                // Shift previously saved information to the left and make room
+                // For 3 additional bits (which will be used for the middle row).
+                mask = ((mask << 3) & 0b111111111) + // Make room for three more bits
+                    (if src[top + col] { 4 } else { 0 }) + // TR
+                    (if src[middle + 1] { 2 } else { 0 }) + // MR
+                    (if src[bottom + col] { 1 } else { 0 }); // BR
 
-                let current_state = src[cell_offset] & 0b01;
-                let next_state = if if current_state == 1 {
+                // Lookup bits
+                let mut neighbors = 0;
+                for i in 0..4 {
+                    neighbors += if mask & (1 << i) != 0 { 1 } else { 0 };
+                }
+
+                for i in 5..9 {
+                    neighbors += if mask & (1 << i) != 0 { 1 } else { 0 };
+                }
+
+                // Save state
+                tar[middle] = if src[middle] {
                     // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
                     // Any live cell with two or three live neighbours lives on to the next generation.
                     // Any live cell with more than three live neighbours dies, as if by overpopulation.
@@ -86,13 +99,7 @@ impl Universe {
                 } else {
                     // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
                     neighbors == 3
-                } {
-                    1
-                } else {
-                    0
-                };
-
-                tar[cell_offset] = if current_state == next_state { 0 } else { 2 } + next_state
+                }
             }
         }
 

@@ -17,7 +17,7 @@ export class JSUniverse {
             const offset = row * cols;
 
             for (let col = 1; col < cols; col++) {
-                source[offset + col] = Math.random() > 0.75 ? 3 : 0;
+                source[offset + col] = Math.random() > 0.75 ? 1 : 0;
             }
         }
 
@@ -38,38 +38,50 @@ export class JSUniverse {
 
         for (let row = 1; row < rows; row++) {
             const offset = row * cols;
-            const top = (row - 1) * cols;
-            const bottom = (row + 1) * cols;
+            const top = (row - 1) * cols + 1;
+            const bottom = (row + 1) * cols + 1;
 
+            // Build 3x3 bit mask, the mask contains the state of the three cells
+            // Below and above the current row.
+            // TL TM X << X will be updated at each iteration (and others shifted to left)
+            // ML MM X
+            // BL BM X
+            let mask =
+                (src[top - 1] ? 32 : 0) + (src[top] ? 4 : 0) +
+                (src[offset - 1] ? 16 : 0) + (src[offset] ? 2 : 0) +
+                (src[bottom - 1] ? 8 : 0) + (src[bottom] ? 1 : 0);
+
+            // Mask.printMatrix();
             for (let col = 1; col < cols; col++) {
-                const cellOffset = offset + col;
-                const bottomOffset = bottom + col;
-                const topOffset = top + col;
+                const middle = offset + col;
 
-                const neighbors = (src[topOffset - 1] & 0b01) + // Top Left
-                    (src[topOffset] & 0b01) +      // Top Middle
-                    (src[topOffset + 1] & 0b01) +  // Top Right
-                    (src[cellOffset - 1] & 0b01) + // Left
-                    (src[cellOffset + 1] & 0b01) + // Right
-                    (src[bottomOffset - 1] & 0b01) + // Bottom Left
-                    (src[bottomOffset] & 0b01) +     // Bottom Middle
-                    (src[bottomOffset + 1] & 0b01);  // Bottom Right
+                // Shift previously saved information to the left and make room
+                // For 3 additional bits (which will be used for the middle row).
+                mask = ((mask << 3) & 0b111111111) + // Make room for three more bits
+                    (src[top + col] ? 4 : 0) + // TR
+                    (src[middle + 1] ? 2 : 0) + // MR
+                    (src[bottom + col] ? 1 : 0); // BR
 
-                const currentState = src[cellOffset] & 0b01;
-                const nextState = (
-                    currentState ?
+                // Lookup bits
+                let neighbors = 0;
+                for (let i = 0; i < 4; i++) {
+                    neighbors += mask & (1 << i) ?  1 : 0;
+                }
 
-                        // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
-                        // Any live cell with two or three live neighbours lives on to the next generation.
-                        // Any live cell with more than three live neighbours dies, as if by overpopulation.
-                        (neighbors < 4 && neighbors > 1) :
-
-                        // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-                        neighbors === 3
-                ) ? 1 : 0;
+                for (let i = 5; i < 9; i++) {
+                    neighbors += mask & (1 << i) ?  1 : 0;
+                }
 
                 // Save state
-                tar[cellOffset] = (currentState === nextState ? 0 : 2) + nextState;
+                tar[middle] = src[middle] ?
+
+                    // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+                    // Any live cell with two or three live neighbours lives on to the next generation.
+                    // Any live cell with more than three live neighbours dies, as if by overpopulation.
+                    (neighbors < 4 && neighbors > 1) :
+
+                    // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+                    neighbors === 3;
             }
         }
 
@@ -80,3 +92,5 @@ export class JSUniverse {
         return this.swap ? this.source : this.target;
     }
 }
+
+

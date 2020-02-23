@@ -26,8 +26,8 @@ const resizeCanvas = () => {
     return {width, height, rows, cols, block};
 };
 
-const start = async (mode = JSUniverse) => {
-    const {rows, cols, block} = resizeCanvas();
+const start = async (mode = RustUniverse) => {
+    const {width, height, rows, cols, block} = resizeCanvas();
 
     // Construct the universe, and get its width and height.
     const universe = await mode.new(cols, rows);
@@ -38,6 +38,8 @@ const start = async (mode = JSUniverse) => {
         const cells = universe.cells();
 
         // Clear rect
+        ctx.fillStyle = '#fff';
+        ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = '#000';
         ctx.beginPath();
 
@@ -45,17 +47,10 @@ const start = async (mode = JSUniverse) => {
             const offset = row * cols;
 
             for (let col = 1; col < cols; col++) {
-                const cell = cells[offset + col];
-
-                if (cell & 0b10) {
+                if (cells[offset + col]) {
                     const x = row * block;
                     const y = col * block;
-
-                    if (cell & 0b01) {
-                        ctx.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
-                    } else {
-                        ctx.clearRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
-                    }
+                    ctx.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
                 }
             }
         }
