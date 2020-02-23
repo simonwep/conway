@@ -2,12 +2,12 @@ import {RustUniverse} from './modes/rust';
 import './styles.css';
 import {JSUniverse}   from './modes/javascript';
 
-const BLOCK_SIZE = 2;
-const BLOCK_MARGIN = 0;
+const BLOCK_SIZE = 1;
+const BLOCK_MARGIN = 1;
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d', {
     antialias: false,
-    alpha: true
+    alpha: false
 });
 
 const resizeCanvas = () => {
@@ -27,35 +27,49 @@ const resizeCanvas = () => {
 };
 
 const start = async (mode = RustUniverse) => {
-    const {rows, cols, block} = resizeCanvas();
+    const {width, height, rows, cols, block} = resizeCanvas();
 
     // Construct the universe, and get its width and height.
     const universe = await mode.new(cols, rows);
     let stopped = false;
 
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, width, height);
+
     const renderLoop = () => {
         universe.nextGen();
-        const cells = universe.cells();
 
-        for (let i = 0; i < cells.length; i += 3) {
-            const col = cells[i] * block;
-            const row = cells[i + 1] * block;
-            const state = cells[i + 2];
-
-            if (state) {
-                ctx.fillRect(col, row, BLOCK_SIZE, BLOCK_SIZE);
-            } else {
-                ctx.clearRect(col, row, BLOCK_SIZE, BLOCK_SIZE);
-            }
+        // Draw killed cells
+        ctx.beginPath();
+        const killed = universe.killed();
+        for (let i = 0; i < killed.length; i += 2) {
+            const row = killed[i] * block;
+            const col = killed[i + 1] * block;
+            ctx.rect(row, col, BLOCK_SIZE, BLOCK_SIZE);
         }
+
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+
+
+        // Draw living cells
+        ctx.beginPath();
+        const resurrected = universe.resurrected();
+        for (let i = 0; i < resurrected.length; i += 2) {
+            const row = resurrected[i] * block;
+            const col = resurrected[i + 1] * block;
+            ctx.rect(row, col, BLOCK_SIZE, BLOCK_SIZE);
+        }
+
+        ctx.fillStyle = '#000';
+        ctx.fill();
 
         if (!stopped) {
             requestAnimationFrame(renderLoop);
         }
     };
 
-    renderLoop();
+    requestAnimationFrame(renderLoop);
     return () => stopped = true;
 };
 

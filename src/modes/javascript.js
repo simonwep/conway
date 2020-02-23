@@ -4,8 +4,12 @@ export class JSUniverse {
     rows = 0;
     source = null;
     target = null;
-    updatedCells = null;
-    updatedAmount = 0;
+    killedCellsBuffer = null;
+    resurrectedCellsBuffer = null;
+    killedCells = null;
+    resurrectedCells = null;
+    killedCellsAmount = 0;
+    resurrectedCellsAmount = 0;
     swap = false;
 
     constructor(cols, rows) {
@@ -26,7 +30,10 @@ export class JSUniverse {
         this.cols = cols;
         this.source = source;
         this.target = target;
-        this.updatedCells = new Uint32Array(totalCells * 3);
+        this.killedCellsBuffer = new ArrayBuffer(totalCells * 2 * 4);
+        this.resurrectedCellsBuffer = new ArrayBuffer(totalCells * 2 * 4);
+        this.killedCells = new Uint32Array(this.killedCellsBuffer);
+        this.resurrectedCells = new Uint32Array(this.resurrectedCellsBuffer);
     }
 
     static async new(cols, rows) {
@@ -34,9 +41,10 @@ export class JSUniverse {
     }
 
     nextGen() {
-        const {updatedCells, source, target, swap, rows, cols} = this;
+        const {resurrectedCells, killedCells, source, target, swap, rows, cols} = this;
         const [src, tar] = swap ? [target, source] : [source, target];
-        this.updatedAmount = 0;
+        this.resurrectedCellsAmount = 0;
+        this.killedCellsAmount = 0;
 
         for (let row = 1; row < rows; row++) {
             const offset = row * cols;
@@ -76,22 +84,28 @@ export class JSUniverse {
                     (mask >> 9 & 0b1);
 
                 const cell = src[middle];
-                const next = cell ?
-                    // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
-                    // Any live cell with two or three live neighbours lives on to the next generation.
-                    // Any live cell with more than three live neighbours dies, as if by overpopulation.
-                    (neighbors < 4 && neighbors > 1) :
+                const next = (
+                    cell ?
+                        // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+                        // Any live cell with two or three live neighbours lives on to the next generation.
+                        // Any live cell with more than three live neighbours dies, as if by overpopulation.
+                        (neighbors < 4 && neighbors > 1) :
 
-                    // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-                    neighbors === 3;
+                        // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+                        neighbors === 3
+                ) ? 1 : 0;
 
                 // Save state
                 tar[middle] = next;
 
                 if (cell !== next) {
-                    updatedCells[this.updatedAmount++] = row;
-                    updatedCells[this.updatedAmount++] = col;
-                    updatedCells[this.updatedAmount++] = next;
+                    if (next) {
+                        resurrectedCells[this.resurrectedCellsAmount++] = row;
+                        resurrectedCells[this.resurrectedCellsAmount++] = col;
+                    } else {
+                        killedCells[this.killedCellsAmount++] = row;
+                        killedCells[this.killedCellsAmount++] = col;
+                    }
                 }
             }
         }
@@ -99,12 +113,20 @@ export class JSUniverse {
         this.swap = !swap;
     }
 
-    cells() {
+    resurrected() {
         return new Uint32Array(
-            this.updatedCells,
+            this.resurrectedCellsBuffer,
             0,
-            this.updatedAmount
-        )
+            this.resurrectedCellsAmount
+        );
+    }
+
+    killed() {
+        return new Uint32Array(
+            this.killedCellsBuffer,
+            0,
+            this.killedCellsAmount
+        );
     }
 }
 

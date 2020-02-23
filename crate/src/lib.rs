@@ -17,8 +17,8 @@ pub struct Universe {
     rows: usize,
     source: Vec<bool>,
     target: Vec<bool>,
-    updated_cells: Vec<(usize, usize, usize)>,
-    update_count: usize,
+    killed_cells: Vec<(u32, u32)>,
+    resurrected_cells: Vec<(u32, u32)>,
     swap: bool,
 }
 
@@ -36,8 +36,8 @@ impl Universe {
 
         Universe {
             swap: false,
-            updated_cells: (0..total_cells).map(|_| (0, 0, 0)).collect(),
-            update_count: 0,
+            killed_cells: Vec::with_capacity(total_cells),
+            resurrected_cells: Vec::with_capacity(total_cells),
             cols,
             rows,
             source,
@@ -45,19 +45,28 @@ impl Universe {
         }
     }
 
-    /// Returns the current cell-list
-    pub fn updated_cells(&mut self) -> *const (usize, usize, usize) {
-        self.updated_cells.as_ptr()
+    pub fn resurrected_cells(&mut self) -> *const (u32, u32) {
+        self.resurrected_cells.as_ptr()
     }
 
-    pub fn update_count(&mut self) -> usize {
-        self.update_count
+    pub fn resurrected_cells_amount(&mut self) -> usize {
+        self.resurrected_cells.len()
+    }
+
+    pub fn killed_cells(&mut self) -> *const (u32, u32) {
+        self.killed_cells.as_ptr()
+    }
+
+    pub fn killed_cells_amount(&mut self) -> usize {
+        self.killed_cells.len()
     }
 
     /// Calculates the next generation
     pub fn next_gen(&mut self) {
-        let updated_cells = &mut self.updated_cells;
-        self.update_count = 0;
+        let killed_cells = &mut self.killed_cells;
+        let resurrected_cells = &mut self.resurrected_cells;
+        resurrected_cells.truncate(0);
+        killed_cells.truncate(0);
 
         let (src, tar) = if self.swap {
             (&mut self.target, &mut self.source)
@@ -113,14 +122,13 @@ impl Universe {
                 tar[middle] = next;
 
                 if cell != next {
-                    // Save changed cell
-                    updated_cells[self.update_count] = (
-                        row as usize,
-                        col as usize,
-                        if tar[middle] { 1 } else { 0 } as usize,
-                    );
+                    let payload = (row as u32, col as u32);
 
-                    self.update_count += 1;
+                    // Save changed cell
+                    match next {
+                        true => resurrected_cells.push(payload),
+                        false => killed_cells.push(payload),
+                    }
                 };
             }
         }

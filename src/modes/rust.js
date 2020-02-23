@@ -10,7 +10,6 @@ export class RustUniverse {
         this.cols = cols;
         this.universe = universe;
         this.wasm = wasm;
-        this.totalCells = cols * rows + rows * 2 + cols * 2;
     }
 
     static async new(cols, rows) {
@@ -30,11 +29,19 @@ export class RustUniverse {
         this.universe.next_gen();
     }
 
-    cells() {
-        return new Int32Array(
+    resurrected() {
+        return new Uint32Array(
             this.wasm.memory.buffer,
-            this.universe.updated_cells(),
-            this.universe.update_count() * 3
+            this.universe.resurrected_cells(),
+            this.universe.resurrected_cells_amount() * 2
+        );
+    }
+
+    killed() {
+        return new Uint32Array(
+            this.wasm.memory.buffer,
+            this.universe.killed_cells(),
+            this.universe.killed_cells_amount() * 2
         );
     }
 }
