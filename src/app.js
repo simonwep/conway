@@ -27,35 +27,28 @@ const resizeCanvas = () => {
 };
 
 const start = async (mode = RustUniverse) => {
-    const {width, height, rows, cols, block} = resizeCanvas();
+    const {rows, cols, block} = resizeCanvas();
 
     // Construct the universe, and get its width and height.
     const universe = await mode.new(cols, rows);
     let stopped = false;
 
+    ctx.fillStyle = '#000';
     const renderLoop = () => {
         universe.nextGen();
         const cells = universe.cells();
 
-        // Clear rect
-        ctx.fillStyle = '#fff';
-        ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
+        for (let i = 0; i < cells.length; i += 3) {
+            const col = cells[i] * block;
+            const row = cells[i + 1] * block;
+            const state = cells[i + 2];
 
-        for (let row = 1; row < rows; row++) {
-            const offset = row * cols;
-
-            for (let col = 1; col < cols; col++) {
-                if (cells[offset + col]) {
-                    const x = row * block;
-                    const y = col * block;
-                    ctx.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
-                }
+            if (state) {
+                ctx.fillRect(col, row, BLOCK_SIZE, BLOCK_SIZE);
+            } else {
+                ctx.clearRect(col, row, BLOCK_SIZE, BLOCK_SIZE);
             }
         }
-
-        ctx.fill();
 
         if (!stopped) {
             requestAnimationFrame(renderLoop);

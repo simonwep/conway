@@ -4,6 +4,8 @@ export class JSUniverse {
     rows = 0;
     source = null;
     target = null;
+    updatedCells = null;
+    updatedAmount = 0;
     swap = false;
 
     constructor(cols, rows) {
@@ -24,6 +26,7 @@ export class JSUniverse {
         this.cols = cols;
         this.source = source;
         this.target = target;
+        this.updatedCells = new Uint32Array(totalCells * 3);
     }
 
     static async new(cols, rows) {
@@ -31,8 +34,9 @@ export class JSUniverse {
     }
 
     nextGen() {
-        const {source, target, swap, rows, cols} = this;
+        const {updatedCells, source, target, swap, rows, cols} = this;
         const [src, tar] = swap ? [target, source] : [source, target];
+        this.updatedAmount = 0;
 
         for (let row = 1; row < rows; row++) {
             const offset = row * cols;
@@ -71,8 +75,8 @@ export class JSUniverse {
                     (mask >> 8 & 0b1) +
                     (mask >> 9 & 0b1);
 
-                // Save state
-                tar[middle] = src[middle] ?
+                const cell = src[middle];
+                const next = cell ?
                     // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
                     // Any live cell with two or three live neighbours lives on to the next generation.
                     // Any live cell with more than three live neighbours dies, as if by overpopulation.
@@ -80,6 +84,15 @@ export class JSUniverse {
 
                     // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
                     neighbors === 3;
+
+                // Save state
+                tar[middle] = next;
+
+                if (cell !== next) {
+                    updatedCells[this.updatedAmount++] = row;
+                    updatedCells[this.updatedAmount++] = col;
+                    updatedCells[this.updatedAmount++] = next;
+                }
             }
         }
 
@@ -87,7 +100,11 @@ export class JSUniverse {
     }
 
     cells() {
-        return this.swap ? this.source : this.target;
+        return new Uint32Array(
+            this.updatedCells,
+            0,
+            this.updatedAmount
+        )
     }
 }
 

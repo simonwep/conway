@@ -17,6 +17,8 @@ pub struct Universe {
     rows: usize,
     source: Vec<bool>,
     target: Vec<bool>,
+    updated_cells: Vec<(usize, usize, usize)>,
+    update_count: usize,
     swap: bool,
 }
 
@@ -34,6 +36,8 @@ impl Universe {
 
         Universe {
             swap: false,
+            updated_cells: (0..total_cells).map(|_| (0, 0, 0)).collect(),
+            update_count: 0,
             cols,
             rows,
             source,
@@ -42,16 +46,19 @@ impl Universe {
     }
 
     /// Returns the current cell-list
-    pub fn cells(&self) -> *const bool {
-        if self.swap {
-            self.source.as_ptr()
-        } else {
-            self.target.as_ptr()
-        }
+    pub fn updated_cells(&mut self) -> *const (usize, usize, usize) {
+        self.updated_cells.as_ptr()
+    }
+
+    pub fn update_count(&mut self) -> usize {
+        self.update_count
     }
 
     /// Calculates the next generation
     pub fn next_gen(&mut self) {
+        let updated_cells = &mut self.updated_cells;
+        self.update_count = 0;
+
         let (src, tar) = if self.swap {
             (&mut self.target, &mut self.source)
         } else {
@@ -91,8 +98,8 @@ impl Universe {
                     + (mask >> 8 & 0b1)
                     + (mask >> 9 & 0b1);
 
-                // Save state
-                tar[middle] = if src[middle] {
+                let cell = src[middle];
+                let next = if cell {
                     // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
                     // Any live cell with two or three live neighbours lives on to the next generation.
                     // Any live cell with more than three live neighbours dies, as if by overpopulation.
@@ -100,7 +107,21 @@ impl Universe {
                 } else {
                     // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
                     neighbors == 3
-                }
+                };
+
+                // Save state
+                tar[middle] = next;
+
+                if cell != next {
+                    // Save changed cell
+                    updated_cells[self.update_count] = (
+                        row as usize,
+                        col as usize,
+                        if tar[middle] { 1 } else { 0 } as usize,
+                    );
+
+                    self.update_count += 1;
+                };
             }
         }
 

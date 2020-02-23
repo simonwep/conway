@@ -31,10 +31,10 @@ export class RustUniverse {
     }
 
     cells() {
-        return new Uint8Array(
+        return new Int32Array(
             this.wasm.memory.buffer,
-            this.universe.cells(),
-            this.totalCells
+            this.universe.updated_cells(),
+            this.universe.update_count() * 3
         );
     }
 }
