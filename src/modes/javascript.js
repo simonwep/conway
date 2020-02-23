@@ -2,7 +2,6 @@ export class JSUniverse {
 
     cols = 0;
     rows = 0;
-    totalCells = 0;
     source = null;
     target = null;
     swap = false;
@@ -25,7 +24,6 @@ export class JSUniverse {
         this.cols = cols;
         this.source = source;
         this.target = target;
-        this.totalCells = totalCells;
     }
 
     static async new(cols, rows) {
@@ -63,18 +61,18 @@ export class JSUniverse {
                     (src[bottom + col] ? 1 : 0); // BR
 
                 // Lookup bits
-                let neighbors = 0;
-                for (let i = 0; i < 4; i++) {
-                    neighbors += mask & (1 << i) ?  1 : 0;
-                }
-
-                for (let i = 5; i < 9; i++) {
-                    neighbors += mask & (1 << i) ?  1 : 0;
-                }
+                const neighbors = (mask & 0b1) +
+                    (mask >> 1 & 0b1) +
+                    (mask >> 2 & 0b1) +
+                    (mask >> 3 & 0b1) +
+                    (mask >> 5 & 0b1) +
+                    (mask >> 6 & 0b1) +
+                    (mask >> 7 & 0b1) +
+                    (mask >> 8 & 0b1) +
+                    (mask >> 9 & 0b1);
 
                 // Save state
                 tar[middle] = src[middle] ?
-
                     // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
                     // Any live cell with two or three live neighbours lives on to the next generation.
                     // Any live cell with more than three live neighbours dies, as if by overpopulation.

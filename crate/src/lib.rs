@@ -63,7 +63,7 @@ impl Universe {
             let top = (row - 1) * self.cols + 1;
             let bottom = (row + 1) * self.cols + 1;
 
-            let mut mask = (if src[top - 1] { 32 } else { 0 })
+            let mut mask: u16 = (if src[top - 1] { 32 } else { 0 })
                 + (if src[top] { 4 } else { 0 })
                 + (if src[offset - 1] { 16 } else { 0 })
                 + (if src[offset] { 2 } else { 0 })
@@ -81,14 +81,15 @@ impl Universe {
                     (if src[bottom + col] { 1 } else { 0 }); // BR
 
                 // Lookup bits
-                let mut neighbors = 0;
-                for i in 0..4 {
-                    neighbors += if mask & (1 << i) != 0 { 1 } else { 0 };
-                }
-
-                for i in 5..9 {
-                    neighbors += if mask & (1 << i) != 0 { 1 } else { 0 };
-                }
+                let neighbors = (mask & 0b1)
+                    + (mask >> 1 & 0b1)
+                    + (mask >> 2 & 0b1)
+                    + (mask >> 3 & 0b1)
+                    + (mask >> 5 & 0b1)
+                    + (mask >> 6 & 0b1)
+                    + (mask >> 7 & 0b1)
+                    + (mask >> 8 & 0b1)
+                    + (mask >> 9 & 0b1);
 
                 // Save state
                 tar[middle] = if src[middle] {
