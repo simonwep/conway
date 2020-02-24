@@ -38,6 +38,11 @@ const start = async (mode = RustUniverse) => {
 
     const renderLoop = () => {
 
+        if (stopped) {
+            universe.free();
+            return;
+        }
+
         // Draw killed cells
         ctx.beginPath();
         const killed = universe.killed();
@@ -63,9 +68,7 @@ const start = async (mode = RustUniverse) => {
         ctx.fill();
 
         universe.nextGen();
-        if (!stopped) {
-            requestAnimationFrame(renderLoop);
-        }
+        requestAnimationFrame(renderLoop);
     };
 
     requestAnimationFrame(renderLoop);
@@ -75,7 +78,6 @@ const start = async (mode = RustUniverse) => {
 (async () => {
     let stop = await start();
 
-    // TODO: Issues when switching...
     window.addEventListener('keyup', async e => {
 
         if (stop) {

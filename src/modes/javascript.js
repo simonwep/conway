@@ -120,6 +120,10 @@ export class JSUniverse {
             this.killedCellsAmount
         );
     }
+
+    /* eslint-disable no-empty-function */
+    free() {
+    }
 }
 
 

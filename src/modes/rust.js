@@ -44,4 +44,8 @@ export class RustUniverse {
             this.universe.killed_cells_amount() * 2
         );
     }
+
+    free(){
+        this.universe.free();
+    }
 }
