@@ -1,18 +1,20 @@
-export class JSUniverse {
+import {Universe} from './universe';
+
+export class JSUniverse implements Universe {
 
     cols = 0;
     rows = 0;
-    source = null;
-    target = null;
-    killedCellsBuffer = null;
-    resurrectedCellsBuffer = null;
-    killedCells = null;
-    resurrectedCells = null;
+    source: Uint8Array = null;
+    target: Uint8Array = null;
+    killedCellsBuffer: ArrayBuffer = null;
+    resurrectedCellsBuffer: ArrayBuffer = null;
+    killedCells: Uint32Array = null;
+    resurrectedCells: Uint32Array = null;
     killedCellsAmount = 0;
     resurrectedCellsAmount = 0;
     swap = false;
 
-    constructor(rows, cols) {
+    constructor(rows: number, cols: number) {
 
         cols += 2;
         rows += 2;
@@ -21,6 +23,7 @@ export class JSUniverse {
         const source = new Uint8Array(totalCells);
         const target = new Uint8Array(totalCells);
 
+        // TODO: Merge buffer
         this.killedCellsBuffer = new ArrayBuffer(totalCells * 2 * 4);
         this.resurrectedCellsBuffer = new ArrayBuffer(totalCells * 2 * 4);
         this.killedCells = new Uint32Array(this.killedCellsBuffer);
@@ -44,11 +47,11 @@ export class JSUniverse {
         this.target = target;
     }
 
-    static async new(rows, cols) {
+    static async new(rows: number, cols: number): Promise<JSUniverse> {
         return Promise.resolve(new JSUniverse(rows, cols));
     }
 
-    nextGen() {
+    nextGen(): void {
         const {resurrectedCells, killedCells, source, target, swap, rows, cols} = this;
         const [src, tar] = swap ? [target, source] : [source, target];
         this.resurrectedCellsAmount = 0;
@@ -105,7 +108,7 @@ export class JSUniverse {
         }
     }
 
-    resurrected() {
+    resurrected(): Uint32Array {
         return new Uint32Array(
             this.resurrectedCellsBuffer,
             0,
@@ -113,7 +116,7 @@ export class JSUniverse {
         );
     }
 
-    killed() {
+    killed(): Uint32Array {
         return new Uint32Array(
             this.killedCellsBuffer,
             0,
@@ -121,8 +124,9 @@ export class JSUniverse {
         );
     }
 
+    /* eslint-disable @typescript-eslint/no-empty-function */
     /* eslint-disable no-empty-function */
-    free() {
+    free(): void {
     }
 }
 

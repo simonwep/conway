@@ -5,7 +5,12 @@ const path = require('path');
 
 module.exports = {
     mode: 'development',
-    entry: './src/app.js',
+    devtool: 'inline-source-map',
+    entry: './src/app.ts',
+
+    resolve: {
+        extensions: ['.ts', '.js', '.css', '.wasm']
+    },
 
     output: {
         path: `${__dirname}/dist`,
@@ -22,8 +27,15 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.js$/,
-                use: 'babel-loader'
+                test: /\.(js|ts)$/,
+                use: [
+                    {
+                        loader: 'ts-loader',
+                        options: {
+                            transpileOnly: true
+                        }
+                    }
+                ]
             },
             {
                 test: /\.css$/,
@@ -47,7 +59,6 @@ module.exports = {
 
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, 'crate'),
-            extraArgs: '--no-typescript --target browser --mode normal',
             forceMode: 'production'
         })
     ]

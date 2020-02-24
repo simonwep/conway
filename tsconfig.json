@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "noImplicitAny": true,
+        "moduleResolution": "classic",
+        "sourceMap": true,
+        "lib": ["esnext", "dom"],
+        "module": "ESNext",
+        "target": "ES2019"
+    }
+}

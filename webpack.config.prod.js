@@ -9,7 +9,13 @@ const path = require('path');
 
 module.exports = {
     mode: 'production',
-    entry: './src/app.js',
+
+    entry: './src/app.ts',
+
+    resolve: {
+        extensions: ['.js', '.ts', '.css', '.wasm'],
+        modules: ['./']
+    },
 
     output: {
         path: `${__dirname}/dist`,
@@ -19,8 +25,9 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.js$/,
-                use: 'babel-loader'
+                test: /\.(js|ts)$/,
+                include: path.join(__dirname, 'src'),
+                use: 'ts-loader'
             },
             {
                 test: /\.css$/,
@@ -64,7 +71,6 @@ module.exports = {
 
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, 'crate'),
-            extraArgs: '--no-typescript',
             forceMode: 'production'
         }),
 

@@ -1,21 +1,23 @@
 {
-    "parser": "babel-eslint",
-    "env": {
-        "browser": true,
-        "node": true,
-        "es6": true
-    },
+    "parser": "@typescript-eslint/parser",
     "extends": [
-        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
         "simon"
     ],
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
     "parserOptions": {
-        "ecmaVersion": 2020,
-        "sourceType": "module"
+        "project": "./tsconfig.json"
     },
     "rules": {
-        "no-cond-assign": "off",
-        "no-console": "warn",
-        "eqeqeq": "error"
+        "@typescript-eslint/unified-signatures": "error",
+        "@typescript-eslint/semi": "error"
     }
 }

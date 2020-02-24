@@ -1,20 +1,23 @@
-export class RustUniverse {
+import {Universe} from './universe';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export class RustUniverse implements Universe {
 
     cols = 0;
     rows = 0;
-    wasm = null;
-    universe = null;
+    wasm: any = null;
+    universe: any = null;
 
-    constructor(rows, cols, universe, wasm) {
+    constructor(rows: number, cols: number, universe: unknown, wasm: unknown) {
         this.rows = rows;
         this.cols = cols;
         this.universe = universe;
         this.wasm = wasm;
     }
 
-    static async new(rows, cols) {
+    static async new(rows: number, cols: number): Promise<RustUniverse> {
         const [{Universe}, wasm] = await Promise.all([
-            import('../../crate/pkg'),
+            import('../../crate/pkg/index'),
             import('../../crate/pkg/index_bg.wasm')
         ]);
 
@@ -25,11 +28,11 @@ export class RustUniverse {
         );
     }
 
-    nextGen() {
+    nextGen(): void {
         this.universe.next_gen();
     }
 
-    resurrected() {
+    resurrected(): Uint32Array {
         return new Uint32Array(
             this.wasm.memory.buffer,
             this.universe.resurrected_cells(),
@@ -37,7 +40,7 @@ export class RustUniverse {
         );
     }
 
-    killed() {
+    killed(): Uint32Array {
         return new Uint32Array(
             this.wasm.memory.buffer,
             this.universe.killed_cells(),
@@ -45,7 +48,7 @@ export class RustUniverse {
         );
     }
 
-    free(){
+    free(): void {
         this.universe.free();
     }
 }

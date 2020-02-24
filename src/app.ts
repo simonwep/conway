@@ -1,6 +1,6 @@
-import {RustUniverse} from './modes/rust';
 import './styles.css';
-import {JSUniverse}   from './modes/javascript';
+import {AvailableUniverses, createUniverse} from './modes/universe';
+
 
 const BLOCK_SIZE = 1;
 const BLOCK_MARGIN = 1;
@@ -8,9 +8,17 @@ const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d', {
     antialias: false,
     alpha: false
-});
+}) as CanvasRenderingContext2D;
 
-const resizeCanvas = () => {
+type CanvasProperties = {
+    width: number;
+    height: number;
+    rows: number;
+    cols: number;
+    block: number;
+};
+
+const resizeCanvas = (): CanvasProperties => {
     const {innerWidth, innerHeight} = window;
     const block = BLOCK_SIZE + BLOCK_MARGIN;
 
@@ -26,17 +34,17 @@ const resizeCanvas = () => {
     return {width, height, rows, cols, block};
 };
 
-const start = async (mode = RustUniverse) => {
+const start = async (mode: AvailableUniverses = 'rust'): Promise<() => void> => {
     const {width, height, rows, cols, block} = resizeCanvas();
 
     // Construct the universe, and get its width and height.
-    const universe = await mode.new(rows, cols);
+    const universe = await createUniverse(mode, rows, cols);
     let stopped = false;
 
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, width, height);
 
-    const renderLoop = () => {
+    const renderLoop = (): void => {
 
         if (stopped) {
             universe.free();
@@ -72,13 +80,16 @@ const start = async (mode = RustUniverse) => {
     };
 
     requestAnimationFrame(renderLoop);
-    return () => stopped = true;
+    return (): void => {
+        stopped = true;
+    };
 };
 
-(async () => {
+/* eslint-disable @typescript-eslint/no-misused-promises */
+(async (): Promise<void> => {
     let stop = await start();
 
-    window.addEventListener('keyup', async e => {
+    window.addEventListener('keyup',  async e => {
 
         if (stop) {
             stop();
@@ -86,11 +97,11 @@ const start = async (mode = RustUniverse) => {
 
         switch (e.code) {
             case 'KeyR' : {
-                stop = await start(RustUniverse);
+                stop = await start('rust');
                 break;
             }
             case  'KeyJ': {
-                stop = await start(JSUniverse);
+                stop = await start('js');
                 break;
             }
         }
