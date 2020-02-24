@@ -11,6 +11,8 @@ export interface Universe {
     killed(): Uint32Array;
 
     free(): void;
+
+    setRuleset(resurrect: number, kill: number): void;
 }
 
 export const createUniverse = async (name: AvailableUniverses, cols: number, rows: number): Promise<Universe> => {

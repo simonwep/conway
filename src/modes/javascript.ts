@@ -2,15 +2,17 @@ import {Universe} from './universe';
 
 export class JSUniverse implements Universe {
 
-    cols = 0;
-    rows = 0;
-    source: Uint8Array = null;
-    target: Uint8Array = null;
-    killedCells: Uint32Array = null;
-    resurrectedCells: Uint32Array = null;
-    killedCellsAmount = 0;
-    resurrectedCellsAmount = 0;
-    swap = false;
+    private readonly cols: number;
+    private readonly rows: number;
+    private readonly source: Uint8Array = null;
+    private readonly target: Uint8Array = null;
+    private readonly killedCells: Uint32Array = null;
+    private readonly resurrectedCells: Uint32Array = null;
+    private surviveRules = 0b000001100;
+    private resurrectRules = 0b000001000;
+    private killedCellsAmount = 0;
+    private resurrectedCellsAmount = 0;
+    private swap = false;
 
     constructor(rows: number, cols: number) {
 
@@ -47,7 +49,18 @@ export class JSUniverse implements Universe {
     }
 
     nextGen(): void {
-        const {resurrectedCells, killedCells, source, target, swap, rows, cols} = this;
+        const {
+            resurrectedCells,
+            killedCells,
+            source,
+            target,
+            swap,
+            rows,
+            cols,
+            surviveRules,
+            resurrectRules
+        } = this;
+
         const [src, tar] = swap ? [target, source] : [source, target];
         this.resurrectedCellsAmount = 0;
         this.killedCellsAmount = 0;
@@ -82,10 +95,11 @@ export class JSUniverse implements Universe {
 
                 const cellIndex = middle + col - 1;
                 const cell = src[cellIndex];
+
                 const next = (
                     cell ?
-                        neighbors < 4 && neighbors > 1 :
-                        neighbors === 3
+                        (1 << neighbors) & surviveRules :
+                        (1 << neighbors) & resurrectRules
                 ) ? 1 : 0;
 
                 tar[cellIndex] = next;
@@ -120,8 +134,14 @@ export class JSUniverse implements Universe {
     }
 
     /* eslint-disable @typescript-eslint/no-empty-function */
+
     /* eslint-disable no-empty-function */
     free(): void {
+    }
+
+    setRuleset(resurrect: number, survive: number): void {
+        this.resurrectRules = resurrect;
+        this.surviveRules = survive;
     }
 }
 

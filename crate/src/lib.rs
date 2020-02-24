@@ -19,6 +19,8 @@ pub struct Universe {
     target: Vec<bool>,
     killed_cells: Vec<(u32, u32)>,
     resurrected_cells: Vec<(u32, u32)>,
+    survive_rules: u16,
+    resurrect_rules: u16,
     swap: bool,
 }
 
@@ -51,6 +53,8 @@ impl Universe {
 
         Universe {
             swap: false,
+            survive_rules: 0b000001100,
+            resurrect_rules: 0b000001000,
             killed_cells,
             resurrected_cells,
             cols,
@@ -136,14 +140,11 @@ impl Universe {
 
                 let cell_index = middle + col - 1;
                 let cell = src[cell_index];
+
                 let next = if cell {
-                    // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
-                    // Any live cell with two or three live neighbours lives on to the next generation.
-                    // Any live cell with more than three live neighbours dies, as if by overpopulation.
-                    neighbors < 4 && neighbors > 1
+                    (1 << neighbors) & self.survive_rules != 0
                 } else {
-                    // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-                    neighbors == 3
+                    (1 << neighbors) & self.resurrect_rules != 0
                 };
 
                 // Save state
@@ -161,5 +162,10 @@ impl Universe {
                 };
             }
         }
+    }
+
+    pub fn set_ruleset(&mut self, resurrect: u16, survive: u16) {
+        self.resurrect_rules = resurrect;
+        self.survive_rules = survive;
     }
 }

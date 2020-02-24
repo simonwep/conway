@@ -1,5 +1,5 @@
-import './styles.css';
 import {AvailableUniverses, createUniverse} from './modes/universe';
+import './styles.css';
 
 
 const BLOCK_SIZE = 1;

@@ -3,10 +3,10 @@ import {Universe} from './universe';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class RustUniverse implements Universe {
 
-    cols = 0;
-    rows = 0;
-    wasm: any = null;
-    universe: any = null;
+    private readonly cols: number;
+    private readonly rows: number;
+    private readonly wasm: any;
+    private readonly universe: any;
 
     constructor(rows: number, cols: number, universe: unknown, wasm: unknown) {
         this.rows = rows;
@@ -50,5 +50,9 @@ export class RustUniverse implements Universe {
 
     free(): void {
         this.universe.free();
+    }
+
+    setRuleset(resurrect: number, survive: number): void {
+        this.universe.set_ruleset(resurrect, survive);
     }
 }
