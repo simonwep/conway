@@ -21,8 +21,8 @@ const resizeCanvas = () => {
     // Resize canvas
     canvas.width = width;
     canvas.height = height;
-    const rows = width / block;
-    const cols = height / block;
+    const cols = width / block;
+    const rows = height / block;
     return {width, height, rows, cols, block};
 };
 
@@ -30,14 +30,13 @@ const start = async (mode = RustUniverse) => {
     const {width, height, rows, cols, block} = resizeCanvas();
 
     // Construct the universe, and get its width and height.
-    const universe = await mode.new(cols, rows);
+    const universe = await mode.new(rows, cols);
     let stopped = false;
 
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, width, height);
 
     const renderLoop = () => {
-        universe.nextGen();
 
         // Draw killed cells
         ctx.beginPath();
@@ -45,12 +44,11 @@ const start = async (mode = RustUniverse) => {
         for (let i = 0; i < killed.length; i += 2) {
             const row = killed[i] * block;
             const col = killed[i + 1] * block;
-            ctx.rect(row, col, BLOCK_SIZE, BLOCK_SIZE);
+            ctx.rect(col, row, BLOCK_SIZE, BLOCK_SIZE);
         }
 
         ctx.fillStyle = '#fff';
         ctx.fill();
-
 
         // Draw living cells
         ctx.beginPath();
@@ -58,12 +56,13 @@ const start = async (mode = RustUniverse) => {
         for (let i = 0; i < resurrected.length; i += 2) {
             const row = resurrected[i] * block;
             const col = resurrected[i + 1] * block;
-            ctx.rect(row, col, BLOCK_SIZE, BLOCK_SIZE);
+            ctx.rect(col, row, BLOCK_SIZE, BLOCK_SIZE);
         }
 
         ctx.fillStyle = '#000';
         ctx.fill();
 
+        universe.nextGen();
         if (!stopped) {
             requestAnimationFrame(renderLoop);
         }
@@ -76,6 +75,7 @@ const start = async (mode = RustUniverse) => {
 (async () => {
     let stop = await start();
 
+    // TODO: Issues when switching...
     window.addEventListener('keyup', async e => {
 
         if (stop) {

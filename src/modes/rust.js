@@ -5,22 +5,22 @@ export class RustUniverse {
     wasm = null;
     universe = null;
 
-    constructor(cols, rows, universe, wasm) {
+    constructor(rows, cols, universe, wasm) {
         this.rows = rows;
         this.cols = cols;
         this.universe = universe;
         this.wasm = wasm;
     }
 
-    static async new(cols, rows) {
+    static async new(rows, cols) {
         const [{Universe}, wasm] = await Promise.all([
             import('../../crate/pkg'),
             import('../../crate/pkg/index_bg.wasm')
         ]);
 
         return new RustUniverse(
-            cols, rows,
-            Universe.new(cols, rows),
+            rows, cols,
+            Universe.new(rows, cols),
             wasm
         );
     }
