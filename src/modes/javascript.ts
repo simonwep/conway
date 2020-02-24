@@ -6,8 +6,6 @@ export class JSUniverse implements Universe {
     rows = 0;
     source: Uint8Array = null;
     target: Uint8Array = null;
-    killedCellsBuffer: ArrayBuffer = null;
-    resurrectedCellsBuffer: ArrayBuffer = null;
     killedCells: Uint32Array = null;
     resurrectedCells: Uint32Array = null;
     killedCellsAmount = 0;
@@ -23,11 +21,8 @@ export class JSUniverse implements Universe {
         const source = new Uint8Array(totalCells);
         const target = new Uint8Array(totalCells);
 
-        // TODO: Merge buffer
-        this.killedCellsBuffer = new ArrayBuffer(totalCells * 2 * 4);
-        this.resurrectedCellsBuffer = new ArrayBuffer(totalCells * 2 * 4);
-        this.killedCells = new Uint32Array(this.killedCellsBuffer);
-        this.resurrectedCells = new Uint32Array(this.resurrectedCellsBuffer);
+        this.killedCells = new Uint32Array(totalCells * 2 * 4);
+        this.resurrectedCells = new Uint32Array(totalCells * 2 * 4);
 
         for (let row = 1; row < rows - 1; row++) {
             const offset = row * cols;
@@ -110,7 +105,7 @@ export class JSUniverse implements Universe {
 
     resurrected(): Uint32Array {
         return new Uint32Array(
-            this.resurrectedCellsBuffer,
+            this.resurrectedCells.buffer,
             0,
             this.resurrectedCellsAmount
         );
@@ -118,7 +113,7 @@ export class JSUniverse implements Universe {
 
     killed(): Uint32Array {
         return new Uint32Array(
-            this.killedCellsBuffer,
+            this.killedCells.buffer,
             0,
             this.killedCellsAmount
         );
