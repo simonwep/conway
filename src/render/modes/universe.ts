@@ -1,7 +1,7 @@
 import {JSUniverse}   from './javascript';
 import {RustUniverse} from './rust';
 
-export type AvailableUniverses = 'rust' | 'js';
+export type UniverseMode = 'rust' | 'js';
 
 export interface Universe {
     nextGen(): void;
@@ -15,7 +15,7 @@ export interface Universe {
     setRuleset(resurrect: number, kill: number): void;
 }
 
-export const createUniverse = async (name: AvailableUniverses, cols: number, rows: number): Promise<Universe> => {
+export const createUniverse = async (name: UniverseMode, cols: number, rows: number): Promise<Universe> => {
     switch (name) {
         case 'rust':
             return RustUniverse.new(cols, rows);

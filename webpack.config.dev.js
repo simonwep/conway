@@ -14,7 +14,8 @@ module.exports = {
 
     output: {
         path: `${__dirname}/dist`,
-        filename: 'bundle.min.js'
+        filename: 'bundle.min.js',
+        globalObject: 'this'
     },
 
     devServer: {
@@ -26,6 +27,10 @@ module.exports = {
 
     module: {
         rules: [
+            {
+                test: /\.worker\.ts$/,
+                use: 'worker-loader'
+            },
             {
                 test: /\.(js|ts)$/,
                 use: [
@@ -59,6 +64,7 @@ module.exports = {
 
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, 'crate'),
+            extraArgs: '--no-typescript --target browser --mode normal',
             forceMode: 'production'
         })
     ]

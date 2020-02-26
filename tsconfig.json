@@ -4,8 +4,9 @@
         "noImplicitAny": true,
         "moduleResolution": "classic",
         "sourceMap": true,
-        "lib": ["esnext", "dom"],
+        "allowJs": true,
+        "lib": ["webworker", "esnext", "dom"],
         "module": "ESNext",
-        "target": "ES2019"
+        "target": "ESNext"
     }
 }
