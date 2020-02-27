@@ -20,7 +20,7 @@ export class Engine {
     private readonly canvas: OffscreenCanvas;
     private readonly ctx: OffscreenCanvasRenderingContext2D;
     private state: EngineRunningState = 'paused';
-    private mode: UniverseMode = 'js';
+    private mode: UniverseMode = 'rust';
     private props: Environment;
 
     constructor(canvas: OffscreenCanvas) {

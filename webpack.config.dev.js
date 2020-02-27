@@ -3,69 +3,107 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
 
-module.exports = {
-    mode: 'development',
-    devtool: 'inline-source-map',
-    entry: './src/app.ts',
+const dist = path.resolve(__dirname, 'dist');
+const crate = path.resolve(__dirname, 'crate');
 
-    resolve: {
-        extensions: ['.ts', '.js', '.css', '.wasm']
-    },
+module.exports = [
+    {
+        devtool: 'inline-source-map',
+        target: 'webworker',
 
-    output: {
-        path: `${__dirname}/dist`,
-        filename: 'bundle.min.js',
-        globalObject: 'this'
-    },
+        entry: {
+            'engine': './src/render/engine.worker.ts'
+        },
 
-    devServer: {
-        contentBase: `${__dirname}/dist`,
-        host: '0.0.0.0',
-        port: 3008,
-        hot: true
-    },
+        output: {
+            path: dist,
+            filename: '[name].worker.js'
+        },
 
-    module: {
-        rules: [
-            {
-                test: /\.worker\.ts$/,
-                use: 'worker-loader'
-            },
-            {
-                test: /\.(js|ts)$/,
-                use: [
-                    {
-                        loader: 'ts-loader',
-                        options: {
-                            transpileOnly: true
+        resolve: {
+            extensions: ['.js', '.ts', '.wasm']
+        },
+
+        module: {
+            rules: [
+                {
+                    test: /\.(js|ts)$/,
+                    use: [
+                        {
+                            loader: 'ts-loader',
+                            options: {
+                                transpileOnly: true
+                            }
                         }
-                    }
-                ]
-            },
-            {
-                test: /\.css$/,
-                use: [
-                    'style-loader',
-                    'css-loader'
-                ]
-            }
+                    ]
+                }
+            ]
+        },
+
+        plugins: [
+
+            new WasmPackPlugin({
+                crateDirectory: crate,
+                extraArgs: '--target browser --mode normal',
+                forceMode: 'production'
+            })
         ]
     },
+    {
+        mode: 'development',
+        devtool: 'inline-source-map',
+        entry: './src/app.ts',
 
-    plugins: [
-        new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('development')
-        }),
+        resolve: {
+            extensions: ['.ts', '.js', '.css']
+        },
 
-        new HtmlWebpackPlugin({
-            template: 'public/index.html',
-            inject: true
-        }),
+        output: {
+            path: dist,
+            filename: 'main.[hash].js',
+            globalObject: 'this'
+        },
 
-        new WasmPackPlugin({
-            crateDirectory: path.resolve(__dirname, 'crate'),
-            extraArgs: '--no-typescript --target browser --mode normal',
-            forceMode: 'production'
-        })
-    ]
-};
+        devServer: {
+            contentBase: dist,
+            writeToDisk: true,
+            host: '0.0.0.0',
+            port: 3008,
+            hot: true
+        },
+
+        module: {
+            rules: [
+                {
+                    test: /\.(js|ts)$/,
+                    use: [
+                        {
+                            loader: 'ts-loader',
+                            options: {
+                                transpileOnly: true
+                            }
+                        }
+                    ]
+                },
+                {
+                    test: /\.css$/,
+                    use: [
+                        'style-loader',
+                        'css-loader'
+                    ]
+                }
+            ]
+        },
+
+        plugins: [
+            new webpack.DefinePlugin({
+                'process.env.NODE_ENV': JSON.stringify('development')
+            }),
+
+            new HtmlWebpackPlugin({
+                template: 'public/index.html',
+                inject: true
+            })
+        ]
+    }
+];

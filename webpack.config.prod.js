@@ -18,8 +18,8 @@ module.exports = {
     },
 
     output: {
-        path: `${__dirname}/dist`,
-        filename: '[hash:8].js'
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'js/main.[hash].js',
     },
 
     module: {
@@ -70,7 +70,7 @@ module.exports = {
         }),
 
         new MiniCssExtractPlugin({
-            filename: '[hash:8].css'
+            filename: 'css/[hash:8].css'
         }),
 
         new WasmPackPlugin({

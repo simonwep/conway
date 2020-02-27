@@ -1,5 +1,4 @@
 import {transfer, wrap} from 'comlink';
-import EngineWorker     from './render/engine.worker';
 import './styles.css';
 
 const canvas = document.querySelector('canvas');
@@ -19,7 +18,10 @@ canvas.height = height;
 /* eslint-disable @typescript-eslint/no-misused-promises */
 (async (): Promise<void> => {
 
-    const worker = EngineWorker();
+    const worker = new Worker(
+        'engine.worker.js'
+    );
+
     const Subby = wrap(worker);
 
 
