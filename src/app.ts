@@ -1,19 +1,9 @@
 import {transfer, wrap} from 'comlink';
+import {Environment}    from './render/engine.worker';
 import './styles.css';
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-const {innerWidth, innerHeight} = window;
-const BLOCK_SIZE = 1;
-const BLOCK_MARGIN = 1;
-const block = BLOCK_SIZE + BLOCK_MARGIN;
 
-// Calculate margin
-const width = innerWidth - innerWidth % block;
-const height = innerHeight - innerHeight % block;
-
-// Resize canvas
-canvas.width = width;
-canvas.height = height;
 
 /* eslint-disable @typescript-eslint/no-misused-promises */
 (async (): Promise<void> => {
@@ -26,13 +16,38 @@ canvas.height = height;
     const offscreenCanvas = canvas.transferControlToOffscreen();
     const payload = transfer(offscreenCanvas, [offscreenCanvas]);
 
-    const instance = await new Subby(payload);
+    const blockSize = 1;
+    const blockMargin = 1;
 
-    await instance.setMode('rust');
+    const instance = await new Subby(
+        payload,
+        {
+            blockSize,
+            blockMargin,
+            width: window.innerWidth,
+            height: window.innerHeight
+        } as Environment
+    );
+
     await instance.play();
 
-    window.addEventListener('keyup', async e => {
+    window.addEventListener('resize', (() => {
+        let timeout: unknown = 0;
 
+        return () => {
+            clearTimeout(timeout as number);
+            timeout = setTimeout(async () => {
+                await instance.updateConfig({
+                    blockSize,
+                    blockMargin,
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                });
+            }, 1000);
+        };
+    })());
+
+    window.addEventListener('keyup', async e => {
         switch (e.code) {
             case 'KeyR' : {
                 await instance.setMode('rust');
@@ -41,6 +56,13 @@ canvas.height = height;
             case  'KeyJ': {
                 await instance.setMode('js');
                 break;
+            }
+            case 'KeyP': {
+                if (await instance.isRunning()) {
+                    await instance.pause();
+                } else {
+                    await instance.play();
+                }
             }
         }
     });

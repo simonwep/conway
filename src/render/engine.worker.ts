@@ -1,61 +1,89 @@
-import {expose}                                 from 'comlink';
-import {createUniverse, Universe, UniverseMode} from './modes/universe';
+import {expose}                 from 'comlink';
+import {JSUniverse}             from './modes/javascript';
+import {RustUniverse}           from './modes/rust';
+import {Universe, UniverseMode} from './modes/universe';
+
+export type Config = {
+    width: number;
+    height: number;
+    blockSize: number;
+    blockMargin: number;
+};
 
 export type Environment = {
     width: number;
     height: number;
-    rows: number;
     cols: number;
+    rows: number;
     block: number;
+    blockSize: number;
+    blockMargin: number;
 };
-
-
-const BLOCK_SIZE = 1;
-const BLOCK_MARGIN = 1;
 
 export class Engine {
 
+    public static readonly STANDARD_MODE: UniverseMode = 'js';
+
     private readonly canvas: OffscreenCanvas;
     private readonly ctx: OffscreenCanvasRenderingContext2D;
-    private universe: Universe | null;
-    private mode: UniverseMode | null;
+    private activeAnimationFrame: number | null;
+    private universe: Universe;
+    private mode: UniverseMode;
+    private env: Environment;
     private running: boolean;
 
-    private constructor(canvas: OffscreenCanvas) {
+    private constructor(
+        canvas: OffscreenCanvas,
+        config: Config
+    ) {
         this.canvas = canvas;
-        this.universe = null;
-        this.mode = null;
-        this.running = false;
+        this.mode = Engine.STANDARD_MODE;
+        this.activeAnimationFrame = null;
+        this.env = this.configToEnv(config);
 
+        this.running = false;
         this.ctx = canvas.getContext('2d', {
             antialias: false,
             alpha: false
         }) as OffscreenCanvasRenderingContext2D;
+
+        // Reset canvas
+        const {width, height, rows, cols} = this.env;
+        canvas.width = width;
+        canvas.height = height;
+
+        this.ctx.fillStyle = '#fff';
+        this.ctx.fillRect(0, 0, width, height);
+        this.universe = new JSUniverse(rows, cols);
     }
 
-    private get props(): Environment {
-        const {width: cw, height: ch} = this.canvas;
-        const block = BLOCK_SIZE + BLOCK_MARGIN;
+    private configToEnv(conf: Config): Environment {
+        const {width, height, blockMargin, blockSize} = conf;
+        const block = blockMargin + blockSize;
 
-        // Calculate margin, rows and cols
-        const width = cw - cw % block;
-        const height = ch - ch % block;
-        const cols = width / block;
-        const rows = height / block;
+        // Recalculate grid and canvas dimensions
+        const realWidth = width - width % block;
+        const realHeight = height - height % block;
+        const cols = realWidth / blockSize;
+        const rows = realHeight / blockSize;
 
         return {
-            width, height,
-            rows, cols,
-            block
+            width: realWidth,
+            height: realHeight,
+            block: blockSize + blockMargin,
+            blockMargin,
+            blockSize,
+            rows,
+            cols
         };
-    };
+    }
 
     public async setMode(mode: UniverseMode): Promise<void> {
-        const {ctx, props, running} = this;
-        const {width, height, rows, cols} = props;
+        const {env, ctx, running} = this;
+        const {cols, rows, width, height} = env;
 
         if (this.universe) {
-            await this.stop();
+            this.stop();
         }
 
         // Reset canvas
@@ -64,11 +92,26 @@ export class Engine {
 
         // Re-initiate universe
         this.mode = mode;
-        this.universe = await createUniverse(mode, rows, cols);
 
-        // Start if it was active
+        switch (mode) {
+            case 'rust': {
+                this.universe = await RustUniverse.new(rows, cols);
+                break;
+            }
+            case 'js': {
+                this.universe = JSUniverse.new(rows, cols);
+                break;
+            }
+            default: {
+                throw new Error(`Unknown mode: ${mode}`);
+            }
+        }
+
+        // Restart if it was running
         if (running) {
-            this.play();
+            requestAnimationFrame(() => {
+                this.play();
+            });
         }
     }
 
@@ -76,19 +119,13 @@ export class Engine {
         this.running = false;
     }
 
-    public async stop(): Promise<void> {
-        this.running = false;
+    public stop(): void {
+        this.pause();
 
-        return new Promise<void>(resolve => {
-            requestAnimationFrame(() => {
-
-                if (this.universe) {
-                    this.universe.free();
-                }
-
-                resolve();
-            });
-        });
+        // Free memory
+        if (this.universe) {
+            this.universe.free();
+        }
     }
 
     public play(): void {
@@ -101,8 +138,8 @@ export class Engine {
         }
 
         this.running = true;
-        const {ctx, props, universe} = this;
-        const {block} = props;
+        const {ctx, universe, env} = this;
+        const {block, blockSize} = env;
 
         const renderLoop = (): void => {
 
@@ -116,7 +153,7 @@ export class Engine {
             for (let i = 0; i < killed.length; i += 2) {
                 const row = killed[i] * block;
                 const col = killed[i + 1] * block;
-                ctx.rect(col, row, BLOCK_SIZE, BLOCK_SIZE);
+                ctx.rect(col, row, blockSize, blockSize);
             }
 
             ctx.fillStyle = '#fff';
@@ -128,7 +165,7 @@ export class Engine {
             for (let i = 0; i < resurrected.length; i += 2) {
                 const row = resurrected[i] * block;
                 const col = resurrected[i + 1] * block;
-                ctx.rect(col, row, BLOCK_SIZE, BLOCK_SIZE);
+                ctx.rect(col, row, blockSize, blockSize);
             }
 
             ctx.fillStyle = '#000';
@@ -139,6 +176,27 @@ export class Engine {
         };
 
         requestAnimationFrame(renderLoop);
+    }
+
+    public isRunning(): boolean {
+        return this.running;
+    }
+
+    public getMode(): UniverseMode {
+        return this.mode;
+    }
+
+    public async updateConfig(config: Config): Promise<void> {
+
+        this.env = this.configToEnv(config);
+        const {env, canvas} = this;
+        const {width, height} = env;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        console.log(env);
+        await this.setMode(this.mode);
     }
 }
 

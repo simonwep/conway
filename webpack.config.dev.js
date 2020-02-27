@@ -8,6 +8,63 @@ const crate = path.resolve(__dirname, 'crate');
 
 module.exports = [
     {
+        mode: 'development',
+        devtool: 'inline-source-map',
+        entry: './src/app.ts',
+
+        resolve: {
+            extensions: ['.ts', '.js', '.css']
+        },
+
+        output: {
+            path: dist,
+            filename: 'main.[hash].js',
+            globalObject: 'this'
+        },
+
+        devServer: {
+            contentBase: dist,
+            host: '0.0.0.0',
+            port: 3008,
+            hot: true
+        },
+
+        module: {
+            rules: [
+                {
+                    test: /\.(js|ts)$/,
+                    use: [
+                        {
+                            loader: 'ts-loader',
+                            options: {
+                                transpileOnly: true
+                            }
+                        }
+                    ]
+                },
+                {
+                    test: /\.css$/,
+                    use: [
+                        'style-loader',
+                        'css-loader'
+                    ]
+                }
+            ]
+        },
+
+        plugins: [
+            new webpack.DefinePlugin({
+                'process.env.NODE_ENV': JSON.stringify('development')
+            }),
+
+            new HtmlWebpackPlugin({
+                template: 'public/index.html',
+                inject: true
+            })
+        ]
+    },
+    {
+        mode: 'development',
         devtool: 'inline-source-map',
         target: 'webworker',
 
@@ -46,63 +103,6 @@ module.exports = [
                 crateDirectory: crate,
                 extraArgs: '--target browser --mode normal',
                 forceMode: 'production'
-            })
-        ]
-    },
-    {
-        mode: 'development',
-        devtool: 'inline-source-map',
-        entry: './src/app.ts',
-
-        resolve: {
-            extensions: ['.ts', '.js', '.css']
-        },
-
-        output: {
-            path: dist,
-            filename: 'main.[hash].js',
-            globalObject: 'this'
-        },
-
-        devServer: {
-            contentBase: dist,
-            writeToDisk: true,
-            host: '0.0.0.0',
-            port: 3008,
-            hot: true
-        },
-
-        module: {
-            rules: [
-                {
-                    test: /\.(js|ts)$/,
-                    use: [
-                        {
-                            loader: 'ts-loader',
-                            options: {
-                                transpileOnly: true
-                            }
-                        }
-                    ]
-                },
-                {
-                    test: /\.css$/,
-                    use: [
-                        'style-loader',
-                        'css-loader'
-                    ]
-                }
-            ]
-        },
-
-        plugins: [
-            new webpack.DefinePlugin({
-                'process.env.NODE_ENV': JSON.stringify('development')
-            }),
-
-            new HtmlWebpackPlugin({
-                template: 'public/index.html',
-                inject: true
             })
         ]
     }

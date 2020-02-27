@@ -44,8 +44,8 @@ export class JSUniverse implements Universe {
         this.target = target;
     }
 
-    static async new(rows: number, cols: number): Promise<JSUniverse> {
-        return Promise.resolve(new JSUniverse(rows, cols));
+    static new(rows: number, cols: number): JSUniverse {
+        return new JSUniverse(rows, cols);
     }
 
     nextGen(): void {
