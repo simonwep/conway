@@ -1,7 +1,7 @@
 import {transfer, wrap} from 'comlink';
 import './styles.css';
 
-const canvas = document.querySelector('canvas');
+const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const {innerWidth, innerHeight} = window;
 const BLOCK_SIZE = 1;
 const BLOCK_MARGIN = 1;
@@ -23,31 +23,26 @@ canvas.height = height;
     );
 
     const Subby = wrap(worker);
-
-
     const offscreenCanvas = canvas.transferControlToOffscreen();
     const payload = transfer(offscreenCanvas, [offscreenCanvas]);
 
     const instance = await new Subby(payload);
 
+    await instance.setMode('rust');
     await instance.play();
 
-    // window.addEventListener('keyup', async e => {
-    //
-    //     if (stop) {
-    //         stop();
-    //     }
-    //
-    //     switch (e.code) {
-    //         case 'KeyR' : {
-    //            await start('rust');
-    //             break;
-    //         }
-    //         case  'KeyJ': {
-    //             await start('js');
-    //             break;
-    //         }
-    //     }
-    // });
+    window.addEventListener('keyup', async e => {
+
+        switch (e.code) {
+            case 'KeyR' : {
+                await instance.setMode('rust');
+                break;
+            }
+            case  'KeyJ': {
+                await instance.setMode('js');
+                break;
+            }
+        }
+    });
 })();
 

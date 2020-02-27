@@ -1,7 +1,5 @@
-import {expose}                       from 'comlink';
-import {createUniverse, UniverseMode} from './modes/universe';
-
-export type EngineRunningState = 'paused' | 'running';
+import {expose}                                 from 'comlink';
+import {createUniverse, Universe, UniverseMode} from './modes/universe';
 
 export type Environment = {
     width: number;
@@ -19,21 +17,23 @@ export class Engine {
 
     private readonly canvas: OffscreenCanvas;
     private readonly ctx: OffscreenCanvasRenderingContext2D;
-    private state: EngineRunningState = 'paused';
-    private mode: UniverseMode = 'rust';
-    private props: Environment;
+    private universe: Universe | null;
+    private mode: UniverseMode | null;
+    private running: boolean;
 
-    constructor(canvas: OffscreenCanvas) {
+    private constructor(canvas: OffscreenCanvas) {
         this.canvas = canvas;
+        this.universe = null;
+        this.mode = null;
+        this.running = false;
+
         this.ctx = canvas.getContext('2d', {
             antialias: false,
             alpha: false
         }) as OffscreenCanvasRenderingContext2D;
-
-        this.recalculateEnvironment();
     }
 
-    public recalculateEnvironment(): void {
+    private get props(): Environment {
         const {width: cw, height: ch} = this.canvas;
         const block = BLOCK_SIZE + BLOCK_MARGIN;
 
@@ -43,39 +43,70 @@ export class Engine {
         const cols = width / block;
         const rows = height / block;
 
-        this.props = {
+        return {
             width, height,
             rows, cols,
             block
         };
     };
 
-    public pause(): void {
-        this.state = 'paused';
-    }
+    public async setMode(mode: UniverseMode): Promise<void> {
+        const {ctx, props, running} = this;
+        const {width, height, rows, cols} = props;
 
-    public async play(): Promise<void> {
-
-        // Validate current state
-        if (this.state === 'running') {
-            throw new Error('Already running.');
+        if (this.universe) {
+            await this.stop();
         }
 
-        this.state = 'running';
-        const {ctx, props, mode} = this;
-        const {width, height, rows, cols, block} = props;
-
-        // Construct the universe, and get its width and height.
-        const universe = await createUniverse(mode, rows, cols);
-
+        // Reset canvas
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, width, height);
 
+        // Re-initiate universe
+        this.mode = mode;
+        this.universe = await createUniverse(mode, rows, cols);
+
+        // Start if it was active
+        if (running) {
+            this.play();
+        }
+    }
+
+    public pause(): void {
+        this.running = false;
+    }
+
+    public async stop(): Promise<void> {
+        this.running = false;
+
+        return new Promise<void>(resolve => {
+            requestAnimationFrame(() => {
+
+                if (this.universe) {
+                    this.universe.free();
+                }
+
+                resolve();
+            });
+        });
+    }
+
+    public play(): void {
+
+        // Validate current state
+        if (this.running) {
+            throw new Error('Already running.');
+        } else if (this.universe === null) {
+            throw new Error('setMode must be called at least once.');
+        }
+
+        this.running = true;
+        const {ctx, props, universe} = this;
+        const {block} = props;
+
         const renderLoop = (): void => {
 
-            // TODO: Only pause, not kill
-            if (this.state === 'paused') {
-                universe.free();
+            if (!this.running) {
                 return;
             }
 

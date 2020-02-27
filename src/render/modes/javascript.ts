@@ -4,10 +4,10 @@ export class JSUniverse implements Universe {
 
     private readonly cols: number;
     private readonly rows: number;
-    private readonly source: Uint8Array = null;
-    private readonly target: Uint8Array = null;
-    private readonly killedCells: Uint32Array = null;
-    private readonly resurrectedCells: Uint32Array = null;
+    private readonly source: Uint8Array;
+    private readonly target: Uint8Array;
+    private readonly killedCells: Uint32Array;
+    private readonly resurrectedCells: Uint32Array;
     private surviveRules = 0b000001100;
     private resurrectRules = 0b000001000;
     private killedCellsAmount = 0;
