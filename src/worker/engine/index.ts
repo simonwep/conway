@@ -108,17 +108,9 @@ export class Engine {
         }
 
         // Restart if it was running
-        return new Promise(resolve => {
-            if (running) {
-                requestAnimationFrame(() => {
-
-                    this.play();
-                    resolve();
-                });
-            }
-
-            resolve();
-        });
+        if (running) {
+            this.play();
+        }
     }
 
     public pause(): void {
@@ -126,6 +118,7 @@ export class Engine {
     }
 
     public stop(): void {
+        this.pause();
 
         // Cancel next frame
         if (this.activeAnimationFrame !== null) {
