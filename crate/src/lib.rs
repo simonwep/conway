@@ -2,8 +2,6 @@ extern crate js_sys;
 
 use wasm_bindgen::prelude::*;
 
-mod utils;
-
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 // Taken from https://github.com/rustwasm/wasm-pack-template/blob/master/src/lib.rs
