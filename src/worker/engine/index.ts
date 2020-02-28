@@ -20,10 +20,17 @@ export type Environment = {
     blockMargin: number;
 };
 
+export interface EngineConstructor {
+    new(canvas: OffscreenCanvas, config: Environment): Engine;
+}
+
 export class Engine {
 
+    // Amount of single frames to stabilize the fps
+    public static readonly FPS_BUFFER = 16;
     public static readonly STANDARD_MODE: UniverseMode = 'js';
 
+    private readonly fpsBuffer: Uint32Array;
     private readonly canvas: OffscreenCanvas;
     private readonly ctx: OffscreenCanvasRenderingContext2D;
     private activeAnimationFrame: number | null;
@@ -31,15 +38,18 @@ export class Engine {
     private mode: UniverseMode;
     private env: Environment;
     private running: boolean;
+    private generation: number;
 
     private constructor(
         canvas: OffscreenCanvas,
-        config: Config
+        config: Environment
     ) {
         this.canvas = canvas;
+        this.fpsBuffer = new Uint32Array(Engine.FPS_BUFFER);
         this.mode = Engine.STANDARD_MODE;
         this.activeAnimationFrame = null;
-        this.env = this.configToEnv(config);
+        this.generation = 0;
+        this.env = Engine.configToEnv(config);
 
         this.running = false;
         this.ctx = canvas.getContext('2d', {
@@ -57,7 +67,7 @@ export class Engine {
         this.universe = new JSUniverse(rows, cols);
     }
 
-    private configToEnv(conf: Config): Environment {
+    private static configToEnv(conf: Config): Environment {
         const {width, height, blockMargin, blockSize} = conf;
         const block = blockMargin + blockSize;
 
@@ -90,6 +100,9 @@ export class Engine {
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, width, height);
 
+        // Reset generation counter
+        this.generation = 0;
+
         // Re-initiate universe
         this.mode = mode;
 
@@ -113,17 +126,17 @@ export class Engine {
         }
     }
 
-    public pause(): void {
+    public async pause(): Promise<void> {
         this.running = false;
-    }
-
-    public stop(): void {
-        this.pause();
 
         // Cancel next frame
         if (this.activeAnimationFrame !== null) {
             cancelAnimationFrame(this.activeAnimationFrame);
         }
+    }
+
+    public async stop(): Promise<void> {
+        await this.pause();
 
         // Free memory
         if (this.universe) {
@@ -131,7 +144,7 @@ export class Engine {
         }
     }
 
-    public play(): void {
+    public async play(): Promise<void> {
 
         // Validate current state
         if (this.running) {
@@ -141,10 +154,18 @@ export class Engine {
         }
 
         this.running = true;
-        const {ctx, universe, env} = this;
+        const {ctx, universe, env, fpsBuffer} = this;
         const {block, blockSize} = env;
 
+        // Reset buffer
+        for (let i = 0; i < fpsBuffer.length; i++) {
+            fpsBuffer[i] = 0;
+        }
+
+        let fpsBufferIndex = 0;
         const renderLoop = (): void => {
+            const start = performance.now();
+            this.generation++;
 
             // Draw killed cells
             ctx.beginPath();
@@ -171,23 +192,47 @@ export class Engine {
             ctx.fill();
 
             universe.nextGen();
+
+            // Save time this frame took
+            const end = performance.now();
+            fpsBuffer[fpsBufferIndex] = ~~(end - start);
+
+            fpsBufferIndex++;
+            if (fpsBufferIndex > Engine.FPS_BUFFER) {
+                fpsBufferIndex = 0;
+            }
+
             this.activeAnimationFrame = requestAnimationFrame(renderLoop);
         };
 
         requestAnimationFrame(renderLoop);
     }
 
-    public isRunning(): boolean {
+    public async isRunning(): Promise<boolean> {
         return this.running;
     }
 
-    public getMode(): UniverseMode {
+    public async getMode(): Promise<UniverseMode> {
         return this.mode;
+    }
+
+    public async getGeneration(): Promise<number> {
+        return this.generation;
+    }
+
+    public async getFrameRate(): Promise<number> {
+        let total = 0;
+
+        for (let i = 0; i < Engine.FPS_BUFFER; i++) {
+            total += this.fpsBuffer[i];
+        }
+
+        return ~~(1000 / (total / Engine.FPS_BUFFER));
     }
 
     public async updateConfig(config: Config): Promise<void> {
 
-        this.env = this.configToEnv(config);
+        this.env = Engine.configToEnv(config);
         const {env, canvas} = this;
         const {width, height} = env;
 

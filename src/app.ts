@@ -1,6 +1,6 @@
-import {transfer, wrap} from 'comlink';
-import {Environment}    from './worker/engine';
+import {transfer, wrap}                 from 'comlink';
 import './style/index.css';
+import {EngineConstructor, Environment} from './worker/engine';
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 
@@ -12,7 +12,7 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
         {type: 'module'}
     );
 
-    const Engine = wrap(worker) as any;
+    const Engine = wrap<EngineConstructor>(worker);
     const offscreenCanvas = canvas.transferControlToOffscreen();
     const payload = transfer(offscreenCanvas, [offscreenCanvas]);
 

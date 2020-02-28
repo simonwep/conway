@@ -18,6 +18,7 @@
     },
     "rules": {
         "@typescript-eslint/unified-signatures": "error",
-        "@typescript-eslint/semi": "error"
+        "@typescript-eslint/semi": "error",
+        "@typescript-eslint/require-await": "off"
     }
 }
