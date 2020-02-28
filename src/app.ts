@@ -1,18 +1,18 @@
 import {transfer, wrap} from 'comlink';
-import {Environment}    from './render/engine.worker';
-import './styles.css';
+import {Environment}    from './worker/engine';
+import './style/index.css';
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-
 
 /* eslint-disable @typescript-eslint/no-misused-promises */
 (async (): Promise<void> => {
 
     const worker = new Worker(
-        'engine.worker.js'
+        './worker/engine/index.ts',
+        {type: 'module'}
     );
 
-    const Subby = wrap(worker);
+    const Subby = wrap(worker) as any;
     const offscreenCanvas = canvas.transferControlToOffscreen();
     const payload = transfer(offscreenCanvas, [offscreenCanvas]);
 

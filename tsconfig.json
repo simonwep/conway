@@ -3,9 +3,8 @@
         "strict": true,
         "outDir": "./dist/",
         "noImplicitAny": true,
-        "moduleResolution": "classic",
+        "moduleResolution": "node",
         "sourceMap": true,
-        "allowJs": true,
         "lib": ["webworker", "esnext", "dom"],
         "module": "ESNext",
         "target": "ESNext"

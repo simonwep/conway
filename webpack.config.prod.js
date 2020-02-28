@@ -4,80 +4,88 @@ const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const WorkerPlugin = require('worker-plugin');
 const webpack = require('webpack');
 const path = require('path');
 
-module.exports = {
-    mode: 'production',
+const dist = path.resolve(__dirname, 'dist');
+const crate = path.resolve(__dirname, 'crate');
+const src = path.resolve(__dirname, 'src');
 
-    entry: './src/app.ts',
+module.exports = [
+    {
+        mode: 'production',
+        entry: './src/app.ts',
+        devtool: 'source-map',
 
-    resolve: {
-        extensions: ['.js', '.ts', '.css', '.wasm'],
-        modules: ['./']
-    },
+        output: {
+            path: dist,
+            globalObject: 'self',
+            filename: 'js/[chunkhash].bundle.js'
+        },
 
-    output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'js/main.[hash].js',
-    },
+        resolve: {
+            extensions: ['.ts', '.js', '.css']
+        },
 
-    module: {
-        rules: [
-            {
-                test: /\.worker\.ts$/,
-                use: 'worker-loader'
-            },
-            {
-                test: /\.(js|ts)$/,
-                include: path.join(__dirname, 'src'),
-                use: 'ts-loader'
-            },
-            {
-                test: /\.css$/,
-                use: [
-                    MiniCssExtractPlugin.loader,
-                    'css-loader'
-                ]
-            }
-        ]
-    },
-
-    optimization: {
-        minimize: true,
-        minimizer: [
-            new TerserPlugin({
-                terserOptions: {
-                    mangle: true
+        module: {
+            rules: [
+                {
+                    test: /\.css$/,
+                    include: src,
+                    use: [
+                        MiniCssExtractPlugin.loader,
+                        'css-loader'
+                    ]
+                },
+                {
+                    test: /\.(js|ts)$/,
+                    include: src,
+                    use: 'ts-loader'
                 }
+            ]
+        },
+
+        optimization: {
+            minimize: true,
+            minimizer: [
+                new TerserPlugin({
+                    sourceMap: true,
+                    terserOptions: {
+                        mangle: true
+                    }
+                }),
+
+                new OptimizeCSSAssetsPlugin({})
+            ]
+        },
+
+        plugins: [
+            new webpack.DefinePlugin({
+                'process.env.NODE_ENV': JSON.stringify('production')
             }),
 
-            new OptimizeCSSAssetsPlugin({})
+            // new BundleAnalyzerPlugin(),
+            new HtmlWebpackPlugin({
+                filename: 'index.html',
+                template: 'public/index.html',
+                inject: true,
+                minify: true
+            }),
+
+            new MiniCssExtractPlugin({
+                filename: 'css/[name].[contenthash:5].css',
+                chunkFilename: 'css/[name].[contenthash:5].css'
+            }),
+
+            new WasmPackPlugin({
+                crateDirectory: crate,
+                extraArgs: '--target browser --mode normal',
+                forceMode: 'production'
+            }),
+
+            new WorkerPlugin(),
+            new CleanWebpackPlugin()
         ]
-    },
-
-    plugins: [
-        new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('production')
-        }),
-
-        // new BundleAnalyzerPlugin(),
-        new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: 'public/index.html',
-            inject: true,
-            minify: true
-        }),
-
-        new MiniCssExtractPlugin({
-            filename: 'css/[hash:8].css'
-        }),
-
-        new WasmPackPlugin({
-            crateDirectory: path.resolve(__dirname, 'crate'),
-            forceMode: 'production'
-        }),
-
-        new CleanWebpackPlugin()
-    ]
-};
+    }
+];

@@ -17,8 +17,8 @@ export class RustUniverse implements Universe {
 
     static async new(rows: number, cols: number): Promise<RustUniverse> {
         const [{Universe}, wasm] = await Promise.all([
-            import('../../../crate/pkg/index'),
-            import('../../../crate/pkg/index_bg.wasm')
+            import('../../../../crate/pkg'),
+            import('../../../../crate/pkg/index_bg.wasm')
         ]);
 
         return new RustUniverse(

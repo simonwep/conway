@@ -1,38 +1,43 @@
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const WorkerPlugin = require('worker-plugin');
 const webpack = require('webpack');
 const path = require('path');
 
 const dist = path.resolve(__dirname, 'dist');
 const crate = path.resolve(__dirname, 'crate');
+const src = path.resolve(__dirname, 'src');
 
 module.exports = [
     {
         mode: 'development',
-        devtool: 'inline-source-map',
         entry: './src/app.ts',
+        devtool: 'inline-source-map',
+
+        output: {
+            path: dist,
+            globalObject: 'self',
+            filename: 'js/[chunkhash].bundle.js'
+        },
 
         resolve: {
             extensions: ['.ts', '.js', '.css']
         },
 
-        output: {
-            path: dist,
-            filename: 'main.[hash].js',
-            globalObject: 'this'
-        },
-
-        devServer: {
-            contentBase: dist,
-            host: '0.0.0.0',
-            port: 3008,
-            hot: true
-        },
-
         module: {
             rules: [
                 {
+                    test: /\.css$/,
+                    include: src,
+                    use: [
+                        'style-loader',
+                        'css-loader'
+                    ]
+                },
+                {
                     test: /\.(js|ts)$/,
+                    include: src,
                     use: [
                         {
                             loader: 'ts-loader',
@@ -40,13 +45,6 @@ module.exports = [
                                 transpileOnly: true
                             }
                         }
-                    ]
-                },
-                {
-                    test: /\.css$/,
-                    use: [
-                        'style-loader',
-                        'css-loader'
                     ]
                 }
             ]
@@ -60,50 +58,20 @@ module.exports = [
             new HtmlWebpackPlugin({
                 template: 'public/index.html',
                 inject: true
-            })
-        ]
-    },
-    {
-        mode: 'development',
-        devtool: 'inline-source-map',
-        target: 'webworker',
+            }),
 
-        entry: {
-            'engine': './src/render/engine.worker.ts'
-        },
-
-        output: {
-            path: dist,
-            filename: '[name].worker.js'
-        },
-
-        resolve: {
-            extensions: ['.js', '.ts', '.wasm']
-        },
-
-        module: {
-            rules: [
-                {
-                    test: /\.(js|ts)$/,
-                    use: [
-                        {
-                            loader: 'ts-loader',
-                            options: {
-                                transpileOnly: true
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-
-        plugins: [
+            new MiniCssExtractPlugin({
+                filename: 'css/[name].[contenthash:5].css',
+                chunkFilename: 'css/[name].[contenthash:5].css'
+            }),
 
             new WasmPackPlugin({
                 crateDirectory: crate,
                 extraArgs: '--target browser --mode normal',
                 forceMode: 'production'
-            })
+            }),
+
+            new WorkerPlugin()
         ]
     }
 ];
