@@ -1,6 +1,13 @@
 import {transfer, wrap}                 from 'comlink';
-import './style/index.css';
+import {h, render}                      from 'preact';
+import {App}                            from './app/App';
+import './styles/_global.scss';
 import {EngineConstructor, Environment} from './worker/engine';
+
+render(
+    <App/>,
+    document.getElementById('app') as HTMLElement
+);
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 

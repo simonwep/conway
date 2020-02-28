@@ -11,10 +11,11 @@ const path = require('path');
 const dist = path.resolve(__dirname, 'dist');
 const crate = path.resolve(__dirname, 'crate');
 const src = path.resolve(__dirname, 'src');
+const app = path.resolve(src, 'app');
 
 module.exports = {
     mode: 'production',
-    entry: './src/app.ts',
+    entry: './src/index.tsx',
     devtool: 'source-map',
 
     output: {
@@ -24,21 +25,54 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.ts', '.js', '.css']
+        extensions: ['.ts', '.tsx', '.js', '.css']
     },
 
     module: {
         rules: [
             {
-                test: /\.css$/,
-                include: src,
+                test: /\.(scss|sass|css)$/,
+                include: app,
                 use: [
                     MiniCssExtractPlugin.loader,
-                    'css-loader'
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: {
+                                localIdentName: '[name]-[hash:base64:5]'
+                            }
+                        }
+                    },
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            prependData: `
+                                @import '~sassyfication';
+                                @import 'src/styles/_global.scss';
+                            `
+                        }
+                    }
                 ]
             },
             {
-                test: /\.(js|ts)$/,
+                test: /\.(scss|sass|css)$/,
+                include: src,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            prependData: `
+                                @import '~sassyfication';
+                                @import 'src/styles/_global.scss';
+                            `
+                        }
+                    }
+                ]
+            },
+            {
+                test: /\.(js|ts|tsx)$/,
                 include: src,
                 use: 'ts-loader'
             }
