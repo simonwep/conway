@@ -12,14 +12,14 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
         {type: 'module'}
     );
 
-    const Subby = wrap(worker) as any;
+    const Engine = wrap(worker) as any;
     const offscreenCanvas = canvas.transferControlToOffscreen();
     const payload = transfer(offscreenCanvas, [offscreenCanvas]);
 
     const blockSize = 1;
-    const blockMargin = 1;
+    const blockMargin = 0;
 
-    const instance = await new Subby(
+    const instance = await new Engine(
         payload,
         {
             blockSize,

@@ -23,8 +23,8 @@ export class JSUniverse implements Universe {
         const source = new Uint8Array(totalCells);
         const target = new Uint8Array(totalCells);
 
-        this.killedCells = new Uint32Array(totalCells * 2 * 4);
-        this.resurrectedCells = new Uint32Array(totalCells * 2 * 4);
+        this.killedCells = new Uint32Array(totalCells * 2);
+        this.resurrectedCells = new Uint32Array(totalCells * 2);
 
         for (let row = 1; row < rows - 1; row++) {
             const offset = row * cols;

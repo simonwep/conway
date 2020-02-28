@@ -108,11 +108,17 @@ export class Engine {
         }
 
         // Restart if it was running
-        if (running) {
-            requestAnimationFrame(() => {
-                this.play();
-            });
-        }
+        return new Promise(resolve => {
+            if (running) {
+                requestAnimationFrame(() => {
+
+                    this.play();
+                    resolve();
+                });
+            }
+
+            resolve();
+        });
     }
 
     public pause(): void {
@@ -120,7 +126,11 @@ export class Engine {
     }
 
     public stop(): void {
-        this.pause();
+
+        // Cancel next frame
+        if (this.activeAnimationFrame !== null) {
+            cancelAnimationFrame(this.activeAnimationFrame);
+        }
 
         // Free memory
         if (this.universe) {
@@ -142,10 +152,6 @@ export class Engine {
         const {block, blockSize} = env;
 
         const renderLoop = (): void => {
-
-            if (!this.running) {
-                return;
-            }
 
             // Draw killed cells
             ctx.beginPath();
@@ -172,7 +178,7 @@ export class Engine {
             ctx.fill();
 
             universe.nextGen();
-            requestAnimationFrame(renderLoop);
+            this.activeAnimationFrame = requestAnimationFrame(renderLoop);
         };
 
         requestAnimationFrame(renderLoop);
@@ -195,7 +201,6 @@ export class Engine {
         canvas.width = width;
         canvas.height = height;
 
-        console.log(env);
         await this.setMode(this.mode);
     }
 }

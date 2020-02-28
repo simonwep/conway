@@ -34,8 +34,8 @@ impl Universe {
         let target: Vec<bool> = (0..total_cells).map(|_| false).collect();
         let mut source: Vec<bool> = (0..total_cells).map(|_| false).collect();
 
-        let killed_cells = Vec::with_capacity(total_cells * 2 * 4);
-        let mut resurrected_cells = Vec::with_capacity(total_cells * 2 * 4);
+        let killed_cells = Vec::with_capacity(total_cells * 2);
+        let mut resurrected_cells = Vec::with_capacity(total_cells * 2);
 
         // Update list of previously born cells
         for row in 1..(rows - 1) {
