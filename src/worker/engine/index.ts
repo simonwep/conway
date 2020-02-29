@@ -20,8 +20,14 @@ export type Environment = {
     blockMargin: number;
 };
 
+export type Transformation = {
+    scale: number;
+    x: number;
+    y: number;
+};
+
 export interface EngineConstructor {
-    new(canvas: OffscreenCanvas, config: Environment): Engine;
+    new(canvas: OffscreenCanvas, config: Config): Engine;
 }
 
 export class Engine {
@@ -31,6 +37,8 @@ export class Engine {
     public static readonly STANDARD_MODE: UniverseMode = 'js';
 
     private readonly fpsBuffer: Uint32Array;
+    private readonly shadowCanvas: OffscreenCanvas;
+    private readonly shadowCtx: OffscreenCanvasRenderingContext2D;
     private readonly canvas: OffscreenCanvas;
     private readonly ctx: OffscreenCanvasRenderingContext2D;
     private activeAnimationFrame: number | null;
@@ -42,16 +50,20 @@ export class Engine {
 
     private constructor(
         canvas: OffscreenCanvas,
-        config: Environment
+        config: Config
     ) {
-        this.canvas = canvas;
+
+        // Convert config to env-properties
+        this.env = Engine.configToEnv(config);
+
+        // Initialize base attributes
         this.fpsBuffer = new Uint32Array(Engine.FPS_BUFFER);
         this.mode = Engine.STANDARD_MODE;
         this.activeAnimationFrame = null;
         this.generation = 0;
-        this.env = Engine.configToEnv(config);
 
         this.running = false;
+        this.canvas = canvas;
         this.ctx = canvas.getContext('2d', {
             antialias: false,
             alpha: false
@@ -62,8 +74,16 @@ export class Engine {
         canvas.width = width;
         canvas.height = height;
 
-        this.ctx.fillStyle = '#fff';
-        this.ctx.fillRect(0, 0, width, height);
+        // Create shadow canvas
+        this.shadowCanvas = new OffscreenCanvas(width, height);
+        this.shadowCtx = this.shadowCanvas.getContext('2d', {
+            antialias: false,
+            alpha: false
+        }) as OffscreenCanvasRenderingContext2D;
+
+        // Clear canvas and initialize js-universe
+        this.shadowCtx.fillStyle = '#fff';
+        this.shadowCtx.fillRect(0, 0, width, height);
         this.universe = new JSUniverse(rows, cols);
     }
 
@@ -80,7 +100,7 @@ export class Engine {
         return {
             width: realWidth,
             height: realHeight,
-            block: blockSize + blockMargin,
+            block,
             blockMargin,
             blockSize,
             rows,
@@ -89,7 +109,7 @@ export class Engine {
     }
 
     public async setMode(mode: UniverseMode): Promise<void> {
-        const {env, ctx, running} = this;
+        const {env, shadowCtx, running} = this;
         const {cols, rows, width, height} = env;
 
         if (this.universe) {
@@ -97,8 +117,8 @@ export class Engine {
         }
 
         // Reset canvas
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, width, height);
+        shadowCtx.fillStyle = '#fff';
+        shadowCtx.fillRect(0, 0, width, height);
 
         // Reset generation counter
         this.generation = 0;
@@ -154,7 +174,7 @@ export class Engine {
         }
 
         this.running = true;
-        const {ctx, universe, env, fpsBuffer} = this;
+        const {ctx, shadowCtx, shadowCanvas, universe, env, fpsBuffer} = this;
         const {block, blockSize} = env;
 
         // Reset buffer
@@ -162,34 +182,35 @@ export class Engine {
             fpsBuffer[i] = 0;
         }
 
+        // TODO: Use device-pixel-ratio
         let fpsBufferIndex = 0;
         const renderLoop = (): void => {
             const start = performance.now();
             this.generation++;
 
             // Draw killed cells
-            ctx.beginPath();
+            shadowCtx.beginPath();
             const killed = universe.killed();
             for (let i = 0; i < killed.length; i += 2) {
                 const row = killed[i] * block;
                 const col = killed[i + 1] * block;
-                ctx.rect(col, row, blockSize, blockSize);
+                shadowCtx.rect(col, row, blockSize, blockSize);
             }
 
-            ctx.fillStyle = '#fff';
-            ctx.fill();
+            shadowCtx.fillStyle = '#fff';
+            shadowCtx.fill();
 
             // Draw living cells
-            ctx.beginPath();
+            shadowCtx.beginPath();
             const resurrected = universe.resurrected();
             for (let i = 0; i < resurrected.length; i += 2) {
                 const row = resurrected[i] * block;
                 const col = resurrected[i + 1] * block;
-                ctx.rect(col, row, blockSize, blockSize);
+                shadowCtx.rect(col, row, blockSize, blockSize);
             }
 
-            ctx.fillStyle = '#000';
-            ctx.fill();
+            shadowCtx.fillStyle = '#000';
+            shadowCtx.fill();
 
             universe.nextGen();
 
@@ -202,6 +223,7 @@ export class Engine {
                 fpsBufferIndex = 0;
             }
 
+            ctx.drawImage(shadowCanvas, 0, 0);
             this.activeAnimationFrame = requestAnimationFrame(renderLoop);
         };
 
@@ -230,14 +252,30 @@ export class Engine {
         return ~~(1000 / (total / Engine.FPS_BUFFER));
     }
 
+    public async transform(t: Transformation): Promise<void> {
+
+        // Reset state
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillRect(0, 0, this.env.width, this.env.height);
+
+        // Apply transformation
+        this.ctx.setTransform(
+            t.scale, 0,
+            0, t.scale,
+            t.x, t.y
+        );
+    }
+
     public async updateConfig(config: Config): Promise<void> {
 
         this.env = Engine.configToEnv(config);
-        const {env, canvas} = this;
+        const {env, canvas, shadowCanvas} = this;
         const {width, height} = env;
 
         canvas.width = width;
         canvas.height = height;
+        shadowCanvas.width = width;
+        shadowCanvas.height = height;
 
         await this.setMode(this.mode);
     }
