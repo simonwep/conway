@@ -74,6 +74,10 @@ export class Engine {
         canvas.width = width;
         canvas.height = height;
 
+        // We're drawing the shadowCanvas with this context,
+        // using image-smoothing would blur pixels.
+        this.ctx.imageSmoothingEnabled = false;
+
         // Create shadow canvas
         this.shadowCanvas = new OffscreenCanvas(width, height);
         this.shadowCtx = this.shadowCanvas.getContext('2d', {
@@ -267,15 +271,17 @@ export class Engine {
     }
 
     public async updateConfig(config: Config): Promise<void> {
-
         this.env = Engine.configToEnv(config);
-        const {env, canvas, shadowCanvas} = this;
+        const {env, canvas, shadowCanvas, ctx} = this;
         const {width, height} = env;
 
         canvas.width = width;
         canvas.height = height;
         shadowCanvas.width = width;
         shadowCanvas.height = height;
+
+        // Restore option
+        ctx.imageSmoothingEnabled = false;
 
         await this.setMode(this.mode);
     }

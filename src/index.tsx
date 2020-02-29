@@ -24,8 +24,8 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
     const payload = transfer(offscreenCanvas, [offscreenCanvas]);
 
     // TODO: Bigger sizes are broken
-    const blockSize = 2;
-    const blockMargin = 2;
+    const blockSize = 1;
+    const blockMargin = 1;
 
     const instance = await new Engine(
         payload,
