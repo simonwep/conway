@@ -22,6 +22,7 @@ module.exports = {
 
     devServer: {
         port: 3008,
+        host: '0.0.0.0',
         hot: true
     },
 
@@ -35,6 +36,10 @@ module.exports = {
 
     module: {
         rules: [
+            {
+                test: /\.svg$/,
+                loader: 'svg-inline-loader'
+            },
             {
                 test: /\.(scss|sass|css)$/,
                 include: app,

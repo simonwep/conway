@@ -187,9 +187,9 @@ export class Engine {
         }
 
         // TODO: Use device-pixel-ratio
+        let latestFrame = performance.now();
         let fpsBufferIndex = 0;
         const renderLoop = (): void => {
-            const start = performance.now();
             this.generation++;
 
             // Draw killed cells
@@ -219,15 +219,15 @@ export class Engine {
             universe.nextGen();
 
             // Save time this frame took
-            // TODO: The framerate is a bit off...
             const end = performance.now();
-            fpsBuffer[fpsBufferIndex] = ~~(end - start);
+            fpsBuffer[fpsBufferIndex] = ~~(end - latestFrame);
 
             fpsBufferIndex++;
             if (fpsBufferIndex > Engine.FPS_BUFFER) {
                 fpsBufferIndex = 0;
             }
 
+            latestFrame = end;
             ctx.drawImage(shadowCanvas, 0, 0, width, height);
             this.activeAnimationFrame = requestAnimationFrame(renderLoop);
         };

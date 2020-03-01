@@ -5,9 +5,6 @@ import {life}            from '../../../store';
 import * as widgetStyles from '../widget.scss';
 import * as styles       from './LifeStats.scss';
 
-
-console.log(styles.lifeStats, widgetStyles.widget);
-
 @observer
 export class LifeStats extends Component {
 
@@ -18,7 +15,7 @@ export class LifeStats extends Component {
                 widgetStyles.widget,
                 styles.lifeStats
             )}>
-                <p>{life.fps} GPS</p>
+                <p>{life.fps} FPS</p>
                 <p>{life.generation}th Generation</p>
             </div>
         );
