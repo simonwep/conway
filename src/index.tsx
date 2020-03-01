@@ -54,7 +54,7 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
         y = Math.round(e.pageY - (e.pageY - y) * delta);
 
         // Lock fullscreen
-        if (scale == 1) {
+        if (scale === 1) {
             canvas.style.cursor = 'default';
             x = 0;
             y = 0;
@@ -85,13 +85,16 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
     });
 
     canvas.addEventListener('mousedown', e => {
+        canvas.style.cursor = 'grabbing';
         dragging = true;
         sx = e.pageX;
         sy = e.pageY;
-        console.log('set');
     });
 
-    canvas.addEventListener('mouseup', () => dragging = false);
+    canvas.addEventListener('mouseup', () => {
+        canvas.style.cursor = 'grab';
+        dragging = false;
+    });
 
     setInterval(async() => {
         life.fps = await instance.getFrameRate();

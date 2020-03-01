@@ -9,7 +9,7 @@
         "build:debug": "webpack --debug --display-error-details --config webpack.config.prod.js",
         "build": "webpack --config webpack.config.prod.js",
         "dev": "webpack-dev-server --config webpack.config.dev.js",
-        "lint:ts": "eslint ./src/**/*.ts --fix",
+        "lint:ts": "eslint src/ --ext .js,.ts,.tsx --fix",
         "lint:rs": "cd crate && cargo fmt",
         "lint:all": "run-p lint:ts lint:rs"
     },
@@ -24,6 +24,7 @@
         "eslint": "^6.8.0",
         "eslint-config-simon": "^1.3.0",
         "eslint-loader": "^3.0.3",
+        "eslint-plugin-react": "^7.18.3",
         "html-webpack-plugin": "^3.2.0",
         "mini-css-extract-plugin": "^0.9.0",
         "node-sass": "^4.13.1",

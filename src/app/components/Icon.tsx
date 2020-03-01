@@ -8,11 +8,11 @@ const icons = {
 };
 
 type Props = {
-    name: keyof typeof icons
+    name: keyof typeof icons;
 };
 
 export default ({name}: Props) => {
     return (
-        <div class="icon" dangerouslySetInnerHTML={{__html: icons[name]}}/>
+        <div className="icon" dangerouslySetInnerHTML={{__html: icons[name]}}/>
     );
-}
+};

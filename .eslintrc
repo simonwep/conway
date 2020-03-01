@@ -1,10 +1,10 @@
 {
     "parser": "@typescript-eslint/parser",
     "extends": [
-        "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
-        "simon"
+        "plugin:react/recommended",
+        "simon/lib/react"
     ],
     "env": {
         "browser": true,
@@ -14,11 +14,17 @@
         "@typescript-eslint"
     ],
     "parserOptions": {
-        "project": "./tsconfig.json"
+        "project": "./tsconfig.json",
+        "ecmaFeatures": {
+            "jsx": true
+        }
     },
     "rules": {
         "@typescript-eslint/unified-signatures": "error",
         "@typescript-eslint/semi": "error",
-        "@typescript-eslint/require-await": "off"
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/require-await": "off",
+        "react/react-in-jsx-scope": "off",
+        "no-unused-vars": "off"
     }
 }

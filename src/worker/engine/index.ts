@@ -36,17 +36,41 @@ export class Engine {
     public static readonly FPS_BUFFER = 16;
     public static readonly STANDARD_MODE: UniverseMode = 'js';
 
-    private readonly fpsBuffer: Uint32Array;
+    // Buffer of the last N frames, used to smooth the current fps.
+    private readonly fpsBuffer: Uint32Array = new Uint32Array(Engine.FPS_BUFFER);
+
+    /**
+     * Two canvas are used to draw the scene, the first one is purely
+     * to draw living and dead cells, the other one is used to transform
+     * it (in case the user zooms in).
+     */
     private readonly shadowCanvas: OffscreenCanvas;
     private readonly shadowCtx: OffscreenCanvasRenderingContext2D;
     private readonly canvas: OffscreenCanvas;
     private readonly ctx: OffscreenCanvasRenderingContext2D;
-    private activeAnimationFrame: number | null;
+
+    // Currently requested frame.
+    private activeAnimationFrame: number | null = null;
+
+    // Current universe and its mode.
     private universe: Universe;
-    private mode: UniverseMode;
+    private mode: UniverseMode = Engine.STANDARD_MODE;
+
+    // env-data such as screen size, size of block etc.
     private env: Environment;
-    private running: boolean;
-    private generation: number;
+
+    // If simulation is running.
+    private running = false;
+
+    // Current generation.
+    private generation = 0;
+
+    /**
+     * Will be set to true if the canvas has been moved / dragged / zoomed.
+     * If true the current screen will get cleared and re-painted, otherwise there
+     * would be fragments from the previous frame.
+     */
+    private moved = false;
 
     private constructor(
         canvas: OffscreenCanvas,
@@ -56,13 +80,6 @@ export class Engine {
         // Convert config to env-properties
         this.env = Engine.configToEnv(config);
 
-        // Initialize base attributes
-        this.fpsBuffer = new Uint32Array(Engine.FPS_BUFFER);
-        this.mode = Engine.STANDARD_MODE;
-        this.activeAnimationFrame = null;
-        this.generation = 0;
-
-        this.running = false;
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d', {
             antialias: false,
@@ -192,6 +209,13 @@ export class Engine {
         const renderLoop = (): void => {
             this.generation++;
 
+            // Check if canvas has been moved since last redraw and clear screen
+            if (this.moved) {
+                shadowCtx.fillStyle = '#fff';
+                shadowCtx.fillRect(0, 0, width, height);
+                this.moved = false;
+            }
+
             // Draw killed cells
             shadowCtx.beginPath();
             const killed = universe.killed();
@@ -263,6 +287,9 @@ export class Engine {
         this.ctx.fillStyle = 'white';
         this.ctx.fillRect(0, 0, this.env.width, this.env.height);
 
+        // Canvas has moved
+        this.moved = true;
+
         // Apply transformation
         this.ctx.setTransform(
             t.scale, 0,
@@ -283,7 +310,6 @@ export class Engine {
 
         // Restore option
         ctx.imageSmoothingEnabled = false;
-
         await this.setMode(this.mode);
     }
 }

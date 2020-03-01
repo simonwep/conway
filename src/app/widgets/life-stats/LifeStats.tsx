@@ -11,7 +11,7 @@ export class LifeStats extends Component {
     render() {
 
         return (
-            <div class={joinStrings(
+            <div className={joinStrings(
                 widgetStyles.widget,
                 styles.lifeStats
             )}>
