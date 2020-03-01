@@ -26,11 +26,11 @@ export class JSUniverse implements Universe {
         this.killedCells = new Uint32Array(totalCells * 2);
         this.resurrectedCells = new Uint32Array(totalCells * 2);
 
-        for (let row = 1; row < rows - 1; row++) {
+        for (let row = 1; row < (rows - 1); row++) {
             const offset = row * cols;
 
-            for (let col = 1; col < cols - 1; col++) {
-                if (Math.random() > 0.45) {
+            for (let col = 1; col < (cols - 1); col++) {
+                if (Math.random() > 0.5) {
                     source[offset + col] = 1;
                     this.resurrectedCells[this.resurrectedCellsAmount++] = row - 1;
                     this.resurrectedCells[this.resurrectedCellsAmount++] = col - 1;
@@ -44,11 +44,11 @@ export class JSUniverse implements Universe {
         this.target = target;
     }
 
-    static new(rows: number, cols: number): JSUniverse {
+    public static new(rows: number, cols: number): JSUniverse {
         return new JSUniverse(rows, cols);
     }
 
-    nextGen(): void {
+    public nextGen(): void {
         const {
             resurrectedCells,
             killedCells,
@@ -71,10 +71,12 @@ export class JSUniverse implements Universe {
             const middle = row * cols + 1;
             const bottom = (row + 1) * cols + 1;
 
-            let mask =
-                (src[top - 1] ? 32 : 0) + (src[top] ? 4 : 0) +
-                (src[middle - 1] ? 16 : 0) + (src[middle] ? 2 : 0) +
-                (src[bottom - 1] ? 8 : 0) + (src[bottom] ? 1 : 0);
+            let mask = (src[top - 1] ? 32 : 0) +
+                (src[top] ? 4 : 0) +
+                (src[middle - 1] ? 16 : 0) +
+                (src[middle] ? 2 : 0) +
+                (src[bottom - 1] ? 8 : 0) +
+                (src[bottom] ? 1 : 0);
 
             for (let col = 1; col < (cols - 1); col++) {
 
@@ -117,31 +119,27 @@ export class JSUniverse implements Universe {
         }
     }
 
-    resurrected(): Uint32Array {
-        return new Uint32Array(
-            this.resurrectedCells.buffer,
-            0,
-            this.resurrectedCellsAmount
+    public resurrected(): Uint32Array {
+        return this.resurrectedCells.subarray(
+            0, this.resurrectedCellsAmount
         );
     }
 
-    killed(): Uint32Array {
-        return new Uint32Array(
-            this.killedCells.buffer,
-            0,
-            this.killedCellsAmount
+    public killed(): Uint32Array {
+        return this.killedCells.subarray(
+            0, this.killedCellsAmount
         );
+    }
+
+    public setRuleset(resurrect: number, survive: number): void {
+        this.resurrectRules = resurrect;
+        this.surviveRules = survive;
     }
 
     /* eslint-disable @typescript-eslint/no-empty-function */
 
     /* eslint-disable no-empty-function */
-    free(): void {
-    }
-
-    setRuleset(resurrect: number, survive: number): void {
-        this.resurrectRules = resurrect;
-        this.surviveRules = survive;
+    public free(): void {
     }
 }
 

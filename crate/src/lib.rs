@@ -62,22 +62,6 @@ impl Universe {
         }
     }
 
-    pub fn resurrected_cells(&mut self) -> *const (u32, u32) {
-        self.resurrected_cells.as_ptr()
-    }
-
-    pub fn resurrected_cells_amount(&mut self) -> u32 {
-        self.resurrected_cells.len() as u32
-    }
-
-    pub fn killed_cells(&mut self) -> *const (u32, u32) {
-        self.killed_cells.as_ptr()
-    }
-
-    pub fn killed_cells_amount(&mut self) -> u32 {
-        self.killed_cells.len() as u32
-    }
-
     /// Calculates the next generation
     pub fn next_gen(&mut self) {
         let resurrected_cells = &mut self.resurrected_cells;
@@ -120,10 +104,10 @@ impl Universe {
             for col in 1..(self.cols - 1) {
                 // Shift previously saved information to the left and make room
                 // For 3 additional bits (which will be used for the middle row).
-                mask = ((mask << 3) & 0b111111111) + // Make room for three more bits
-                    (if src[top + col] { 4 } else { 0 }) + // TR
-                    (if src[middle + col] { 2 } else { 0 }) + // MR
-                    (if src[bottom + col] { 1 } else { 0 }); // BR
+                mask = ((mask << 3) & 0b111111111)  // Make room for three more bits
+                    + (if src[top + col] { 4 } else { 0 }) // TR
+                    + (if src[middle + col] { 2 } else { 0 })  // MR
+                    + (if src[bottom + col] { 1 } else { 0 }); // BR
 
                 // Count amount of living neighbors
                 let neighbors = (mask & 0b1)
@@ -160,6 +144,22 @@ impl Universe {
                 };
             }
         }
+    }
+
+    pub fn resurrected_cells(&mut self) -> *const (u32, u32) {
+        self.resurrected_cells.as_ptr()
+    }
+
+    pub fn resurrected_cells_amount(&mut self) -> u32 {
+        self.resurrected_cells.len() as u32
+    }
+
+    pub fn killed_cells(&mut self) -> *const (u32, u32) {
+        self.killed_cells.as_ptr()
+    }
+
+    pub fn killed_cells_amount(&mut self) -> u32 {
+        self.killed_cells.len() as u32
     }
 
     pub fn set_ruleset(&mut self, resurrect: u16, survive: u16) {

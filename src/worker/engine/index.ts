@@ -98,8 +98,8 @@ export class Engine {
         // Recalculate grid and canvas dimensions
         const realWidth = width - width % block;
         const realHeight = height - height % block;
-        const cols = realWidth / blockSize;
-        const rows = realHeight / blockSize;
+        const cols = realWidth / block;
+        const rows = realHeight / block;
 
         return {
             width: realWidth,
@@ -179,7 +179,7 @@ export class Engine {
 
         this.running = true;
         const {ctx, shadowCtx, shadowCanvas, universe, env, fpsBuffer} = this;
-        const {block, blockSize} = env;
+        const {block, blockSize, width, height} = env;
 
         // Reset buffer
         for (let i = 0; i < fpsBuffer.length; i++) {
@@ -227,7 +227,7 @@ export class Engine {
                 fpsBufferIndex = 0;
             }
 
-            ctx.drawImage(shadowCanvas, 0, 0);
+            ctx.drawImage(shadowCanvas, 0, 0, width, height);
             this.activeAnimationFrame = requestAnimationFrame(renderLoop);
         };
 

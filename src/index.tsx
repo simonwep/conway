@@ -23,8 +23,7 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
     const offscreenCanvas = canvas.transferControlToOffscreen();
     const payload = transfer(offscreenCanvas, [offscreenCanvas]);
 
-    // TODO: Larger sizes are broken
-    const blockSize = 1;
+    const blockSize = 2;
     const blockMargin = 1;
 
     const instance = await new Engine(

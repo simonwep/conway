@@ -15,7 +15,7 @@ export class RustUniverse implements Universe {
         this.wasm = wasm;
     }
 
-    static async new(rows: number, cols: number): Promise<RustUniverse> {
+    public static async new(rows: number, cols: number): Promise<RustUniverse> {
         const [{Universe}, wasm] = await Promise.all([
             import(/* webpackChunkName: "crate-wrapper" */ '../../../../crate/pkg'),
             import(/* webpackChunkName: "crate-wasm" */ '../../../../crate/pkg/index_bg.wasm')
@@ -28,11 +28,11 @@ export class RustUniverse implements Universe {
         );
     }
 
-    nextGen(): void {
+    public nextGen(): void {
         this.universe.next_gen();
     }
 
-    resurrected(): Uint32Array {
+    public resurrected(): Uint32Array {
         return new Uint32Array(
             this.wasm.memory.buffer,
             this.universe.resurrected_cells(),
@@ -40,7 +40,7 @@ export class RustUniverse implements Universe {
         );
     }
 
-    killed(): Uint32Array {
+    public killed(): Uint32Array {
         return new Uint32Array(
             this.wasm.memory.buffer,
             this.universe.killed_cells(),
@@ -48,11 +48,11 @@ export class RustUniverse implements Universe {
         );
     }
 
-    free(): void {
+    public free(): void {
         this.universe.free();
     }
 
-    setRuleset(resurrect: number, survive: number): void {
+    public setRuleset(resurrect: number, survive: number): void {
         this.universe.set_ruleset(resurrect, survive);
     }
 }
