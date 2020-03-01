@@ -2,6 +2,7 @@ import {transfer, wrap}            from 'comlink';
 import {h, render}                 from 'preact';
 import {App}                       from './app/App';
 import './styles/_global.scss';
+import {life}                      from './store';
 import {Config, EngineConstructor} from './worker/engine';
 
 render(
@@ -91,6 +92,11 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
     });
 
     canvas.addEventListener('mouseup', () => dragging = false);
+
+    setInterval(async() => {
+        life.fps = await instance.getFrameRate();
+        life.generation = await instance.getGeneration();
+    }, 1000);
 
     window.addEventListener('resize', (() => {
         let timeout: unknown = 0;

@@ -1,7 +1,10 @@
-import {h} from 'preact';
+import {h}         from 'preact';
+import {LifeStats} from './widgets/life-stats/LifeStats';
 
 export function App() {
     return (
-        <p>Hello World</p>
+        <div>
+            <LifeStats/>
+        </div>
     );
 }

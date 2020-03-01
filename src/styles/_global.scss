@@ -1,4 +1,5 @@
 @import '~normalize.css';
+@import './variables';
 
 * {
     margin: 0;
@@ -19,4 +20,5 @@ canvas {
     bottom: 0;
     right: 0;
     margin: auto;
+    z-index: -1;
 }

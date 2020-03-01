@@ -25,7 +25,11 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.ts', '.tsx', '.js', '.css']
+        extensions: ['.ts', '.tsx', '.js', '.scss'],
+        alias: {
+            'react': 'preact/compat',
+            'react-dom': 'preact/compat'
+        }
     },
 
     module: {
@@ -39,7 +43,7 @@ module.exports = {
                         loader: 'css-loader',
                         options: {
                             modules: {
-                                localIdentName: '[name]-[hash:base64:5]'
+                                localIdentName: '[hash:base64:5]'
                             }
                         }
                     },
@@ -56,7 +60,7 @@ module.exports = {
             },
             {
                 test: /\.(scss|sass|css)$/,
-                include: src,
+                exclude: app,
                 use: [
                     MiniCssExtractPlugin.loader,
                     'css-loader',

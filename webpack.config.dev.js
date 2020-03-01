@@ -17,15 +17,20 @@ module.exports = {
     output: {
         path: dist,
         globalObject: 'self',
-        filename: '[chunkhash].bundle.js'
+        filename: '[hash].bundle.js'
     },
 
     devServer: {
-        port: 3008
+        port: 3008,
+        hot: true
     },
 
     resolve: {
-        extensions: ['.ts', '.tsx', '.js', '.css']
+        extensions: ['.ts', '.tsx', '.js', '.scss'],
+        alias: {
+            'react': 'preact/compat',
+            'react-dom': 'preact/compat'
+        }
     },
 
     module: {
@@ -38,6 +43,7 @@ module.exports = {
                     {
                         loader: 'css-loader',
                         options: {
+                            sourceMap: true,
                             modules: {
                                 localIdentName: '[name]-[hash:base64:5]'
                             }
@@ -56,7 +62,7 @@ module.exports = {
             },
             {
                 test: /\.(scss|sass|css)$/,
-                include: src,
+                exclude: app,
                 use: [
                     'style-loader',
                     'css-loader',

@@ -219,6 +219,7 @@ export class Engine {
             universe.nextGen();
 
             // Save time this frame took
+            // TODO: The framerate is a bit off...
             const end = performance.now();
             fpsBuffer[fpsBufferIndex] = ~~(end - start);
 
