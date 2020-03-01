@@ -23,7 +23,7 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
     const offscreenCanvas = canvas.transferControlToOffscreen();
     const payload = transfer(offscreenCanvas, [offscreenCanvas]);
 
-    // TODO: Bigger sizes are broken
+    // TODO: Larger sizes are broken
     const blockSize = 1;
     const blockMargin = 1;
 
@@ -41,9 +41,7 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 
     let scale = 1;
     const zoomFactor = 2;
-    let x = 0;
-    let y = 0;
-
+    let x = 0, y = 0;
     canvas.addEventListener('wheel', async e => {
         const delta = (e.deltaY < 0 ? zoomFactor : 1 / zoomFactor);
 
@@ -56,18 +54,44 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
         y = Math.round(e.pageY - (e.pageY - y) * delta);
 
         // Lock fullscreen
-        if (scale <= 1) {
+        if (scale == 1) {
+            canvas.style.cursor = 'default';
             x = 0;
             y = 0;
-            scale = 1;
+        } else {
+            canvas.style.cursor = 'grab';
         }
 
-        // TODO: Fix blurry pixels
         await instance.transform({
             scale, x, y
         });
     });
 
+    let dragging = false;
+    let sx = 0, sy = 0;
+    canvas.addEventListener('mousemove', async e => {
+        if (dragging && scale > 1) {
+            x = Math.round(x + (e.pageX - sx));
+            y = Math.round(y + (e.pageY - sy));
+
+            sx = e.pageX;
+            sy = e.pageY;
+
+            // TODO: Lock on edges
+            await instance.transform({
+                scale, x, y
+            });
+        }
+    });
+
+    canvas.addEventListener('mousedown', e => {
+        dragging = true;
+        sx = e.pageX;
+        sy = e.pageY;
+        console.log('set');
+    });
+
+    canvas.addEventListener('mouseup', () => dragging = false);
 
     window.addEventListener('resize', (() => {
         let timeout: unknown = 0;
