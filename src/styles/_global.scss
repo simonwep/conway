@@ -13,6 +13,17 @@ html {
     height: 100%;
 }
 
+input,
+button {
+    outline: none;
+    background: inherit;
+    border: none;
+}
+
+button {
+    cursor: pointer;
+}
+
 canvas {
     position: absolute;
     top: 0;

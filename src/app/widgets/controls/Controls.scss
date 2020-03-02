@@ -1,0 +1,121 @@
+.controls {
+    @include flex(row, center, center);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+.container {
+    @include flex(row, center);
+
+    > p {
+        @include size(1.5em, 2px);
+        flex-shrink: 0;
+        background: $color-bright-blue;
+        margin: 0 1em;
+    }
+}
+
+.playPauseBtn {
+    @include size(20px, 20px);
+    position: relative;
+    transition: all 0.3s;
+
+    &::before,
+    &::after {
+        @include size(20px, 4px);
+        position: absolute;
+        top: 0;
+        content: '';
+        display: block;
+        background: $color-bright-blue;
+        transition: all 0.3s;
+        border-radius: 50em;
+    }
+
+    &::before {
+        left: 0;
+        transform: translateX(2px);
+    }
+
+    &::after {
+        right: 0;
+        transform: translateX(-2px);
+    }
+
+    &:hover {
+        &::before {
+            transform: translateX(3px);
+        }
+
+        &::after {
+            transform: translateX(-3px);
+        }
+    }
+
+    &[data-state=playing] {
+        transform: scale(0.75);
+
+        &::before,
+        &::after {
+            transform: none;
+            right: 0;
+        }
+
+        &:hover {
+            transform: scale(0.85);
+        }
+
+        &::before {
+            margin-left: 100%;
+            transform: translateX(-100%) rotate(45deg) translateY(40%);
+        }
+
+        &::after {
+            transform: rotate(-45deg) translateY(-40%);
+        }
+    }
+}
+
+.forwardBtn {
+    @include size(20px, 40px);
+    margin: 0 -10px 0 0;
+
+    > div {
+        @include size(20px, 14px);
+        position: relative;
+        transition: all 0.3s;
+        display: inline-block;
+
+        &::before,
+        &::after {
+            @include size(14px, 3px);
+            @include pseudo();
+            @include position(0, 0, 0, 0);
+            background: $color-bright-blue;
+            margin: auto;
+            transform: rotate(45deg);
+            border-radius: 50em;
+        }
+
+        &::before {
+            transform: rotate(45deg) translateY(40%);
+        }
+
+        &::after {
+            transform: rotate(-45deg) translateY(-40%);
+        }
+    }
+
+    &:hover {
+        > div:nth-child(1) {
+            transform: translateX(4px);
+        }
+
+        > div:nth-child(2) {
+            transform: translateX(2px);
+        }
+    }
+}

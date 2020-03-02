@@ -291,6 +291,7 @@ export class Engine {
         this.moved = true;
 
         // Apply transformation
+        // TODO: Bug: Only changed-cells get re-drawed
         this.ctx.setTransform(
             t.scale, 0,
             0, t.scale,
