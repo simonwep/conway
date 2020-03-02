@@ -1,5 +1,5 @@
 import {Component, h}   from 'preact';
-import {init}           from '../controller';
+import {bind}           from '../lib/preact-utils';
 import {LoadingOverlay} from './LoadingOverlay';
 import {Controls}       from './widgets/controls/Controls';
 import {LifeStats}      from './widgets/life-stats/LifeStats';
@@ -16,23 +16,21 @@ export class App extends Component<Props, State> {
         canvasInitialized: false
     };
 
-    componentDidMount(): void {
-
-        // TODO: What about errors?
-        init().then(() => {
-            this.setState({
-                ...this.state,
-                canvasInitialized: true
-            });
+    @bind
+    onLoaded() {
+        this.setState({
+            ...this.state,
+            canvasInitialized: true
         });
     }
 
     render(_: Props, {canvasInitialized}: State) {
-        return canvasInitialized ? (
+        return (
             <div>
                 <LifeStats/>
                 <Controls/>
+                {!canvasInitialized ? <LoadingOverlay onLoaded={this.onLoaded}/> : ''}
             </div>
-        ) : (<LoadingOverlay/>);
+        );
     }
 }

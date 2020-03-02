@@ -3,4 +3,30 @@
     @include flex(column, center, center);
     position: fixed;
     background: white;
+    transition: all 0.3s 0.95s;
+
+    > div {
+        display: grid;
+        grid-gap: 0.5vmin;
+        grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr;
+    }
+
+    &[data-finish=true] {
+        opacity: 0;
+        transform: translateY(25vh);
+
+        .cell {
+            transition: all 1s cubic-bezier(0.88, 0, 1, 0.27);
+        }
+    }
+}
+
+.cell {
+    @include size(5vmin);
+    border-radius: 0.25em;
+    transition: all 0.1s;
+
+    &[data-active=true] {
+        background: $color-bright-blue;
+    }
 }
