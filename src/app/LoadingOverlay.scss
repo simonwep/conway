@@ -1,0 +1,6 @@
+.loadingOverlay {
+    @include position(0, 0, 0, 0);
+    @include flex(column, center, center);
+    position: fixed;
+    background: white;
+}
