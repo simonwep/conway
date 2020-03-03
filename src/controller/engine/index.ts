@@ -277,12 +277,8 @@ export class Engine {
     }
 
     public async transform(t: Transformation): Promise<void> {
-        const {ctx, shadowCanvas, env} = this;
+        const {ctx, shadowCanvas, env, running} = this;
         const {width, height} = env;
-
-        // Reset state
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, this.env.width, this.env.height);
 
         // Apply transformation
         this.ctx.setTransform(
@@ -291,8 +287,10 @@ export class Engine {
             t.x, t.y
         );
 
-        // Redraw
-        ctx.drawImage(shadowCanvas, 0, 0, width, height);
+        // Redraw if simulation is currently not running
+        if (!running) {
+            ctx.drawImage(shadowCanvas, 0, 0, width, height);
+        }
     }
 
     public async updateConfig(config: Config): Promise<void> {
