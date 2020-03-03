@@ -3,7 +3,6 @@
     @include flex(column, center, center);
     position: fixed;
     background: white;
-    transition: all 0.3s 0.95s;
 
     > div {
         display: grid;
@@ -14,6 +13,7 @@
     &[data-finish=true] {
         opacity: 0;
         transform: translateY(25vh);
+        transition: all 0.3s 0.95s;
 
         .cell {
             transition: all 1s cubic-bezier(0.88, 0, 1, 0.27);

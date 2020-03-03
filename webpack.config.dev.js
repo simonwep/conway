@@ -16,13 +16,16 @@ module.exports = {
 
     output: {
         path: dist,
-        globalObject: 'self',
-        filename: '[hash].bundle.js'
+        filename: '[name].js'
     },
 
     devServer: {
         port: 3008,
+        disableHostCheck: true,
+        historyApiFallback: true,
+        stats: 'errors-only',
         host: '0.0.0.0',
+        liveReload: false,
         hot: true
     },
 
@@ -41,26 +44,36 @@ module.exports = {
                 loader: 'svg-inline-loader'
             },
             {
-                test: /\.(scss|sass|css)$/,
+                enforce: 'pre',
+                test: /\.s[ac]ss$/,
+                use: [
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sourceMap: true,
+                            prependData: '@import "src/styles/_global.scss";'
+                        }
+                    }
+                ]
+            },
+            {
+                test: /\.module\.(scss|sass|css)$/,
                 include: app,
                 use: [
-                    'style-loader',
+                    {
+                        loader: 'style-loader',
+                        options: {
+                            hmr: true
+                        }
+                    },
                     {
                         loader: 'css-loader',
                         options: {
                             sourceMap: true,
+                            importLoaders: 1,
                             modules: {
                                 localIdentName: '[name]-[hash:base64:5]'
                             }
-                        }
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            prependData: `
-                                @import '~sassyfication';
-                                @import 'src/styles/_global.scss';
-                            `
                         }
                     }
                 ]
@@ -69,15 +82,17 @@ module.exports = {
                 test: /\.(scss|sass|css)$/,
                 exclude: app,
                 use: [
-                    'style-loader',
-                    'css-loader',
                     {
-                        loader: 'sass-loader',
+                        loader: 'style-loader',
                         options: {
-                            prependData: `
-                                @import '~sassyfication';
-                                @import 'src/styles/_global.scss';
-                            `
+                            hmr: true
+                        }
+                    },
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            importLoaders: 1,
+                            sourceMap: true
                         }
                     }
                 ]
@@ -110,9 +125,13 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: crate,
             extraArgs: '--target browser --mode normal',
-            forceMode: 'production'
+            forceMode: 'development'
         }),
 
-        new WorkerPlugin()
+        new WorkerPlugin({
+            globalObject: 'self'
+        }),
+
+        new webpack.HotModuleReplacementPlugin()
     ]
 };

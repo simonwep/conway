@@ -1,9 +1,6 @@
-import {transfer, wrap}            from 'comlink';
-import {h, render}                 from 'preact';
-import {App}                       from './app/App';
-import {life}                      from './store';
+import {h, render} from 'preact';
+import {App}       from './app/App';
 import './styles/_global.scss';
-import {Config, EngineConstructor} from './controller/engine';
 
 render(
     <App/>,

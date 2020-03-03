@@ -1,7 +1,7 @@
 import {Component, h} from 'preact';
 import {init}         from '../controller';
-import {random}       from '../lib/random';
-import styles         from './LoadingOverlay.scss';
+import {random} from '../lib/random';
+import styles   from './LoadingOverlay.module.scss';
 
 const frames = [
     [

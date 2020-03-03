@@ -20,7 +20,6 @@ module.exports = {
 
     output: {
         path: dist,
-        globalObject: 'self',
         filename: '[name].[contenthash:8].bundle.js'
     },
 
@@ -39,25 +38,29 @@ module.exports = {
                 loader: 'svg-inline-loader'
             },
             {
-                test: /\.(scss|sass|css)$/,
+                enforce: 'pre',
+                test: /\.s[ac]ss$/,
+                use: [
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            prependData: '@import "src/styles/_global.scss";'
+                        }
+                    }
+                ]
+            },
+            {
+                test: /\.module\.(scss|sass|css)$/,
                 include: app,
                 use: [
                     MiniCssExtractPlugin.loader,
                     {
                         loader: 'css-loader',
                         options: {
+                            importLoaders: 1,
                             modules: {
                                 localIdentName: '[hash:base64:5]'
                             }
-                        }
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            prependData: `
-                                @import '~sassyfication';
-                                @import 'src/styles/_global.scss';
-                            `
                         }
                     }
                 ]
@@ -67,22 +70,16 @@ module.exports = {
                 exclude: app,
                 use: [
                     MiniCssExtractPlugin.loader,
-                    'css-loader',
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            prependData: `
-                                @import '~sassyfication';
-                                @import 'src/styles/_global.scss';
-                            `
-                        }
-                    }
+                    'css-loader'
                 ]
             },
             {
                 test: /\.(js|ts|tsx)$/,
                 include: src,
-                use: 'ts-loader'
+                use: [
+                    'ts-loader',
+                    'eslint-loader'
+                ]
             }
         ]
     },
@@ -115,8 +112,8 @@ module.exports = {
         }),
 
         new MiniCssExtractPlugin({
-            filename: 'css/[name].[contenthash:5].css',
-            chunkFilename: 'css/[name].[contenthash:5].css'
+            filename: 'css/[name].[hash:6].css',
+            chunkFilename: 'css/[name].[hash:6].css'
         }),
 
         new WasmPackPlugin({

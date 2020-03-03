@@ -1,8 +1,8 @@
 import {observer}        from 'mobx-react';
 import {Component, h}    from 'preact';
 import {joinStrings}     from '../../../lib/preact-utils';
-import * as widgetStyles from '../widget.scss';
-import * as styles       from './Controls.scss';
+import * as widgetStyles from '../widget.module.scss';
+import * as styles       from './Controls.module.scss';
 
 @observer
 export class Controls extends Component {
