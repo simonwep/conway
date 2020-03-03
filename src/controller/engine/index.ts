@@ -65,13 +65,6 @@ export class Engine {
     // Current generation.
     private generation = 0;
 
-    /**
-     * Will be set to true if the canvas has been moved / dragged / zoomed.
-     * If true the current screen will get cleared and re-painted, otherwise there
-     * would be fragments from the previous frame.
-     */
-    private moved = false;
-
     private constructor(
         canvas: OffscreenCanvas,
         config: Config
@@ -233,13 +226,6 @@ export class Engine {
         const {block, blockSize, width, height} = env;
         this.generation++;
 
-        // Check if canvas has been moved since last redraw and clear screen
-        if (this.moved) {
-            shadowCtx.fillStyle = '#fff';
-            shadowCtx.fillRect(0, 0, width, height);
-            this.moved = false;
-        }
-
         // Draw killed cells
         shadowCtx.beginPath();
         const killed = universe.killed();
@@ -298,17 +284,14 @@ export class Engine {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, this.env.width, this.env.height);
 
-        // Canvas has moved
-        this.moved = true;
-
         // Apply transformation
-        // TODO: Bug: Only changed-cells get re-drawed
         this.ctx.setTransform(
             t.scale, 0,
             0, t.scale,
             t.x, t.y
         );
 
+        // Redraw
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
