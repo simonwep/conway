@@ -9,6 +9,23 @@ export let engine: null | Remote<Engine> = null;
 // If engine has been initialized
 export let initialized = false;
 
+// GOL Controls
+export const controls = {
+
+    async play(): Promise<void> {
+        await engine!.play();
+    },
+
+    async pause(): Promise<void> {
+        await engine!.pause();
+    },
+
+    async next(): Promise<void> {
+        await engine!.nextGeneration();
+    }
+};
+
+
 // Called only once to mount the canvas
 export const init = async (): Promise<void> => {
 

@@ -195,8 +195,7 @@ export class Engine {
         }
 
         this.running = true;
-        const {ctx, shadowCtx, shadowCanvas, universe, env, fpsBuffer} = this;
-        const {block, blockSize, width, height} = env;
+        const {fpsBuffer} = this;
 
         // Reset buffer
         for (let i = 0; i < fpsBuffer.length; i++) {
@@ -206,41 +205,10 @@ export class Engine {
         // TODO: Use device-pixel-ratio
         let latestFrame = performance.now();
         let fpsBufferIndex = 0;
-        const renderLoop = (): void => {
-            this.generation++;
+        const renderLoop = async (): Promise<void> => {
 
-            // Check if canvas has been moved since last redraw and clear screen
-            if (this.moved) {
-                shadowCtx.fillStyle = '#fff';
-                shadowCtx.fillRect(0, 0, width, height);
-                this.moved = false;
-            }
-
-            // Draw killed cells
-            shadowCtx.beginPath();
-            const killed = universe.killed();
-            for (let i = 0; i < killed.length; i += 2) {
-                const row = killed[i] * block;
-                const col = killed[i + 1] * block;
-                shadowCtx.rect(col, row, blockSize, blockSize);
-            }
-
-            shadowCtx.fillStyle = '#fff';
-            shadowCtx.fill();
-
-            // Draw living cells
-            shadowCtx.beginPath();
-            const resurrected = universe.resurrected();
-            for (let i = 0; i < resurrected.length; i += 2) {
-                const row = resurrected[i] * block;
-                const col = resurrected[i + 1] * block;
-                shadowCtx.rect(col, row, blockSize, blockSize);
-            }
-
-            shadowCtx.fillStyle = '#000';
-            shadowCtx.fill();
-
-            universe.nextGen();
+            // Draw next generation
+            await this.nextGeneration();
 
             // Save time this frame took
             const end = performance.now();
@@ -252,11 +220,52 @@ export class Engine {
             }
 
             latestFrame = end;
-            ctx.drawImage(shadowCanvas, 0, 0, width, height);
+
+            // Request next frame
             this.activeAnimationFrame = requestAnimationFrame(renderLoop);
         };
 
         requestAnimationFrame(renderLoop);
+    }
+
+    public async nextGeneration(): Promise<void> {
+        const {ctx, shadowCtx, shadowCanvas, universe, env} = this;
+        const {block, blockSize, width, height} = env;
+        this.generation++;
+
+        // Check if canvas has been moved since last redraw and clear screen
+        if (this.moved) {
+            shadowCtx.fillStyle = '#fff';
+            shadowCtx.fillRect(0, 0, width, height);
+            this.moved = false;
+        }
+
+        // Draw killed cells
+        shadowCtx.beginPath();
+        const killed = universe.killed();
+        for (let i = 0; i < killed.length; i += 2) {
+            const row = killed[i] * block;
+            const col = killed[i + 1] * block;
+            shadowCtx.rect(col, row, blockSize, blockSize);
+        }
+
+        shadowCtx.fillStyle = '#fff';
+        shadowCtx.fill();
+
+        // Draw living cells
+        shadowCtx.beginPath();
+        const resurrected = universe.resurrected();
+        for (let i = 0; i < resurrected.length; i += 2) {
+            const row = resurrected[i] * block;
+            const col = resurrected[i + 1] * block;
+            shadowCtx.rect(col, row, blockSize, blockSize);
+        }
+
+        shadowCtx.fillStyle = '#000';
+        shadowCtx.fill();
+
+        universe.nextGen();
+        ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
     public async isRunning(): Promise<boolean> {
@@ -282,10 +291,12 @@ export class Engine {
     }
 
     public async transform(t: Transformation): Promise<void> {
+        const {ctx, shadowCanvas, env} = this;
+        const {width, height} = env;
 
         // Reset state
-        this.ctx.fillStyle = 'white';
-        this.ctx.fillRect(0, 0, this.env.width, this.env.height);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, this.env.width, this.env.height);
 
         // Canvas has moved
         this.moved = true;
@@ -297,6 +308,8 @@ export class Engine {
             0, t.scale,
             t.x, t.y
         );
+
+        ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
     public async updateConfig(config: Config): Promise<void> {

@@ -46,6 +46,6 @@
         "mobx": "^5.15.4",
         "mobx-react": "^6.1.8",
         "normalize.css": "^8.0.1",
-        "preact": "^10.3.3"
+        "preact": "^10.3.0"
     }
 }

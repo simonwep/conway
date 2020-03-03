@@ -1,7 +1,7 @@
 import {Component, h} from 'preact';
 import {init}         from '../controller';
-import {random} from '../lib/random';
-import styles   from './LoadingOverlay.module.scss';
+import {random}       from '../lib/random';
+import styles         from './LoadingOverlay.module.scss';
 
 const frames = [
     [
@@ -44,7 +44,7 @@ export class LoadingOverlay extends Component<Props, State> {
         randomTarget: []
     };
 
-    async componentDidMount(): Promise<void> {
+    componentDidMount() {
         const start = performance.now() + 350 * 4;
 
         const interval = setInterval(() => {

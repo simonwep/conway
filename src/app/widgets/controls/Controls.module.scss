@@ -23,7 +23,6 @@
     position: relative;
     transition: all 0.3s;
 
-
     &::before,
     &::after {
         @include size(20px, 4px);
@@ -81,8 +80,8 @@
 }
 
 .forwardBtn {
-    @include size(20px, 40px);
-    margin: 0 -10px 0 0;
+    @include size(20px, 28px);
+    transition: all 0.3s;
 
     > div {
         @include size(20px, 14px);
@@ -102,21 +101,27 @@
         }
 
         &::before {
-            transform: rotate(45deg) translateY(40%);
+            transform: translateX(100%) rotate(45deg) translateY(40%);
         }
 
         &::after {
-            transform: rotate(-45deg) translateY(-40%);
+            transform: translateX(100%) rotate(-45deg) translateY(-40%);
         }
     }
 
     &:hover {
         > div:nth-child(1) {
-            transform: translateX(4px);
+            transform: translateX(25%);
         }
 
         > div:nth-child(2) {
-            transform: translateX(2px);
+            transform: translateX(15%);
         }
+    }
+
+    &[data-state=disabled] {
+        pointer-events: none;
+        filter: grayscale(1);
+        opacity: 0.45;
     }
 }
