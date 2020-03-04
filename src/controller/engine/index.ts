@@ -1,7 +1,5 @@
-import {expose}                 from 'comlink';
-import {JSUniverse}             from './modes/javascript';
-import {RustUniverse}           from './modes/rust';
-import {Universe, UniverseMode} from './modes/universe';
+import {expose}          from 'comlink';
+import {UniverseWrapper} from './container';
 
 export type Config = {
     width: number;
@@ -34,7 +32,6 @@ export class Engine {
 
     // Amount of single frames to stabilize the fps
     public static readonly FPS_BUFFER = 16;
-    public static readonly STANDARD_MODE: UniverseMode = 'js';
 
     // Buffer of the last N frames, used to smooth the current fps.
     private readonly fpsBuffer: Uint32Array = new Uint32Array(Engine.FPS_BUFFER);
@@ -49,12 +46,11 @@ export class Engine {
     private readonly canvas: OffscreenCanvas;
     private readonly ctx: OffscreenCanvasRenderingContext2D;
 
+    // Rust wrapper
+    private universe: UniverseWrapper | null;
+
     // Currently requested frame.
     private activeAnimationFrame: number | null = null;
-
-    // Current universe and its mode.
-    private universe: Universe;
-    private mode: UniverseMode = Engine.STANDARD_MODE;
 
     // env-data such as screen size, size of block etc.
     private env: Environment;
@@ -98,7 +94,20 @@ export class Engine {
         // Clear canvas and initialize js-universe
         this.shadowCtx.fillStyle = '#fff';
         this.shadowCtx.fillRect(0, 0, width, height);
-        this.universe = new JSUniverse(rows, cols);
+        this.universe = null;
+    }
+
+    public async mount(): Promise<void> {
+        const {rows, cols} = this.env;
+
+        if (this.universe) {
+            throw new Error('Universe already mounted.');
+        }
+
+        this.universe = await UniverseWrapper.new(
+            rows,
+            cols
+        );
     }
 
     private static configToEnv(conf: Config): Environment {
@@ -120,44 +129,6 @@ export class Engine {
             rows,
             cols
         };
-    }
-
-    public async setMode(mode: UniverseMode): Promise<void> {
-        const {env, shadowCtx, running} = this;
-        const {cols, rows, width, height} = env;
-
-        if (this.universe) {
-            this.stop();
-        }
-
-        // Reset canvas
-        shadowCtx.fillStyle = '#fff';
-        shadowCtx.fillRect(0, 0, width, height);
-
-        // Reset generation counter
-        this.generation = 0;
-
-        // Re-initiate universe
-        this.mode = mode;
-
-        switch (mode) {
-            case 'rust': {
-                this.universe = await RustUniverse.new(rows, cols);
-                break;
-            }
-            case 'js': {
-                this.universe = JSUniverse.new(rows, cols);
-                break;
-            }
-            default: {
-                throw new Error(`Unknown mode: ${mode}`);
-            }
-        }
-
-        // Restart if it was running
-        if (running) {
-            this.play();
-        }
     }
 
     public async pause(): Promise<void> {
@@ -228,7 +199,7 @@ export class Engine {
 
         // Draw killed cells
         shadowCtx.beginPath();
-        const killed = universe.killed();
+        const killed = universe!.killed();
         for (let i = 0; i < killed.length; i += 2) {
             const row = killed[i] * block;
             const col = killed[i + 1] * block;
@@ -240,7 +211,7 @@ export class Engine {
 
         // Draw living cells
         shadowCtx.beginPath();
-        const resurrected = universe.resurrected();
+        const resurrected = universe!.resurrected();
         for (let i = 0; i < resurrected.length; i += 2) {
             const row = resurrected[i] * block;
             const col = resurrected[i + 1] * block;
@@ -250,16 +221,12 @@ export class Engine {
         shadowCtx.fillStyle = '#000';
         shadowCtx.fill();
 
-        universe.nextGen();
+        universe!.nextGen();
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
     public async isRunning(): Promise<boolean> {
         return this.running;
-    }
-
-    public async getMode(): Promise<UniverseMode> {
-        return this.mode;
     }
 
     public async getGeneration(): Promise<number> {
@@ -305,7 +272,6 @@ export class Engine {
 
         // Restore option
         ctx.imageSmoothingEnabled = false;
-        await this.setMode(this.mode);
     }
 }
 

@@ -55,6 +55,7 @@ export const init = async (): Promise<void> => {
     );
 
     // Auto-play
+    await current.mount();
     await current.play();
 
     // Fire modules
@@ -76,26 +77,6 @@ export const init = async (): Promise<void> => {
             }, 1000);
         };
     })());
-
-    window.addEventListener('keyup', async e => {
-        switch (e.code) {
-            case 'KeyR' : {
-                await current.setMode('rust');
-                break;
-            }
-            case  'KeyJ': {
-                await current.setMode('js');
-                break;
-            }
-            case 'KeyP': {
-                if (await current.isRunning()) {
-                    await current.pause();
-                } else {
-                    await current.play();
-                }
-            }
-        }
-    });
 
     initialized = true;
 };

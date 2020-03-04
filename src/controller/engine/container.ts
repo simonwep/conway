@@ -1,7 +1,4 @@
-import {Universe} from './universe';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export class RustUniverse implements Universe {
+export class UniverseWrapper  {
 
     private readonly cols: number;
     private readonly rows: number;
@@ -15,13 +12,13 @@ export class RustUniverse implements Universe {
         this.wasm = wasm;
     }
 
-    public static async new(rows: number, cols: number): Promise<RustUniverse> {
+    public static async new(rows: number, cols: number): Promise<UniverseWrapper> {
         const [{Universe}, wasm] = await Promise.all([
-            import(/* webpackChunkName: "crate-wrapper" */ '../../../../crate/pkg'),
-            import(/* webpackChunkName: "crate-wasm" */ '../../../../crate/pkg/index_bg.wasm')
+            import(/* webpackChunkName: "crate-wrapper" */ '../../../crate/pkg'),
+            import(/* webpackChunkName: "crate-wasm" */ '../../../crate/pkg/index_bg.wasm')
         ]);
 
-        return new RustUniverse(
+        return new UniverseWrapper(
             rows, cols,
             Universe.new(rows, cols),
             wasm

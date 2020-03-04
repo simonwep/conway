@@ -125,7 +125,7 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: crate,
             extraArgs: '--target browser --mode normal',
-            forceMode: 'development'
+            forceMode: 'production'
         }),
 
         new WorkerPlugin({
