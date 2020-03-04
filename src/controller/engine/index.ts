@@ -61,6 +61,9 @@ export class Engine {
     // Current generation.
     private generation = 0;
 
+    // FPS limiter, negative means no limit
+    private fpsLimit = 30;
+
     private constructor(
         canvas: OffscreenCanvas,
         config: Config
@@ -76,7 +79,7 @@ export class Engine {
         }) as OffscreenCanvasRenderingContext2D;
 
         // Reset canvas
-        const {width, height, rows, cols} = this.env;
+        const {width, height} = this.env;
         canvas.width = width;
         canvas.height = height;
 
@@ -169,32 +172,47 @@ export class Engine {
         // TODO: Use device-pixel-ratio
         let latestFrame = performance.now();
         let fpsBufferIndex = 0;
+
         const renderLoop = async (): Promise<void> => {
 
-            // Draw next generation
-            await this.nextGeneration();
-
-            // Save time this frame took
+            // Update fps-buffer
             const end = performance.now();
             fpsBuffer[fpsBufferIndex] = ~~(end - latestFrame);
-
+            latestFrame = end;
             fpsBufferIndex++;
+
+            // Rotate if out-of-bounds
             if (fpsBufferIndex > Engine.FPS_BUFFER) {
                 fpsBufferIndex = 0;
             }
 
-            latestFrame = end;
+            // Draw next generation
+            const duration = await this.nextGeneration();
 
-            // Request next frame
+            // Check if fps-limit is enabled
+            if (~this.fpsLimit) {
+                const rest = (1000 / (this.fpsLimit + 1)) - duration;
+
+                // Don't wait for a single millisecond
+                if (rest > 1) {
+                    setTimeout(() => {
+                        this.activeAnimationFrame = requestAnimationFrame(renderLoop);
+                    }, rest);
+                    return;
+                }
+            }
+
             this.activeAnimationFrame = requestAnimationFrame(renderLoop);
         };
+
 
         requestAnimationFrame(renderLoop);
     }
 
-    public async nextGeneration(): Promise<void> {
+    public async nextGeneration(): Promise<number> {
         const {ctx, shadowCtx, shadowCanvas, universe, env} = this;
         const {block, blockSize, width, height} = env;
+        const start = performance.now();
         this.generation++;
 
         // Draw killed cells
@@ -223,10 +241,19 @@ export class Engine {
 
         universe!.nextGen();
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
+        return performance.now() - start;
     }
 
     public async isRunning(): Promise<boolean> {
         return this.running;
+    }
+
+    public async limitFPS(limit: number): Promise<void> {
+        if (limit <= 0) {
+            throw new Error(`FPS Cannot be limited to a negative number or zero (got ${limit})`);
+        }
+
+        this.fpsLimit = limit;
     }
 
     public async getGeneration(): Promise<number> {
