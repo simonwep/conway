@@ -1,6 +1,16 @@
 .lifeStats {
+    @include flex(row);
     position: absolute;
     font-weight: 500;
     line-height: 1.5em;
     bottom: 0;
+    z-index: 1;
+}
+
+.lockFPSBtn:hover {
+    background: $color-primary;
+}
+
+.resetGenerationCounterBtn:hover {
+    background: $color-error;
 }

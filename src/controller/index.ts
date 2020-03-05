@@ -22,6 +22,10 @@ export const controls = {
 
     async next(): Promise<void> {
         await engine!.nextGeneration();
+    },
+
+    async limitFPS(limit: number | null): Promise<void> {
+        await engine!.limitFPS(limit);
     }
 };
 

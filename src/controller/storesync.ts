@@ -14,5 +14,6 @@ export const storesync = (
     setInterval(async () => {
         life.fps = await current.getFrameRate();
         life.generation = await current.getGeneration();
+        life.fpsLimitation = await current.getFrameRateLimitation();
     }, 1000);
 };

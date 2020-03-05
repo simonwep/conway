@@ -1,10 +1,10 @@
-import {h}     from 'preact';
-import counter from '../../icons/counter.svg';
-import frames  from '../../icons/frames.svg';
+import {h}   from 'preact';
+import lock  from '../../icons/lock.svg';
+import reset from '../../icons/reset.svg';
 
 const icons = {
-    counter,
-    frames
+    reset,
+    lock
 };
 
 type Props = {

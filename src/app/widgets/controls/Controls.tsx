@@ -1,8 +1,8 @@
 import {observer}          from 'mobx-react';
 import {Component, h}      from 'preact';
-import {controls}          from '../../../controller';
-import {bind, joinStrings} from '../../../lib/preact-utils';
-import * as widgetStyles   from '../widget.module.scss';
+import {controls}        from '../../../controller';
+import {bind, cn}        from '../../../lib/preact-utils';
+import * as widgetStyles from '../widget.module.scss';
 import * as styles         from './Controls.module.scss';
 
 type Props = {};
@@ -45,7 +45,7 @@ export class Controls extends Component<Props, State> {
 
         return (
             <div className={styles.controls}>
-                <div className={joinStrings(
+                <div className={cn(
                     widgetStyles.widget,
                     styles.container
                 )}>

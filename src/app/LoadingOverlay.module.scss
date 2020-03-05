@@ -3,6 +3,8 @@
     @include flex(column, center, center);
     position: fixed;
     background: white;
+    z-index: 100;
+    display: none;
 
     > div {
         display: grid;
@@ -27,6 +29,6 @@
     transition: all 0.1s;
 
     &[data-active=true] {
-        background: $color-bright-blue;
+        background: $color-primary;
     }
 }

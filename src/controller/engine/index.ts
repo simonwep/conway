@@ -61,8 +61,8 @@ export class Engine {
     // Current generation.
     private generation = 0;
 
-    // FPS limiter, negative means no limit
-    private fpsLimit = 30;
+    // FPS limiter, null means no limit
+    private fpsLimit: number | null = 45;
 
     private constructor(
         canvas: OffscreenCanvas,
@@ -173,13 +173,11 @@ export class Engine {
         let latestFrame = performance.now();
         let fpsBufferIndex = 0;
 
-        const renderLoop = async (): Promise<void> => {
+        const renderLoop = async (end: number): Promise<void> => {
 
             // Update fps-buffer
-            const end = performance.now();
-            fpsBuffer[fpsBufferIndex] = ~~(end - latestFrame);
+            fpsBuffer[fpsBufferIndex++] = ~~(end - latestFrame);
             latestFrame = end;
-            fpsBufferIndex++;
 
             // Rotate if out-of-bounds
             if (fpsBufferIndex > Engine.FPS_BUFFER) {
@@ -190,13 +188,18 @@ export class Engine {
             const duration = await this.nextGeneration();
 
             // Check if fps-limit is enabled
-            if (~this.fpsLimit) {
-                const rest = (1000 / (this.fpsLimit + 1)) - duration;
+            if (this.fpsLimit !== null) {
+                const targetDiff = (1000 / (this.fpsLimit + 1));
+                const rest = targetDiff - duration;
 
-                // Don't wait for a single millisecond
+                // Wait for at least more than a single millisecond
                 if (rest > 1) {
                     setTimeout(() => {
-                        this.activeAnimationFrame = requestAnimationFrame(renderLoop);
+
+                        if (this.running) {
+                            renderLoop(performance.now());
+                        }
+
                     }, rest);
                     return;
                 }
@@ -248,8 +251,8 @@ export class Engine {
         return this.running;
     }
 
-    public async limitFPS(limit: number): Promise<void> {
-        if (limit <= 0) {
+    public async limitFPS(limit: number | null): Promise<void> {
+        if (limit !== null && limit <= 0) {
             throw new Error(`FPS Cannot be limited to a negative number or zero (got ${limit})`);
         }
 
@@ -268,6 +271,10 @@ export class Engine {
         }
 
         return ~~(1000 / (total / Engine.FPS_BUFFER));
+    }
+
+    public async getFrameRateLimitation(): Promise<null | number> {
+        return this.fpsLimit;
     }
 
     public async transform(t: Transformation): Promise<void> {

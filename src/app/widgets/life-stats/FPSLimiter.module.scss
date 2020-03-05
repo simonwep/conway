@@ -1,0 +1,31 @@
+.fpsLimiter {
+    @include flex(column, center, space-between);
+}
+
+.arrowUp,
+.arrowDown {
+    @include size(18px);
+    position: relative;
+
+    &::before,
+    &::after {
+        @include pseudo();
+        @include size(4px, 65%);
+        @include position(0, 0, 0, 0);
+        background: $color-primary;
+        border-radius: 50em;
+        margin: auto;
+    }
+
+    &::before {
+        transform: translateX(-27.5%) rotate(-45deg);
+    }
+
+    &::after {
+        transform: translateX(27.5%) rotate(45deg);
+    }
+}
+
+.arrowDown {
+    transform: rotate(180deg);
+}
