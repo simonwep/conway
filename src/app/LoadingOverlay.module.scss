@@ -4,7 +4,6 @@
     position: fixed;
     background: white;
     z-index: 100;
-    display: none;
 
     > div {
         display: grid;
@@ -18,7 +17,7 @@
         transition: all 0.3s 0.95s;
 
         .cell {
-            transition: all 1s cubic-bezier(0.88, 0, 1, 0.27);
+            transition: all 1s ease-in;
         }
     }
 }
