@@ -27,6 +27,10 @@ export const controls = {
 
     async limitFPS(limit: number | null): Promise<void> {
         await engine!.limitFPS(limit);
+    },
+
+    async updateRuleset(resurrect: number, survive: number): Promise<void> {
+        await engine!.updateRuleset(resurrect, survive);
     }
 };
 

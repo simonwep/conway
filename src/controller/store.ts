@@ -8,6 +8,8 @@ export default class Life {
     @observable public fpsLimitation: number | null = null;
     @observable public generation = 0;
     @observable public generationOffset = 0;
+    @observable public surviveRules = 0b000001100;
+    @observable public resurrectRules = 0b000001000;
 
     // Engine to fetch data from
     private source: Remote<Engine> | null = null;
@@ -43,4 +45,17 @@ export default class Life {
         this.fpsLimitation = num;
         controls.limitFPS(num);
     }
+
+    @action
+    public updateSurviveRules(bitMap: number): void {
+        this.surviveRules = bitMap;
+        controls.updateRuleset(this.resurrectRules, this.surviveRules);
+    }
+
+    @action
+    public updateResurrectRules(bitMap: number): void {
+        this.resurrectRules = bitMap;
+        controls.updateRuleset(this.resurrectRules, this.surviveRules);
+    }
 }
+

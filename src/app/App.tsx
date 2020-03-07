@@ -3,6 +3,7 @@ import {bind}           from '../lib/preact-utils';
 import {LoadingOverlay} from './LoadingOverlay';
 import {Controls}       from './widgets/controls/Controls';
 import {LifeStats}      from './widgets/life-stats/LifeStats';
+import {Rules}          from './widgets/rules/Rules';
 
 type Props = {};
 type State = {
@@ -28,6 +29,7 @@ export class App extends Component<Props, State> {
             <div>
                 <LifeStats/>
                 <Controls/>
+                <Rules/>
                 {!canvasInitialized ? <LoadingOverlay onLoaded={this.onLoaded}/> : ''}
             </div>
         );

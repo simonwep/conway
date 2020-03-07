@@ -1,0 +1,48 @@
+.rules {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    > h3 {
+        @include font(400, 1em);
+        color: $color-text;
+        margin-top: 0.3em;
+
+        &:not(:first-child) {
+            margin-top: 1em;
+        }
+    }
+
+    > div {
+        @include flex(row);
+        margin: 0.5em 0;
+
+        > button {
+            @include flex(row, center, center);
+            @include size(1em);
+            @include font(500, 1.15em);
+            padding: 0.35em 0.25em 0.4em;
+            box-sizing: content-box;
+            border-radius: 0.15em;
+            box-shadow: 0 0.05em 0.15em rgba(black, 0.15);
+            color: rgba($color-text, 0.75);
+            transition: all 0.3s;
+
+            &.active {
+                opacity: 1;
+                box-shadow: 0 0.05em 0.25em rgba($color-primary, 0.75);
+                background: $color-primary;
+                color: white;
+            }
+
+            &:not(:last-child) {
+                margin-right: 0.35em;
+            }
+
+            &:not(.active):hover {
+                color: $color-text;
+                box-shadow: 0 0.1em 0.3em rgba(black, 0.15);
+            }
+        }
+    }
+}

@@ -1,11 +1,11 @@
 .stats {
-    @include flex(column);
+    @include flex(column, stretch, space-between);
 
     > section {
         @include flex(row, center);
 
         &:not(:last-child) {
-            margin-bottom: 0.5em;
+            margin-bottom: 0.75em;
         }
 
         button {

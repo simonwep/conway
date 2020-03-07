@@ -301,6 +301,10 @@ export class Engine {
         // Restore option
         ctx.imageSmoothingEnabled = false;
     }
+
+    public async updateRuleset(resurrect: number, survive: number): Promise<void> {
+        this.universe!.setRuleset(resurrect, survive);
+    }
 }
 
 expose(Engine);
