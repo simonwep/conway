@@ -63,7 +63,7 @@ export class Engine {
     private generation = 0;
 
     // FPS limiter, null means no limit
-    private fpsLimit: number | null = 45;
+    private fpsLimit: number | null = null;
 
     private constructor(
         canvas: OffscreenCanvas,
@@ -174,19 +174,23 @@ export class Engine {
         let latestFrame = performance.now();
         let fpsBufferIndex = 0;
 
-        const renderLoop = async (end: number = performance.now()): Promise<void> => {
+        const renderLoop = async (): Promise<void> => {
+            const end = performance.now();
             if (!this.running) {
                 return;
             }
 
             // Update fps-buffer
-            fpsBuffer[fpsBufferIndex++] = ~~(end - latestFrame);
-            latestFrame = end;
+            if (latestFrame !== 0) {
+                fpsBuffer[fpsBufferIndex++] = end - latestFrame;
 
-            // Rotate if out-of-bounds
-            if (fpsBufferIndex > Engine.FPS_BUFFER) {
-                fpsBufferIndex = 0;
+                // Rotate if out-of-bounds
+                if (fpsBufferIndex > Engine.FPS_BUFFER) {
+                    fpsBufferIndex = 0;
+                }
             }
+
+            latestFrame = end;
 
             // Draw next generation
             const duration = await this.nextGeneration();
@@ -205,7 +209,6 @@ export class Engine {
 
             this.activeAnimationFrame = requestAnimationFrame(renderLoop);
         };
-
 
         requestAnimationFrame(renderLoop);
     }
@@ -243,10 +246,6 @@ export class Engine {
         universe!.nextGen();
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
         return performance.now() - start;
-    }
-
-    public async isRunning(): Promise<boolean> {
-        return this.running;
     }
 
     public async limitFPS(limit: number | null): Promise<void> {

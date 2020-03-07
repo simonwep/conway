@@ -56,7 +56,7 @@
         > button {
             @include flex(row, center, center);
             @include size(1em);
-            @include font(500, 1.15em);
+            @include font(500);
             padding: 0.35em 0.25em 0.4em;
             box-sizing: content-box;
             border-radius: 0.15em;
