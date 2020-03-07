@@ -3,13 +3,49 @@
     top: 0;
     left: 0;
 
-    > h3 {
-        @include font(400, 1em);
-        color: $color-text;
+    > header {
+        @include flex(row, center);
         margin-top: 0.3em;
 
         &:not(:first-child) {
             margin-top: 1em;
+        }
+
+        > button {
+            @include size(16px);
+            position: relative;
+            border-radius: 50%;
+            margin-right: 0.5em;
+            overflow: hidden;
+
+            &::before,
+            &::after {
+                @include pseudo();
+                @include size(100%);
+                top: 0;
+                left: 0;
+            }
+
+            &::before {
+                border-radius: 50%;
+                box-sizing: border-box;
+                border: 2px solid $color-primary;
+            }
+
+            &::after {
+                background: $color-primary;
+                transform: rotate(-45deg) translate3d(0, -50%, 0);
+                transition: all 0.3s;
+            }
+
+            &:hover::after {
+                transform: rotate(-45deg) translate3d(0, 50%, 0);
+            }
+        }
+
+        > h3 {
+            @include font(400, 1em);
+            color: $color-text;
         }
     }
 
@@ -24,12 +60,13 @@
             padding: 0.35em 0.25em 0.4em;
             box-sizing: content-box;
             border-radius: 0.15em;
-            box-shadow: 0 0.05em 0.15em rgba(black, 0.15);
+            border: 1px solid rgba(black, 0.075);
             color: rgba($color-text, 0.75);
             transition: all 0.3s;
 
             &.active {
                 opacity: 1;
+                border-color: transparent;
                 box-shadow: 0 0.05em 0.25em rgba($color-primary, 0.75);
                 background: $color-primary;
                 color: white;
@@ -40,8 +77,8 @@
             }
 
             &:not(.active):hover {
-                color: $color-text;
-                box-shadow: 0 0.1em 0.3em rgba(black, 0.15);
+                color: rgba($color-text, 0.95);
+                border: 1px solid rgba(black, 0.125);
             }
         }
     }

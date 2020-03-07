@@ -24,6 +24,16 @@ export class Rules extends Component {
         };
     }
 
+    @bind
+    inverseSurviveRules() {
+        life.updateSurviveRules(~life.surviveRules);
+    }
+
+    @bind
+    inverseResurrectRules() {
+        life.updateResurrectRules(~life.resurrectRules);
+    }
+
     generateNumberedList(fn: UpdateRulesFunction, rules: number) {
         return [...new Array(10)].map((_, index) => {
             return <button onClick={fn(index)}
@@ -47,10 +57,16 @@ export class Rules extends Component {
                 widgetStyles.widget,
                 styles.rules
             )}>
-                <h3>Cells survives with <code>n</code> neighbors:</h3>
+                <header>
+                    <button onClick={this.inverseSurviveRules}/>
+                    <h3>Cells survives with <code>n</code> neighbors:</h3>
+                </header>
                 <div>{surviveList}</div>
 
-                <h3>Resurrect cell on <code>n</code> neighbors:</h3>
+                <header>
+                    <button onClick={this.inverseResurrectRules}/>
+                    <h3>Resurrect cell on <code>n</code> neighbors:</h3>
+                </header>
                 <div>{resurrectList}</div>
             </div>
         );
