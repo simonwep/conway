@@ -272,7 +272,7 @@ export class Engine {
     }
 
     public async transform(t: Transformation): Promise<void> {
-        const {ctx, shadowCanvas, env, running} = this;
+        const {ctx, shadowCanvas, env} = this;
         const {width, height} = env;
 
         // Apply transformation
@@ -282,10 +282,8 @@ export class Engine {
             t.x, t.y
         );
 
-        // Redraw if simulation is currently not running
-        if (!running) {
-            ctx.drawImage(shadowCanvas, 0, 0, width, height);
-        }
+        // Redraw immediately{
+        ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
     public async updateConfig(config: Config): Promise<void> {

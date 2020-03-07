@@ -25,6 +25,8 @@ export class FPSLimiter extends Component {
         } else {
             this.decreaseLimit(e);
         }
+
+        e.preventDefault();
     }
 
     @bind
