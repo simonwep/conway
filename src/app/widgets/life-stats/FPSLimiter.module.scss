@@ -1,5 +1,9 @@
 .fpsLimiter {
     @include flex(column, center, space-between);
+
+    > p {
+        cursor: ns-resize;
+    }
 }
 
 .arrowUp,

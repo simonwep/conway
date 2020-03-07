@@ -25,6 +25,10 @@
             &.active {
                 background: $color-primary;
             }
+
+            &.resetGenerationCounterBtn:hover {
+                background: $color-primary;
+            }
         }
     }
 }

@@ -19,6 +19,15 @@ export class FPSLimiter extends Component {
     }
 
     @bind
+    handleWheelEvent(e: WheelEvent) {
+        if (e.deltaY < 0) {
+            this.increaseLimit(e);
+        } else {
+            this.decreaseLimit(e);
+        }
+    }
+
+    @bind
     updateLimit(event: MouseEvent, negative: boolean) {
         const {fpsLimitation} = life;
 
@@ -46,7 +55,7 @@ export class FPSLimiter extends Component {
                 widgetStyles.widget,
                 styles.fpsLimiter,
                 {[widgetStyles.disabled]: fpsLimitation === null}
-            )}>
+            )} onWheel={this.handleWheelEvent}>
                 <button className={styles.arrowUp} onClick={this.increaseLimit}/>
                 <p>{fpsLimitation === null ? '-' : fpsLimitation}</p>
                 <button className={styles.arrowDown} onClick={this.decreaseLimit}/>
