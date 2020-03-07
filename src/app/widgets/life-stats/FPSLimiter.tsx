@@ -1,10 +1,9 @@
-import {observer}          from 'mobx-react';
-import {Component, h}      from 'preact';
-import {controls} from '../../../controller';
-import {bind, cn} from '../../../lib/preact-utils';
-import {life}     from '../../../store';
-import * as widgetStyles   from '../widget.module.scss';
-import * as styles         from './FPSLimiter.module.scss';
+import {observer}        from 'mobx-react';
+import {Component, h}    from 'preact';
+import {bind, cn}        from '../../../lib/preact-utils';
+import {life}            from '../../../store';
+import * as widgetStyles from '../widget.module.scss';
+import * as styles       from './FPSLimiter.module.scss';
 
 @observer
 export class FPSLimiter extends Component {
@@ -27,13 +26,14 @@ export class FPSLimiter extends Component {
             return;
         }
 
-        const amount = (
-            event.ctrlKey || event.ctrlKey ? 10 :
-                event.shiftKey ? 5 : 1
-        ) * (negative ? -1 : 1);
-
-        controls.limitFPS(
-            Math.max(1, fpsLimitation + amount)
+        life.setFPSLimitation(
+            Math.max(
+                1,
+                fpsLimitation + (
+                    event.ctrlKey || event.ctrlKey ? 10 :
+                        event.shiftKey ? 5 : 1
+                ) * (negative ? -1 : 1)
+            )
         );
     }
 

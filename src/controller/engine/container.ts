@@ -1,11 +1,15 @@
-export class UniverseWrapper  {
+import {Universe} from '../../../crate/pkg';
+
+export class UniverseWrapper {
 
     private readonly cols: number;
     private readonly rows: number;
-    private readonly wasm: any;
-    private readonly universe: any;
 
-    constructor(rows: number, cols: number, universe: unknown, wasm: unknown) {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    private readonly wasm: any;
+    private readonly universe: Universe;
+
+    constructor(rows: number, cols: number, universe: Universe, wasm: unknown) {
         this.rows = rows;
         this.cols = cols;
         this.universe = universe;

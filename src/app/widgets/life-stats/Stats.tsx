@@ -1,6 +1,5 @@
 import {observer}        from 'mobx-react';
 import {Component, h}    from 'preact';
-import {controls}        from '../../../controller';
 import {bind, cn}        from '../../../lib/preact-utils';
 import {life}            from '../../../store';
 import Icon              from '../../components/Icon';
@@ -17,7 +16,7 @@ export class Stats extends Component {
 
     @bind
     toggleFramerateLimiter() {
-        controls.limitFPS(life.fpsLimitation === null ? 30 : null);
+        life.setFPSLimitation(life.fpsLimitation === null ? 30 : null);
     }
 
     render() {

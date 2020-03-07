@@ -7,7 +7,7 @@ import {FPSLimiter}   from './FPSLimiter';
 import * as styles    from './LifeStats.module.scss';
 import {Stats}        from './Stats';
 
-type Props = {};
+type Props = unknown;
 type State = {
     fpsLimiterEnabled: boolean;
 };

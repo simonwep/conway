@@ -28,6 +28,7 @@ export interface EngineConstructor {
     new(canvas: OffscreenCanvas, config: Config): Engine;
 }
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 export class Engine {
 
     // Amount of single frames to stabilize the fps
@@ -173,7 +174,10 @@ export class Engine {
         let latestFrame = performance.now();
         let fpsBufferIndex = 0;
 
-        const renderLoop = async (end: number): Promise<void> => {
+        const renderLoop = async (end: number = performance.now()): Promise<void> => {
+            if (!this.running) {
+                return;
+            }
 
             // Update fps-buffer
             fpsBuffer[fpsBufferIndex++] = ~~(end - latestFrame);
@@ -189,18 +193,12 @@ export class Engine {
 
             // Check if fps-limit is enabled
             if (this.fpsLimit !== null) {
-                const targetDiff = (1000 / (this.fpsLimit + 1));
+                const targetDiff = (1000 / this.fpsLimit);
                 const rest = targetDiff - duration;
 
                 // Wait for at least more than a single millisecond
-                if (rest > 1) {
-                    setTimeout(() => {
-
-                        if (this.running) {
-                            renderLoop(performance.now());
-                        }
-
-                    }, rest);
+                if (rest > 16) {
+                    setTimeout(renderLoop, rest);
                     return;
                 }
             }
@@ -271,10 +269,6 @@ export class Engine {
         }
 
         return ~~(1000 / (total / Engine.FPS_BUFFER));
-    }
-
-    public async getFrameRateLimitation(): Promise<null | number> {
-        return this.fpsLimit;
     }
 
     public async transform(t: Transformation): Promise<void> {

@@ -1,7 +1,7 @@
 import {Remote, transfer, wrap}            from 'comlink';
+import {life}                              from '../store';
 import {Config, Engine, EngineConstructor} from './engine';
 import {panning}                           from './panning';
-import {storesync}                         from './storesync';
 
 // Engine instance
 export let engine: null | Remote<Engine> = null;
@@ -10,6 +10,7 @@ export let engine: null | Remote<Engine> = null;
 export let initialized = false;
 
 // GOL Controls
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 export const controls = {
 
     async play(): Promise<void> {
@@ -29,11 +30,11 @@ export const controls = {
     }
 };
 
-
 // Called only once to mount the canvas
 export const init = async (): Promise<void> => {
 
     // Mount worker
+    // TODO: There's a memory-leak somewhere
     const Engine = wrap<EngineConstructor>(new Worker(
         './engine/index.ts',
         {type: 'module'}
@@ -58,13 +59,15 @@ export const init = async (): Promise<void> => {
         } as Config
     );
 
+    // Link to store
+    life.setSource(current);
+
     // Auto-play
     await current.mount();
     await current.play();
 
-    // Fire modules
+    // Launch modules
     panning(canvas, current);
-    storesync(canvas, current);
 
     window.addEventListener('resize', (() => {
         let timeout: unknown = 0;

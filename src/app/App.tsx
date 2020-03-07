@@ -4,7 +4,6 @@ import {LoadingOverlay} from './LoadingOverlay';
 import {Controls}       from './widgets/controls/Controls';
 import {LifeStats}      from './widgets/life-stats/LifeStats';
 
-
 type Props = {};
 type State = {
     canvasInitialized: boolean;
