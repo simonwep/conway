@@ -6,6 +6,7 @@
 .arrowDown {
     @include size(18px);
     position: relative;
+    transition: all 0.3s;
 
     &::before,
     &::after {
@@ -24,8 +25,16 @@
     &::after {
         transform: translateX(27.5%) rotate(45deg);
     }
+
+    &:hover {
+        transform: translateY(-5%);
+    }
 }
 
 .arrowDown {
     transform: rotate(180deg);
+
+    &:hover {
+        transform: rotate(180deg) translateY(-5%);
+    }
 }
