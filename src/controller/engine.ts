@@ -165,11 +165,6 @@ export class Engine {
         this.running = true;
         const {fpsBuffer} = this;
 
-        // Reset buffer
-        for (let i = 0; i < fpsBuffer.length; i++) {
-            fpsBuffer[i] = 0;
-        }
-
         // TODO: Use device-pixel-ratio
         let latestFrame = performance.now();
         let fpsBufferIndex = 0;
@@ -281,7 +276,8 @@ export class Engine {
             t.x, t.y
         );
 
-        // Redraw immediately{
+        // Redraw immediately
+        // TODO: Redraw
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 

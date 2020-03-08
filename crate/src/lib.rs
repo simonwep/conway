@@ -15,6 +15,8 @@ pub struct Universe {
     rows: usize,
     source: Vec<bool>,
     target: Vec<bool>,
+    killed_cells_offset: usize,
+    resurrected_cells_offset: usize,
     killed_cells: Vec<(u32, u32)>,
     resurrected_cells: Vec<(u32, u32)>,
     survive_rules: u16,
@@ -26,6 +28,7 @@ pub struct Universe {
 impl Universe {
     /// Creates a new game-of-life universe
     pub fn new(mut rows: usize, mut cols: usize) -> Universe {
+
         // Add padding
         cols += 2;
         rows += 2;
@@ -34,17 +37,20 @@ impl Universe {
         let target: Vec<bool> = (0..total_cells).map(|_| false).collect();
         let mut source: Vec<bool> = (0..total_cells).map(|_| false).collect();
 
-        let killed_cells = Vec::with_capacity(total_cells * 2);
-        let mut resurrected_cells = Vec::with_capacity(total_cells * 2);
+        let mut killed_cells: Vec<(u32, u32)> = (0..total_cells).map(|_| (0, 0)).collect();
+        let mut resurrected_cells: Vec<(u32, u32)> = (0..total_cells).map(|_| (0, 0)).collect();
 
         // Update list of previously born cells
+        let mut resurrected_cells_offset: usize = 0;
         for row in 1..(rows - 1) {
             let offset = row * cols;
 
             for col in 1..(cols - 1) {
                 if js_sys::Math::random() > 0.45 {
                     source[offset + col] = true;
-                    resurrected_cells.push(((row - 1) as u32, (col - 1) as u32))
+                    resurrected_cells[resurrected_cells_offset] =
+                        ((row - 1) as u32, (col - 1) as u32);
+                    resurrected_cells_offset += 1;
                 }
             }
         }
@@ -53,6 +59,8 @@ impl Universe {
             swap: false,
             survive_rules: 0b000001100,
             resurrect_rules: 0b000001000,
+            killed_cells_offset: 0,
+            resurrected_cells_offset,
             killed_cells,
             resurrected_cells,
             cols,
@@ -66,8 +74,8 @@ impl Universe {
     pub fn next_gen(&mut self) {
         let resurrected_cells = &mut self.resurrected_cells;
         let killed_cells = &mut self.killed_cells;
-        resurrected_cells.truncate(0);
-        killed_cells.truncate(0);
+        self.resurrected_cells_offset = 0;
+        self.killed_cells_offset = 0;
 
         let (src, tar) = if self.swap {
             (&mut self.target, &mut self.source)
@@ -138,8 +146,14 @@ impl Universe {
 
                     // Save changed cell
                     match next {
-                        true => resurrected_cells.push(payload),
-                        false => killed_cells.push(payload),
+                        true => {
+                            resurrected_cells[self.resurrected_cells_offset] = payload;
+                            self.resurrected_cells_offset += 1;
+                        }
+                        false => {
+                            killed_cells[self.killed_cells_offset] = payload;
+                            self.killed_cells_offset += 1;
+                        }
                     };
                 };
             }
@@ -151,7 +165,7 @@ impl Universe {
     }
 
     pub fn resurrected_cells_amount(&mut self) -> u32 {
-        self.resurrected_cells.len() as u32
+        self.resurrected_cells_offset as u32
     }
 
     pub fn killed_cells(&mut self) -> *const (u32, u32) {
@@ -159,7 +173,7 @@ impl Universe {
     }
 
     pub fn killed_cells_amount(&mut self) -> u32 {
-        self.killed_cells.len() as u32
+        self.killed_cells_offset as u32
     }
 
     pub fn set_ruleset(&mut self, resurrect: u16, survive: u16) {
