@@ -28,7 +28,6 @@ pub struct Universe {
 impl Universe {
     /// Creates a new game-of-life universe
     pub fn new(mut rows: usize, mut cols: usize) -> Universe {
-
         // Add padding
         cols += 2;
         rows += 2;

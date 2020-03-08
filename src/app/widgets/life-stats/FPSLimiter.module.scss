@@ -17,7 +17,7 @@
         @include pseudo();
         @include size(4px, 65%);
         @include position(0, 0, 0, 0);
-        background: $color-primary;
+        background: var(--c-primary);
         border-radius: 50em;
         margin: auto;
     }

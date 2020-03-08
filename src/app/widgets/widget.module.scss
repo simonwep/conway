@@ -1,13 +1,13 @@
 .widget {
     @include inline-flex(column);
-    background: white;
+    background: var(--c-primary-bg);
     margin: 0.5em;
     padding: 0.75em 1em;
     border-radius: 0.5em;
-    border: 2px solid $color-primary;
-    box-shadow: 0 1px 0.35em $color-primary;
+    border: 2px solid var(--c-primary);
+    box-shadow: 0 1px 0.35em var(--c-primary);
     font-family: $font-family;
-    color: $color-text;
+    color: var(--c-text);
     transition: all 0.3s;
 }
 

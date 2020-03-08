@@ -29,11 +29,11 @@
             &::before {
                 border-radius: 50%;
                 box-sizing: border-box;
-                border: 2px solid $color-primary;
+                border: 2px solid var(--c-primary);
             }
 
             &::after {
-                background: $color-primary;
+                background: var(--c-primary);
                 transform: rotate(-45deg) translate3d(0, -50%, 0);
                 transition: all 0.3s;
             }
@@ -45,7 +45,7 @@
 
         > h3 {
             @include font(400, 1em);
-            color: $color-text;
+            color: var(--c-text);
         }
     }
 
@@ -61,15 +61,15 @@
             box-sizing: content-box;
             border-radius: 0.15em;
             border: 1px solid rgba(black, 0.075);
-            color: rgba($color-text, 0.75);
+            color: rgba(var(--c-text), 0.75);
             transition: all 0.3s;
 
             &.active {
                 opacity: 1;
                 border-color: transparent;
-                box-shadow: 0 0.05em 0.25em rgba($color-primary, 0.75);
-                background: $color-primary;
-                color: white;
+                box-shadow: 0 0.05em 0.25em  var(--c-primary);
+                background: var(--c-primary);
+                color: var(--c-primary-bg);
             }
 
             &:not(:last-child) {
@@ -77,7 +77,7 @@
             }
 
             &:not(.active):hover {
-                color: rgba($color-text, 0.95);
+                color: rgba(var(--c-text), 0.95);
                 border: 1px solid rgba(black, 0.125);
             }
         }

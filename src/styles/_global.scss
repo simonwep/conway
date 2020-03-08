@@ -26,7 +26,7 @@ button {
 }
 
 code {
-    background: #f6f8fa;
+    background: var(--c-primary-bg);
     font-family: monospace;
     font-weight: inherit;
     padding: 0 0.45em 0.15em;
@@ -43,6 +43,30 @@ canvas {
 }
 
 #app {
-    font-size: 1.75vmin;
     user-select: none;
+
+    --c-text: #242930;
+    --c-primary: #388dff;
+    --c-primary-accent: #87baff;
+    --c-primary-bg: #fff;
+    --c-secondary-bg: #fff;
+}
+
+// TODO: Add button to manually switch
+@media screen and (prefers-color-scheme: dark) {
+    body {
+        background: black;
+    }
+
+    canvas {
+        filter: invert(1);
+    }
+
+    #app {
+        --c-text: #e8eaec;
+        --c-primary: #2e8ae6;
+        --c-primary-accent: #42597b;
+        --c-primary-bg: #19191f;
+        --c-secondary-bg: #131315;
+    }
 }

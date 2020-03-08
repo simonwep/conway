@@ -10,7 +10,7 @@
 
         button {
             @include size(1.5em);
-            background: $color-primary-accent;
+            background: var(--c-primary-accent);
             border-radius: 100%;
             cursor: pointer;
             transition: all 0.3s;
@@ -18,16 +18,16 @@
 
             svg {
                 @include size(100%);
-                fill: white;
+                fill: var(--c-primary-bg);
                 padding: 0.25em;
             }
 
             &.active {
-                background: $color-primary;
+                background: var(--c-primary);
             }
 
             &.resetGenerationCounterBtn:hover {
-                background: $color-primary;
+                background: var(--c-primary);
             }
         }
     }

@@ -2,7 +2,7 @@
     @include position(0, 0, 0, 0);
     @include flex(column, center, center);
     position: fixed;
-    background: white;
+    background: var(--c-primary-bg);
     z-index: 100;
 
     > div {
@@ -28,6 +28,6 @@
     transition: all 0.1s;
 
     &[data-active=true] {
-        background: $color-primary;
+        background: var(--c-primary);
     }
 }
