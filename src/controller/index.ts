@@ -19,8 +19,8 @@ export const init = async (): Promise<void> => {
         {type: 'module'}
     ));
 
-    const blockSize = 2;
-    const blockMargin = 1;
+    const blockSize = 1;
+    const blockMargin = 0;
 
     // Prep offscreenCanvas
     const canvas = document.querySelector('body > canvas') as HTMLCanvasElement;
