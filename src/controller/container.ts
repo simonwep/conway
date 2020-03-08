@@ -1,4 +1,4 @@
-import {Universe} from '../../../crate/pkg';
+import {Universe} from '../../crate/pkg';
 
 export class UniverseWrapper {
 
@@ -18,8 +18,8 @@ export class UniverseWrapper {
 
     public static async new(rows: number, cols: number): Promise<UniverseWrapper> {
         const [{Universe}, wasm] = await Promise.all([
-            import(/* webpackChunkName: "crate-wrapper" */ '../../../crate/pkg'),
-            import(/* webpackChunkName: "crate-wasm" */ '../../../crate/pkg/index_bg.wasm')
+            import(/* webpackChunkName: "crate-wrapper" */ '../../crate/pkg'),
+            import(/* webpackChunkName: "crate-wasm" */ '../../crate/pkg/index_bg.wasm')
         ]);
 
         return new UniverseWrapper(

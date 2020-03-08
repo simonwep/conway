@@ -4,35 +4,10 @@ import {Config, Engine, EngineConstructor} from './engine';
 import {panning}                           from './panning';
 
 // Engine instance
-export let engine: null | Remote<Engine> = null;
+export let engine: Remote<Engine>;
 
 // If engine has been initialized
 export let initialized = false;
-
-// GOL Controls
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-export const controls = {
-
-    async play(): Promise<void> {
-        await engine!.play();
-    },
-
-    async pause(): Promise<void> {
-        await engine!.pause();
-    },
-
-    async next(): Promise<void> {
-        await engine!.nextGeneration();
-    },
-
-    async limitFPS(limit: number | null): Promise<void> {
-        await engine!.limitFPS(limit);
-    },
-
-    async updateRuleset(resurrect: number, survive: number): Promise<void> {
-        await engine!.updateRuleset(resurrect, survive);
-    }
-};
 
 // Called only once to mount the canvas
 export const init = async (): Promise<void> => {
@@ -40,7 +15,7 @@ export const init = async (): Promise<void> => {
     // Mount worker
     // TODO: There's a memory-leak somewhere
     const Engine = wrap<EngineConstructor>(new Worker(
-        './engine/index.ts',
+        './engine.ts',
         {type: 'module'}
     ));
 

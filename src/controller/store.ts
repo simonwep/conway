@@ -1,6 +1,6 @@
 import {Remote}                       from 'comlink';
 import {action, computed, observable} from 'mobx';
-import {controls}                     from './';
+import {engine}                       from './';
 import {Engine}                       from './engine';
 
 export default class Life {
@@ -10,6 +10,7 @@ export default class Life {
     @observable public generationOffset = 0;
     @observable public surviveRules = 0b000001100;
     @observable public resurrectRules = 0b000001000;
+    @observable public zoomFactor = 1;
 
     // Engine to fetch data from
     private source: Remote<Engine> | null = null;
@@ -25,14 +26,14 @@ export default class Life {
         }, 1000);
     }
 
-    @action
-    public setSource(engine: Remote<Engine>): void {
-        this.source = engine;
-    }
-
     @computed
     public get generationCount(): number {
         return this.generation - this.generationOffset;
+    }
+
+    @action
+    public setSource(engine: Remote<Engine>): void {
+        this.source = engine;
     }
 
     @action
@@ -43,19 +44,19 @@ export default class Life {
     @action
     public setFPSLimitation(num: number | null): void {
         this.fpsLimitation = num;
-        controls.limitFPS(num);
+        engine.limitFPS(num);
     }
 
     @action
     public updateSurviveRules(bitMap: number): void {
         this.surviveRules = bitMap;
-        controls.updateRuleset(this.resurrectRules, this.surviveRules);
+        engine.updateRuleset(this.resurrectRules, this.surviveRules);
     }
 
     @action
     public updateResurrectRules(bitMap: number): void {
         this.resurrectRules = bitMap;
-        controls.updateRuleset(this.resurrectRules, this.surviveRules);
+        engine.updateRuleset(this.resurrectRules, this.surviveRules);
     }
 }
 
