@@ -13,7 +13,6 @@ export let initialized = false;
 export const init = async (): Promise<void> => {
 
     // Mount worker
-    // TODO: There's a memory-leak somewhere
     const Engine = wrap<EngineConstructor>(new Worker(
         './engine.worker.ts',
         {type: 'module'}

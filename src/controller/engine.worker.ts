@@ -264,6 +264,8 @@ export class EngineWorker {
     public async transform(t: Transformation): Promise<void> {
         const {ctx, shadowCanvas, env} = this;
         const {width, height} = env;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, width, height);
 
         // Apply transformation
         this.ctx.setTransform(

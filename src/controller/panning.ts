@@ -1,4 +1,6 @@
 import {Remote}       from 'comlink';
+import {JSXInternal}  from 'preact/src/jsx';
+import {on}           from '../lib/dom-events';
 import {EngineWorker} from './engine.worker';
 
 /**
@@ -40,7 +42,7 @@ export const panning = (
 
     let dragging = false;
     let sx = 0, sy = 0;
-    canvas.addEventListener('mousemove', async e => {
+    on(canvas, 'mousemove', async (e: MouseEvent) => {
         if (dragging && scale > 1) {
             x = Math.round(x + (e.pageX - sx));
             y = Math.round(y + (e.pageY - sy));
@@ -55,14 +57,14 @@ export const panning = (
         }
     });
 
-    canvas.addEventListener('mousedown', e => {
+    on(canvas, 'mousedown', (e: MouseEvent) => {
         canvas.style.cursor = 'grabbing';
         dragging = true;
         sx = e.pageX;
         sy = e.pageY;
     });
 
-    canvas.addEventListener('mouseup', () => {
+    on(canvas, ['mouseup', 'mouseleave'], () => {
         canvas.style.cursor = 'grab';
         dragging = false;
     });
