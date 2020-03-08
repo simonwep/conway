@@ -1,5 +1,5 @@
-import {Remote} from 'comlink';
-import {Engine} from './engine';
+import {Remote}       from 'comlink';
+import {EngineWorker} from './engine.worker';
 
 /**
  * Panning feature
@@ -8,7 +8,7 @@ import {Engine} from './engine';
  */
 export const panning = (
     canvas: HTMLCanvasElement,
-    current: Remote<Engine>
+    current: Remote<EngineWorker>
 ) => {
     let scale = 1;
     const zoomFactor = 2;

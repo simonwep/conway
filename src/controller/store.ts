@@ -1,7 +1,7 @@
 import {Remote}                       from 'comlink';
 import {action, computed, observable} from 'mobx';
-import {engine}                       from './';
-import {Engine}                       from './engine';
+import {engine}       from './';
+import {EngineWorker} from './engine.worker';
 
 export default class Life {
     @observable public fps = 0;
@@ -13,7 +13,7 @@ export default class Life {
     @observable public zoomFactor = 1;
 
     // Engine to fetch data from
-    private source: Remote<Engine> | null = null;
+    private source: Remote<EngineWorker> | null = null;
 
     public constructor() {
         setInterval(async () => {
@@ -32,7 +32,7 @@ export default class Life {
     }
 
     @action
-    public setSource(engine: Remote<Engine>): void {
+    public setSource(engine: Remote<EngineWorker>): void {
         this.source = engine;
     }
 

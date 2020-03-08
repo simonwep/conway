@@ -1,5 +1,5 @@
 import {expose}          from 'comlink';
-import {UniverseWrapper} from './container';
+import {UniverseWrapper} from './engine.wrapper';
 
 export type Config = {
     width: number;
@@ -25,17 +25,17 @@ export type Transformation = {
 };
 
 export interface EngineConstructor {
-    new(canvas: OffscreenCanvas, config: Config): Engine;
+    new(canvas: OffscreenCanvas, config: Config): EngineWorker;
 }
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-export class Engine {
+export class EngineWorker {
 
     // Amount of single frames to stabilize the fps
     public static readonly FPS_BUFFER = 16;
 
     // Buffer of the last N frames, used to smooth the current fps.
-    private readonly fpsBuffer: Uint32Array = new Uint32Array(Engine.FPS_BUFFER);
+    private readonly fpsBuffer: Uint32Array = new Uint32Array(EngineWorker.FPS_BUFFER);
 
     /**
      * Two canvas are used to draw the scene, the first one is purely
@@ -71,7 +71,7 @@ export class Engine {
     ) {
 
         // Convert config to env-properties
-        this.env = Engine.configToEnv(config);
+        this.env = EngineWorker.configToEnv(config);
 
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d', {
@@ -103,10 +103,6 @@ export class Engine {
 
     public async mount(): Promise<void> {
         const {rows, cols} = this.env;
-
-        if (this.universe) {
-            throw new Error('Universe already mounted.');
-        }
 
         this.universe = await UniverseWrapper.new(
             rows,
@@ -180,7 +176,7 @@ export class Engine {
                 fpsBuffer[fpsBufferIndex++] = end - latestFrame;
 
                 // Rotate if out-of-bounds
-                if (fpsBufferIndex > Engine.FPS_BUFFER) {
+                if (fpsBufferIndex > EngineWorker.FPS_BUFFER) {
                     fpsBufferIndex = 0;
                 }
             }
@@ -258,11 +254,11 @@ export class Engine {
     public async getFrameRate(): Promise<number> {
         let total = 0;
 
-        for (let i = 0; i < Engine.FPS_BUFFER; i++) {
+        for (let i = 0; i < EngineWorker.FPS_BUFFER; i++) {
             total += this.fpsBuffer[i];
         }
 
-        return ~~(1000 / (total / Engine.FPS_BUFFER));
+        return ~~(1000 / (total / EngineWorker.FPS_BUFFER));
     }
 
     public async transform(t: Transformation): Promise<void> {
@@ -277,13 +273,13 @@ export class Engine {
         );
 
         // Redraw immediately
-        // TODO: Redraw
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
     public async updateConfig(config: Config): Promise<void> {
-        this.env = Engine.configToEnv(config);
-        const {env, canvas, shadowCanvas, ctx} = this;
+
+        this.env = EngineWorker.configToEnv(config);
+        const {env, canvas, shadowCanvas, shadowCtx, ctx, running} = this;
         const {width, height} = env;
 
         canvas.width = width;
@@ -293,6 +289,18 @@ export class Engine {
 
         // Restore option
         ctx.imageSmoothingEnabled = false;
+        shadowCtx.fillStyle = 'white';
+        shadowCtx.fillRect(0, 0, width, height);
+        ctx.drawImage(shadowCanvas, 0, 0, width, height);
+
+        // Remount
+        await this.stop();
+        await this.mount();
+
+        // Auto-play if simulation was active
+        if (running) {
+            await this.play();
+        }
     }
 
     public async updateRuleset(resurrect: number, survive: number): Promise<void> {
@@ -300,4 +308,4 @@ export class Engine {
     }
 }
 
-expose(Engine);
+expose(EngineWorker);

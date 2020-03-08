@@ -1,10 +1,10 @@
-import {Remote, transfer, wrap}            from 'comlink';
-import {life}                              from '../store';
-import {Config, Engine, EngineConstructor} from './engine';
-import {panning}                           from './panning';
+import {Remote, transfer, wrap}                  from 'comlink';
+import {life}                                    from '../store';
+import {Config, EngineConstructor, EngineWorker} from './engine.worker';
+import {panning}                                 from './panning';
 
 // Engine instance
-export let engine: Remote<Engine>;
+export let engine: Remote<EngineWorker>;
 
 // If engine has been initialized
 export let initialized = false;
@@ -15,7 +15,7 @@ export const init = async (): Promise<void> => {
     // Mount worker
     // TODO: There's a memory-leak somewhere
     const Engine = wrap<EngineConstructor>(new Worker(
-        './engine.ts',
+        './engine.worker.ts',
         {type: 'module'}
     ));
 
