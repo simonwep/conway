@@ -26,7 +26,7 @@ button {
 }
 
 code {
-    background: var(--c-primary-bg);
+    background: var(--c-secondary-bg);
     font-family: monospace;
     font-weight: inherit;
     padding: 0 0.45em 0.15em;
@@ -45,7 +45,8 @@ canvas {
 #app {
     user-select: none;
 
-    --c-text: #242930;
+    --c-text-primary: #242930;
+    --c-text-secondary: #fff;
     --c-primary: #388dff;
     --c-primary-accent: #87baff;
     --c-primary-bg: #fff;
@@ -63,9 +64,10 @@ canvas {
     }
 
     #app {
-        --c-text: #e8eaec;
-        --c-primary: #2e8ae6;
-        --c-primary-accent: #42597b;
+        --c-text-primary: #fff;
+        --c-text-secondary: #fff;
+        --c-primary: #2f95f3;
+        --c-primary-accent: #4a617b;
         --c-primary-bg: #19191f;
         --c-secondary-bg: #131315;
     }
