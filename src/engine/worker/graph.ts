@@ -18,23 +18,98 @@ let canvas: OffscreenCanvas;
 let ctx: OffscreenCanvasRenderingContext2D;
 
 // Graph buffer
-const BUFFER_SIZE = 500 * 2; // 100 * (killed, resurrected)
+const BUFFER_SIZE = 1000 * 3; // 100 * (killed, resurrected, alive)
 const buffer = new Uint32Array(BUFFER_SIZE);
 let bufferOffset = 0;
+let alive = 0;
+
+/**
+ * Draws a line-chart
+ * @param color Stroke color
+ * @param source Source array
+ * @param offset Array offset, where to start
+ * @param end Stop-index, where to stop
+ * @param step
+ * @param xf X-Axis factor / multiplier
+ * @param yf Y-Axis factor  / multiplier
+ * @param yn Y-Normalizer Each value of source gets this value subtracted
+ */
+function drawLineChart(
+    color: string,
+    source: ArrayLike<number>,
+    offset: number,
+    end: number,
+    step: number,
+    xf: number,
+    yf: number,
+    yn: number
+) {
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+
+    for (let i = offset; i < end; i += step) {
+        const x = xf * i;
+        const y = yf * (source[i] - yn);
+
+        if (i === offset) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    }
+
+    ctx.stroke();
+}
+
+/**
+ * Calculates the min-max values of periodic pairs.
+ * @param source Source array
+ * @param end Stop-index, where to stop
+ * @param items Amount of pairs (used as offset)
+ */
+function calculateMinMaxValues(
+    source: ArrayLike<number>,
+    end: number,
+    items: number
+): Array<[number, number]> {
+    const minMax: Array<[number, number]> = [
+        ...new Array(items)
+    ].map(() => [0, Number.MAX_VALUE]);
+
+    for (let i = 0; i < end; i += items) {
+        for (let j = 0; j < items; j++) {
+            const value = source[i + j];
+            const group = minMax[j];
+
+            if (value > group[0]) {
+                group[0] = value;
+            } else if (value < group[1]) {
+                group[1] = value;
+            }
+        }
+    }
+
+    return minMax;
+}
 
 // Update function
 function update(data: UpdatePayload) {
     const {width, height} = canvas;
 
+    // Update count of cells alive
+    alive += data.resurrected - data.killed;
+
     // Update buffer and shift if full
     if (bufferOffset < buffer.length) {
-        buffer[bufferOffset] = data.killed;
-        buffer[bufferOffset + 1] = data.resurrected;
-        bufferOffset += 2;
+        buffer[bufferOffset] = alive;
+        buffer[bufferOffset + 1] = data.killed;
+        buffer[bufferOffset + 2] = data.resurrected;
+        bufferOffset += 3;
     } else {
 
         // Remove first element and override last
-        buffer.copyWithin(0, 2, buffer.length);
+        buffer.copyWithin(0, 3, buffer.length);
+        buffer[BUFFER_SIZE - 3] = alive;
         buffer[BUFFER_SIZE - 2] = data.killed;
         buffer[bufferOffset - 1] = data.resurrected;
     }
@@ -43,28 +118,19 @@ function update(data: UpdatePayload) {
     const bufferSize = Math.min(bufferOffset, buffer.length);
 
     // Calculate current maximum of killed / resurrected cells
-    let maxKilled = 0;
-    let maxResurrected = 0;
-    let minKilled = Number.MAX_VALUE;
-    let minResurrected = Number.MAX_VALUE;
-    for (let i = 0; i < bufferSize; i += 2) {
-        const killed = buffer[i];
-        const resurrected = buffer[i + 1];
+    const [
+        [maxAlive, minAlive],
+        [maxKilled, minKilled],
+        [maxResurrected, minResurrected]
+    ] = calculateMinMaxValues(buffer, bufferSize, 3);
 
-        if (killed > maxKilled) {
-            maxKilled = killed;
-        } else if (killed < minKilled) {
-            minKilled = killed;
-        }
+    // Calculate smallest possible y-factor for all three graphs
+    const kpr = height / Math.max(
+        (maxKilled - minKilled),
+        (maxResurrected - minResurrected),
+        (maxAlive - minAlive)
+    );
 
-        if (resurrected > maxResurrected) {
-            maxResurrected = resurrected;
-        } else if (resurrected < minResurrected) {
-            minResurrected = resurrected;
-        }
-    }
-
-    const kpr = height / (maxKilled - minKilled);
     const xpr = width / bufferSize;
 
     // Clear canvas
@@ -97,43 +163,15 @@ function update(data: UpdatePayload) {
     ctx.stroke();
     ctx.resetTransform();
 
-    // Draw graph of killed cells
-    ctx.strokeStyle = '#ff2638';
+    // Draw graph of cells alive
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    ctx.beginPath();
 
-    for (let i = 0; i < bufferSize; i += 2) {
-        const x = xpr * i;
-        const y = kpr * (buffer[i] - minKilled);
-
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
-    }
-
-    ctx.stroke();
-
-    // Draw graph of resurrected cells
-    ctx.strokeStyle = '#26ff26';
-    ctx.beginPath();
-
-    for (let i = 1; i < bufferSize; i += 2) {
-        const x = xpr * i;
-        const y = kpr * (buffer[i] - minResurrected);
-
-        if (i === 1) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
-    }
-
-    ctx.stroke();
+    // Draw charts
+    drawLineChart('#ff26a5', buffer, 0, bufferSize, 3, xpr, kpr, minAlive);
+    drawLineChart('#ff2638', buffer, 1, bufferSize, 3, xpr, kpr, minKilled);
+    drawLineChart('#26ff26', buffer, 2, bufferSize, 3, xpr, kpr, minResurrected);
 }
-
 
 // Listen to input
 self.addEventListener('message', ev => {
