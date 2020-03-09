@@ -22,7 +22,7 @@ export class Graph extends Component {
                 widgetStyles.widget,
                 styles.graph
             )}>
-                <canvas ref={this.canvas}/>
+                <canvas ref={this.canvas} height={182} width={381}/>
             </div>
         );
     }

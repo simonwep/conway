@@ -1,13 +1,8 @@
 .graph {
     @include flex(row, center, center);
-    width: 20em;
-    height: 10em;
     position: absolute;
     top: 0;
     right: 0;
+    overflow: hidden;
     padding: 0;
-
-    > canvas {
-        @include size(100%);
-    }
 }
