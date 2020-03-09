@@ -1,6 +1,6 @@
 import {Remote}       from 'comlink';
 import {on}           from '../../lib/dom-events';
-import {EngineWorker} from '../worker';
+import {EngineWorker} from '../worker/main';
 
 /**
  * Panning feature

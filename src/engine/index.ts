@@ -1,21 +1,32 @@
 import {Remote, transfer, wrap}                  from 'comlink';
 import {life}                                    from '../store';
-import {Config, EngineConstructor, EngineWorker} from './worker';
 import {panning}                                 from './plugins/panning';
 import {resize}                                  from './plugins/resize';
+import {Config, EngineConstructor, EngineWorker} from './worker/main';
 
 // Engine instance
 export let engine: Remote<EngineWorker>;
 
-// If engine has been initialized
-export let initialized = false;
+// Async way to retrieve the engine as soon as possible
+const engineMountListeners: Array<() => void> = [];
+export const getEngine = async (): Promise<typeof engine> => {
+    if (engine) {
+        return engine;
+    }
+
+    return new Promise(resolve => {
+        engineMountListeners.push(() => {
+            resolve(engine);
+        });
+    });
+};
 
 // Called only once to mount the canvas
 export const init = async (): Promise<void> => {
 
     // Mount worker
     const Engine = wrap<EngineConstructor>(new Worker(
-        './worker.ts',
+        './worker/main.ts',
         {type: 'module'}
     ));
 
@@ -39,7 +50,7 @@ export const init = async (): Promise<void> => {
     );
 
     // Link to store
-    life.setSource(current);
+    life.setEngine(current);
 
     // Auto-play
     await current.mount();
@@ -48,5 +59,9 @@ export const init = async (): Promise<void> => {
     // Launch modules
     panning(canvas, current);
     resize(canvas, current);
-    initialized = true;
+
+    // Fire awaiting requests
+    for (const req of engineMountListeners) {
+        req();
+    }
 };

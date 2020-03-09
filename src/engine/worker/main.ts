@@ -1,5 +1,5 @@
 import {expose}          from 'comlink';
-import {UniverseWrapper} from './wrapper';
+import {UniverseWrapper} from '../wrapper';
 
 export type Config = {
     width: number;
@@ -46,6 +46,9 @@ export class EngineWorker {
     private readonly shadowCtx: OffscreenCanvasRenderingContext2D;
     private readonly canvas: OffscreenCanvas;
     private readonly ctx: OffscreenCanvasRenderingContext2D;
+
+    // Child-worker responsible for drawing the charts
+    private graphicalWorker: Worker;
 
     // Rust wrapper
     private universe: UniverseWrapper | null;
@@ -99,6 +102,12 @@ export class EngineWorker {
         this.shadowCtx.fillStyle = '#fff';
         this.shadowCtx.fillRect(0, 0, width, height);
         this.universe = null;
+
+        // Initialize graphical worker
+        this.graphicalWorker = new Worker(
+            './graph.ts',
+            {type: 'module'}
+        );
     }
 
     public async mount(): Promise<void> {
@@ -236,6 +245,16 @@ export class EngineWorker {
 
         universe!.nextGen();
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
+
+        // Transfer changes to graph-worker
+        this.graphicalWorker.postMessage({
+            type: 'update',
+            payload: {
+                killed: killed.length,
+                resurrected: resurrected.length
+            }
+        });
+
         return performance.now() - start;
     }
 
@@ -308,6 +327,13 @@ export class EngineWorker {
 
     public async updateRuleset(resurrect: number, survive: number): Promise<void> {
         this.universe!.setRuleset(resurrect, survive);
+    }
+
+    public async setGraphCanvas(canvas: OffscreenCanvas): Promise<void> {
+        this.graphicalWorker.postMessage({
+            type: 'canvas',
+            payload: canvas
+        }, [canvas]);
     }
 }
 

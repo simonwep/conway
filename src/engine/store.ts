@@ -1,7 +1,7 @@
 import {Remote}                       from 'comlink';
 import {action, computed, observable} from 'mobx';
 import {engine}       from './';
-import {EngineWorker} from './worker';
+import {EngineWorker} from './worker/main';
 
 export default class Life {
     @observable public fps = 0;
@@ -32,7 +32,7 @@ export default class Life {
     }
 
     @action
-    public setSource(engine: Remote<EngineWorker>): void {
+    public setEngine(engine: Remote<EngineWorker>): void {
         this.source = engine;
     }
 
