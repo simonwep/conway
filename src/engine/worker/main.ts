@@ -243,18 +243,17 @@ export class EngineWorker {
         shadowCtx.fillStyle = '#000';
         shadowCtx.fill();
 
-        universe!.nextGen();
-        ctx.drawImage(shadowCanvas, 0, 0, width, height);
-
         // Transfer changes to graph-worker
         this.graphicalWorker.postMessage({
             type: 'update',
             payload: {
-                killed: killed.length,
-                resurrected: resurrected.length
+                killed: killed.length / 2,
+                resurrected: resurrected.length / 2
             }
         });
 
+        universe!.nextGen();
+        ctx.drawImage(shadowCanvas, 0, 0, width, height);
         return performance.now() - start;
     }
 
