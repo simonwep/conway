@@ -2,7 +2,7 @@ type Methods = 'addEventListener' | 'removeEventListener';
 
 /* eslint-disable prefer-rest-params */
 function eventListener(method: Methods) {
-    return <T extends Function>(elements: Node | Array<Node>, events: string | Array<string>, fn: T, options = {}) => {
+    return <T extends Function>(elements: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: T, options = {}) => {
 
         // Normalize array
         if (elements instanceof HTMLCollection || elements instanceof NodeList) {

@@ -1,5 +1,5 @@
 import {Component, h} from 'preact';
-import {init}         from '../controller';
+import {init}         from '../engine';
 import {random}       from '../lib/random';
 import styles         from './LoadingOverlay.module.scss';
 

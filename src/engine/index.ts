@@ -1,7 +1,8 @@
 import {Remote, transfer, wrap}                  from 'comlink';
 import {life}                                    from '../store';
-import {Config, EngineConstructor, EngineWorker} from './engine.worker';
-import {panning}                                 from './panning';
+import {Config, EngineConstructor, EngineWorker} from './worker';
+import {panning}                                 from './plugins/panning';
+import {resize}                                  from './plugins/resize';
 
 // Engine instance
 export let engine: Remote<EngineWorker>;
@@ -14,7 +15,7 @@ export const init = async (): Promise<void> => {
 
     // Mount worker
     const Engine = wrap<EngineConstructor>(new Worker(
-        './engine.worker.ts',
+        './worker.ts',
         {type: 'module'}
     ));
 
@@ -46,22 +47,6 @@ export const init = async (): Promise<void> => {
 
     // Launch modules
     panning(canvas, current);
-
-    window.addEventListener('resize', (() => {
-        let timeout: unknown = 0;
-
-        return () => {
-            clearTimeout(timeout as number);
-            timeout = setTimeout(async () => {
-                await current.updateConfig({
-                    blockSize,
-                    blockMargin,
-                    width: window.innerWidth,
-                    height: window.innerHeight
-                });
-            }, 1000);
-        };
-    })());
-
+    resize(canvas, current);
     initialized = true;
 };

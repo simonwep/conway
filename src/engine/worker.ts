@@ -1,5 +1,5 @@
 import {expose}          from 'comlink';
-import {UniverseWrapper} from './engine.wrapper';
+import {UniverseWrapper} from './wrapper';
 
 export type Config = {
     width: number;
@@ -278,9 +278,8 @@ export class EngineWorker {
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
-    public async updateConfig(config: Config): Promise<void> {
-
-        this.env = EngineWorker.configToEnv(config);
+    public async updateConfig(config: Partial<Config>): Promise<void> {
+        this.env = EngineWorker.configToEnv({...this.env, ...config});
         const {env, canvas, shadowCanvas, shadowCtx, ctx, running} = this;
         const {width, height} = env;
 
@@ -291,6 +290,8 @@ export class EngineWorker {
 
         // Restore option
         ctx.imageSmoothingEnabled = false;
+
+        // Clear
         shadowCtx.fillStyle = 'white';
         shadowCtx.fillRect(0, 0, width, height);
         ctx.drawImage(shadowCanvas, 0, 0, width, height);

@@ -1,7 +1,6 @@
 import {Remote}       from 'comlink';
-import {JSXInternal}  from 'preact/src/jsx';
-import {on}           from '../lib/dom-events';
-import {EngineWorker} from './engine.worker';
+import {on}           from '../../lib/dom-events';
+import {EngineWorker} from '../worker';
 
 /**
  * Panning feature

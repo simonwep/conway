@@ -1,7 +1,7 @@
 import {Remote}                       from 'comlink';
 import {action, computed, observable} from 'mobx';
 import {engine}       from './';
-import {EngineWorker} from './engine.worker';
+import {EngineWorker} from './worker';
 
 export default class Life {
     @observable public fps = 0;
