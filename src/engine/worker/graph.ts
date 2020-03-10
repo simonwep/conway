@@ -18,7 +18,7 @@ let canvas: OffscreenCanvas;
 let ctx: OffscreenCanvasRenderingContext2D;
 
 // Graph buffer
-const BUFFER_SIZE = 1000 * 3; // n * (killed, resurrected, alive)
+const BUFFER_SIZE = 250 * 3; // n * (killed, resurrected, alive)
 const buffer = new Uint32Array(BUFFER_SIZE);
 let bufferOffset = 0;
 let alive = 0;
@@ -26,6 +26,9 @@ let alive = 0;
 // Update function
 function update(data: UpdatePayload) {
     const {width, height} = canvas;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
 
     // Update count of cells alive
     alive += data.resurrected - data.killed;
@@ -52,76 +55,29 @@ function update(data: UpdatePayload) {
      * Calculates the min-max values of periodic pairs.
      * @param items Amount of pairs (used as offset)
      */
-    function calculateMinMaxValues(items: number): Array<[number, number]> {
-        const minMax: Array<[number, number]> = [
-            ...new Array(items)
-        ].map(() => [0, Number.MAX_VALUE]);
+    const calculateMinMaxValues = (items: number): Array<number> => {
+        const max = [...new Array(items)].fill(0);
 
         for (let i = 0; i < bufferSize; i += items) {
             for (let j = 0; j < items; j++) {
                 const value = buffer[i + j];
-                const group = minMax[j];
 
-                if (value > group[0]) {
-                    group[0] = value;
-                } else if (value < group[1]) {
-                    group[1] = value;
+                if (value > max[j]) {
+                    max[j] = value;
                 }
             }
         }
 
-        return minMax;
-    }
+        return max;
+    };
 
     // Calculate current maximum of killed / resurrected cells
-    const [
-        [maxAlive, minAlive],
-        [maxKilled, minKilled],
-        [maxResurrected, minResurrected]
-    ] = calculateMinMaxValues(3);
+    const [maxAlive, maxKilled, maxResurrected] = calculateMinMaxValues(3);
 
-
-    // Calculate smallest possible y-factor for all three graphs
-    const kpr = height / Math.max(
-        (maxAlive - minAlive),
-        (maxKilled - minKilled),
-        (maxResurrected - minResurrected)
-    );
-
+    // Calculate smallest possible scale
+    const maxY = Math.max(maxAlive, maxKilled, maxResurrected);
+    const kpr = height / maxY;
     const xpr = width / bufferSize;
-
-    /**
-     * Draws a line-chart
-     * @param color Stroke color
-     * @param offset Array offset, where to start
-     * @param step
-     * @param yn Y-Normalizer Each value of source gets this value subtracted
-     */
-    function drawLineChart(
-        color: string,
-        offset: number,
-        step: number,
-        yn: number
-    ) {
-        ctx.strokeStyle = color;
-        ctx.beginPath();
-
-        for (let i = offset; i < bufferSize; i += step) {
-            const x = xpr * i;
-            const y = height - kpr * (buffer[i] - yn);
-
-            if (i === offset) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        }
-
-        ctx.stroke();
-    }
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
 
     // Draw grid
     const gx = width / 2;
@@ -154,10 +110,34 @@ function update(data: UpdatePayload) {
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
 
+    /**
+     * Draws a line-chart
+     * @param color Stroke color
+     * @param offset Array offset, where to start
+     * @param step
+     */
+    const drawLineChart = (color: string, offset: number, step: number) => {
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+
+        for (let i = offset; i < bufferSize; i += step) {
+            const x = xpr * i;
+            const y = height - kpr * buffer[i];
+
+            if (i === offset) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+
+        ctx.stroke();
+    };
+
     // Draw charts
-    drawLineChart('#ff26a5', 0, 3, minAlive);
-    drawLineChart('#ff2638', 1, 3, minKilled);
-    drawLineChart('#26ff26', 2, 3, minResurrected);
+    drawLineChart('#ff26a5', 0, 3);
+    drawLineChart('#ff2638', 1, 3);
+    drawLineChart('#26ff26', 2, 3);
 }
 
 // Listen to input
