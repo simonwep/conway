@@ -7,13 +7,8 @@ import {FPSLimiter}   from './FPSLimiter';
 import * as styles    from './LifeStats.module.scss';
 import {Stats}        from './Stats';
 
-type Props = unknown;
-type State = {
-    fpsLimiterEnabled: boolean;
-};
-
 @observer
-export class LifeStats extends Component<State, Props> {
+export class LifeStats extends Component {
 
     @bind
     @action

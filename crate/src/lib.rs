@@ -36,7 +36,7 @@ impl Universe {
         let target: Vec<bool> = (0..total_cells).map(|_| false).collect();
         let mut source: Vec<bool> = (0..total_cells).map(|_| false).collect();
 
-        let mut killed_cells: Vec<(u32, u32)> = (0..total_cells).map(|_| (0, 0)).collect();
+        let killed_cells: Vec<(u32, u32)> = (0..total_cells).map(|_| (0, 0)).collect();
         let mut resurrected_cells: Vec<(u32, u32)> = (0..total_cells).map(|_| (0, 0)).collect();
 
         // Update list of previously born cells
