@@ -13,14 +13,14 @@ export function cn(...values: Array<string | {[key: string]: boolean}>): string 
             case 'object': {
                 for (const [key, val] of Object.entries(item)) {
                     if (val) {
-                        str += `${key  } `;
+                        str += `${key} `;
                     }
                 }
 
                 break;
             }
             case 'string': {
-                str += `${item  } `;
+                str += `${item} `;
             }
         }
     }

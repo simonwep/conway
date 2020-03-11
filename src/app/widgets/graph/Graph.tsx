@@ -1,6 +1,6 @@
-import {transfer}                from 'comlink';
 import {observer}                from 'mobx-react';
 import {Component, createRef, h} from 'preact';
+import {transfer}                from '../../../actor/actor.main';
 import {getEngine}               from '../../../engine';
 import {cn}                      from '../../../lib/preact-utils';
 import * as widgetStyles         from '../widget.module.scss';
@@ -12,8 +12,10 @@ export class Graph extends Component {
 
     componentDidMount(): void {
         const offscreenCanvas = (this.canvas.current as HTMLCanvasElement).transferControlToOffscreen();
-        const payload = transfer(offscreenCanvas, [offscreenCanvas]);
-        getEngine().then(engine => engine.setGraphCanvas(payload));
+
+        getEngine().then(engine => {
+            return engine.call('setGraphCanvas', transfer(offscreenCanvas));
+        });
     }
 
     render() {

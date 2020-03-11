@@ -1,9 +1,10 @@
-import {observer}          from 'mobx-react';
-import {Component, h} from 'preact';
-import {engine}       from '../../../engine';
-import {bind, cn}     from '../../../lib/preact-utils';
+import {observer}        from 'mobx-react';
+import {Component, h}    from 'preact';
+import {engine}          from '../../../engine';
+import {bind, cn}        from '../../../lib/preact-utils';
+import {life}            from '../../../store';
 import * as widgetStyles from '../widget.module.scss';
-import * as styles         from './Controls.module.scss';
+import * as styles       from './Controls.module.scss';
 
 type Props = {};
 type State = {
@@ -22,9 +23,9 @@ export class Controls extends Component<Props, State> {
         const {paused} = this.state;
 
         if (paused) {
-            engine.play();
+            life.play();
         } else {
-            engine.pause();
+            life.pause();
         }
 
         this.setState({
@@ -35,7 +36,7 @@ export class Controls extends Component<Props, State> {
 
     @bind
     nextGeneration() {
-        engine.nextGeneration();
+        life.nextGeneration();
     }
 
     render() {

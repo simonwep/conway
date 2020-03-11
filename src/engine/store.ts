@@ -1,7 +1,6 @@
-import {Remote}                       from 'comlink';
 import {action, computed, observable} from 'mobx';
-import {engine}       from './';
-import {EngineWorker} from './worker/main';
+import {ActorInstance}                from '../actor/actor.main';
+import {engine}                       from './';
 
 export default class Life {
     @observable public fps = 0;
@@ -13,15 +12,15 @@ export default class Life {
     @observable public zoomFactor = 1;
 
     // Engine to fetch data from
-    private source: Remote<EngineWorker> | null = null;
+    private source: ActorInstance | null = null;
 
     public constructor() {
         setInterval(async () => {
             const {source} = this;
 
             if (source) {
-                this.fps = await source.getFrameRate();
-                this.generation = await source.getGeneration();
+                this.fps = await source.call('getFrameRate') as number;
+                this.generation = await source.call('getGeneration') as number;
             }
         }, 1000);
     }
@@ -32,7 +31,7 @@ export default class Life {
     }
 
     @action
-    public setEngine(engine: Remote<EngineWorker>): void {
+    public setEngine(engine: ActorInstance): void {
         this.source = engine;
     }
 
@@ -44,19 +43,31 @@ export default class Life {
     @action
     public setFPSLimitation(num: number | null): void {
         this.fpsLimitation = num;
-        engine.limitFPS(num);
+        engine.call('limitFPS', num);
     }
 
     @action
     public updateSurviveRules(bitMap: number): void {
         this.surviveRules = bitMap;
-        engine.updateRuleset(this.resurrectRules, this.surviveRules);
+        engine.call('updateRuleset', this.resurrectRules, this.surviveRules);
     }
 
     @action
     public updateResurrectRules(bitMap: number): void {
         this.resurrectRules = bitMap;
-        engine.updateRuleset(this.resurrectRules, this.surviveRules);
+        engine.call('updateRuleset', this.resurrectRules, this.surviveRules);
+    }
+
+    public nextGeneration(): void {
+        engine.call('nextGeneration');
+    }
+
+    public play(): void {
+        engine.call('play');
+    }
+
+    public pause(): void {
+        engine.call('pause');
     }
 }
 

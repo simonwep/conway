@@ -1,6 +1,5 @@
-import {Remote}       from 'comlink';
-import {on}           from '../../lib/dom-events';
-import {EngineWorker} from '../worker/main';
+import {ActorInstance} from '../../actor/actor.main';
+import {on}            from '../../lib/dom-events';
 
 /**
  * Panning feature
@@ -9,13 +8,13 @@ import {EngineWorker} from '../worker/main';
  */
 export const resize = (
     canvas: HTMLCanvasElement,
-    current: Remote<EngineWorker>
+    current: ActorInstance
 ) => {
     let timeout: unknown = 0;
     on(window, 'resize', () => {
         clearTimeout(timeout as number);
         timeout = setTimeout(async () => {
-            await current.updateConfig({
+            await current.call('updateConfig', {
                 width: window.innerWidth,
                 height: window.innerHeight
             });

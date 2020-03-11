@@ -1,34 +1,22 @@
-import {Remote, transfer, wrap}                  from 'comlink';
-import {life}                                    from '../store';
-import {panning}                                 from './plugins/panning';
-import {resize}                                  from './plugins/resize';
-import {Config, EngineConstructor, EngineWorker} from './worker/main';
+import {Actor, ActorInstance, transfer} from '../actor/actor.main';
+import {life}                           from '../store';
+import {panning}                        from './plugins/panning';
+import {resize}                         from './plugins/resize';
+import {Config, Engine}                 from './worker/main';
 
 // Engine instance
-export let engine: Remote<EngineWorker>;
+export let engine: ActorInstance;
 
 // Async way to retrieve the engine as soon as possible
-const engineMountListeners: Array<() => void> = [];
+const engineMountListeners: Array<(engine: ActorInstance) => void> = [];
 export const getEngine = async (): Promise<typeof engine> => {
-    if (engine) {
-        return engine;
-    }
-
     return new Promise(resolve => {
-        engineMountListeners.push(() => {
-            resolve(engine);
-        });
+        engineMountListeners.push(resolve);
     });
 };
 
 // Called only once to mount the canvas
 export const init = async (): Promise<void> => {
-
-    // Mount worker
-    const Engine = wrap<EngineConstructor>(new Worker(
-        './worker/main.ts',
-        {type: 'module'}
-    ));
 
     const blockSize = 2;
     const blockMargin = 1;
@@ -36,25 +24,23 @@ export const init = async (): Promise<void> => {
     // Prep offscreenCanvas
     const canvas = document.querySelector('body > canvas') as HTMLCanvasElement;
     const offscreenCanvas = canvas.transferControlToOffscreen();
-    const payload = transfer(offscreenCanvas, [offscreenCanvas]);
 
-    // Create engine instance
-    const current = engine = await new Engine(
-        payload,
-        {
-            blockSize,
-            blockMargin,
-            width: window.innerWidth,
-            height: window.innerHeight
-        } as Config
-    );
+    // Mount worker
+    const current = engine = await new Actor(new Worker(
+        './worker/main.ts',
+        {type: 'module'}
+    )).create('Engine', transfer(offscreenCanvas), {
+        blockSize,
+        blockMargin,
+        width: window.innerWidth,
+        height: window.innerHeight
+    } as Config);
 
     // Link to store
     life.setEngine(current);
 
     // Auto-play
-    await current.mount();
-    await current.play();
+    await current.call('play');
 
     // Launch modules
     panning(canvas, current);
@@ -62,6 +48,6 @@ export const init = async (): Promise<void> => {
 
     // Fire awaiting requests
     for (const req of engineMountListeners) {
-        req();
+        req(current);
     }
 };

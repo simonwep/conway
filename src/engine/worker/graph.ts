@@ -1,124 +1,112 @@
+import {actor}                       from '../../actor/actor.worker';
 import {calculateMaximums, drawGrid} from './graph.utils';
 
-export type CanvasInitialization = {
-    type: 'canvas';
-    payload: OffscreenCanvas;
-};
+@actor()
+export class Graph {
 
-export type UpdatePayload = {
-    killed: number;
-    resurrected: number;
-};
+    // Target canvas
+    private canvas: OffscreenCanvas | null = null;
+    private ctx: OffscreenCanvasRenderingContext2D | null = null;
 
-export type UpdateData = {
-    type: 'update';
-    payload: UpdatePayload;
-};
+    // Graph buffer
+    private static GRAPH_PADDING = 10;
+    private static BUFFER_SIZE = 250 * 3; // n * (killed, resurrected, alive)
+    private buffer = new Uint32Array(Graph.BUFFER_SIZE);
+    private bufferOffset = 0;
+    private alive = 0;
 
-// Target canvas
-let canvas: OffscreenCanvas;
-let ctx: OffscreenCanvasRenderingContext2D;
-
-// Graph buffer
-const GRAPH_PADDING = 10;
-const BUFFER_SIZE = 250 * 3; // n * (killed, resurrected, alive)
-const buffer = new Uint32Array(BUFFER_SIZE);
-let bufferOffset = 0;
-let alive = 0;
-
-// Update function
-function update(data: UpdatePayload) {
-    const {width, height} = canvas;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-
-    // Update count of cells alive
-    alive += data.resurrected - data.killed;
-
-    // Update buffer and shift if full
-    if (bufferOffset < buffer.length) {
-        buffer[bufferOffset] = alive;
-        buffer[bufferOffset + 1] = data.killed;
-        buffer[bufferOffset + 2] = data.resurrected;
-        bufferOffset += 3;
-    } else {
-
-        // Remove first element and override last
-        buffer.copyWithin(0, 3, buffer.length);
-        buffer[BUFFER_SIZE - 3] = alive;
-        buffer[BUFFER_SIZE - 2] = data.killed;
-        buffer[bufferOffset - 1] = data.resurrected;
+    public setCanvas(canvas: OffscreenCanvas): void {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d', {
+            antialias: false,
+            alpha: true
+        }) as OffscreenCanvasRenderingContext2D;
     }
 
-    // Current size of buffer, either it's filled or currently in the process
-    const bufferSize = Math.min(bufferOffset, buffer.length);
+    public update(killed: number, resurrected: number): void {
+        if (this.canvas) {
+            this.render(killed, resurrected);
+        } else {
+            this.alive += resurrected - killed;
+        }
+    }
 
-    // Draw grid
-    drawGrid(ctx, width, height);
+    private render(killed: number, resurrected: number) {
+        const {canvas, ctx, buffer} = this;
 
-    // Calculate current maximum of killed / resurrected cells
-    const [maxAlive, maxKilled, maxResurrected] = calculateMaximums(3, buffer, bufferSize);
-
-    // Calculate smallest possible scale
-    const maxY = Math.max(maxAlive, maxKilled, maxResurrected);
-    const graphHeight = height - GRAPH_PADDING * 2;
-    const kpr = graphHeight / maxY;
-    const xpr = width / bufferSize;
-
-    // Stroke styles
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-
-    /**
-     * Draws a line-chart
-     * @param color Stroke color
-     * @param offset Array offset, where to start
-     * @param step
-     */
-    const drawLineChart = (color: string, offset: number, step: number) => {
-        ctx.strokeStyle = color;
-        ctx.beginPath();
-
-        for (let i = offset; i < bufferSize; i += step) {
-            const x = xpr * i;
-            const y = graphHeight - kpr * buffer[i] + GRAPH_PADDING;
-
-            if (i === offset) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
+        if (!canvas || !ctx) {
+            throw new Error('Not initialized yet.');
         }
 
-        ctx.stroke();
-    };
+        const {width, height} = canvas;
 
-    // Draw charts
-    drawLineChart('#ff26a5', 0, 3);
-    drawLineChart('#ff2638', 1, 3);
-    drawLineChart('#26ff26', 2, 3);
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+
+        // Update count of cells alive
+        this.alive += resurrected - killed;
+
+        // Update buffer and shift if full
+        if (this.bufferOffset < buffer.length) {
+            buffer[this.bufferOffset] = this.alive;
+            buffer[this.bufferOffset + 1] = killed;
+            buffer[this.bufferOffset + 2] = resurrected;
+            this.bufferOffset += 3;
+        } else {
+
+            // Remove first element and override last
+            buffer.copyWithin(0, 3, buffer.length);
+            buffer[Graph.BUFFER_SIZE - 3] = this.alive;
+            buffer[Graph.BUFFER_SIZE - 2] = killed;
+            buffer[this.bufferOffset - 1] = resurrected;
+        }
+
+        // Current size of buffer, either it's filled or currently in the process
+        const bufferSize = Math.min(this.bufferOffset, buffer.length);
+
+        // Draw grid
+        drawGrid(ctx, width, height);
+
+        // Calculate current maximum of killed / resurrected cells
+        const [maxAlive, maxKilled, maxResurrected] = calculateMaximums(3, buffer, bufferSize);
+
+        // Calculate smallest possible scale
+        const maxY = Math.max(maxAlive, maxKilled, maxResurrected);
+        const graphHeight = height - Graph.GRAPH_PADDING * 2;
+        const kpr = graphHeight / maxY;
+        const xpr = width / bufferSize;
+
+        // Stroke styles
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+
+        /**
+         * Draws a line-chart
+         * @param color Stroke color
+         * @param offset Array offset, where to start
+         * @param step
+         */
+        const drawLineChart = (color: string, offset: number, step: number) => {
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+
+            for (let i = offset; i < bufferSize; i += step) {
+                const x = xpr * i;
+                const y = graphHeight - kpr * buffer[i] + Graph.GRAPH_PADDING;
+
+                if (i === offset) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.stroke();
+        };
+
+        // Draw charts
+        drawLineChart('#ff26a5', 0, 3);
+        drawLineChart('#ff2638', 1, 3);
+        drawLineChart('#26ff26', 2, 3);
+    }
 }
-
-// Listen to input
-self.addEventListener('message', ev => {
-    const msg = ev.data as (CanvasInitialization | UpdateData);
-
-    switch (msg.type) {
-        case 'canvas': {
-            canvas = msg.payload;
-            ctx = canvas.getContext('2d', {
-                antialias: false,
-                alpha: true
-            }) as OffscreenCanvasRenderingContext2D;
-            break;
-        }
-        case 'update': {
-            if (canvas) {
-                update(msg.payload);
-            } else {
-                alive += msg.payload.resurrected - msg.payload.killed;
-            }
-        }
-    }
-});

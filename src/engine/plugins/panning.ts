@@ -1,6 +1,5 @@
-import {Remote}       from 'comlink';
-import {on}           from '../../lib/dom-events';
-import {EngineWorker} from '../worker/main';
+import {ActorInstance} from '../../actor/actor.main';
+import {on}            from '../../lib/dom-events';
 
 /**
  * Panning feature
@@ -9,7 +8,7 @@ import {EngineWorker} from '../worker/main';
  */
 export const panning = (
     canvas: HTMLCanvasElement,
-    current: Remote<EngineWorker>
+    current: ActorInstance
 ) => {
     let scale = 1;
     const zoomFactor = 2;
@@ -34,7 +33,7 @@ export const panning = (
             canvas.style.cursor = 'grab';
         }
 
-        await current.transform({
+        await current.call('transform', {
             scale, x, y
         });
     });
@@ -50,7 +49,7 @@ export const panning = (
             sy = e.pageY;
 
             // TODO: Lock on edges
-            await current.transform({
+            await current.call('transform', {
                 scale, x, y
             });
         }

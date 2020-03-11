@@ -1,5 +1,7 @@
-import {expose}          from 'comlink';
-import {UniverseWrapper} from '../wrapper';
+import {actor}                          from '../../actor/actor.worker';
+import {Actor, ActorInstance, transfer} from '../../actor/actor.main';
+import {UniverseWrapper}                from '../wrapper';
+import {Graph}                          from './graph';
 
 export type Config = {
     width: number;
@@ -25,17 +27,18 @@ export type Transformation = {
 };
 
 export interface EngineConstructor {
-    new(canvas: OffscreenCanvas, config: Config): EngineWorker;
+    new(canvas: OffscreenCanvas, config: Config): Engine;
 }
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-export class EngineWorker {
+@actor('create')
+export class Engine {
 
     // Amount of single frames to stabilize the fps
     public static readonly FPS_BUFFER = 16;
 
     // Buffer of the last N frames, used to smooth the current fps.
-    private readonly fpsBuffer: Uint32Array = new Uint32Array(EngineWorker.FPS_BUFFER);
+    private readonly fpsBuffer: Uint32Array = new Uint32Array(Engine.FPS_BUFFER);
 
     /**
      * Two canvas are used to draw the scene, the first one is purely
@@ -48,10 +51,10 @@ export class EngineWorker {
     private readonly ctx: OffscreenCanvasRenderingContext2D;
 
     // Child-worker responsible for drawing the charts
-    private graphicalWorker: Worker;
+    private readonly graphicalWorker: ActorInstance;
 
     // Rust wrapper
-    private universe: UniverseWrapper | null;
+    private universe: UniverseWrapper;
 
     // Currently requested frame.
     private activeAnimationFrame: number | null = null;
@@ -70,11 +73,15 @@ export class EngineWorker {
 
     private constructor(
         canvas: OffscreenCanvas,
-        config: Config
+        env: Environment,
+        graphicalWorker: ActorInstance,
+        universe: UniverseWrapper
     ) {
 
-        // Convert config to env-properties
-        this.env = EngineWorker.configToEnv(config);
+        // Apply props
+        this.env = env;
+        this.universe = universe;
+        this.graphicalWorker = graphicalWorker;
 
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d', {
@@ -101,16 +108,35 @@ export class EngineWorker {
         // Clear canvas and initialize js-universe
         this.shadowCtx.fillStyle = '#fff';
         this.shadowCtx.fillRect(0, 0, width, height);
-        this.universe = null;
+    }
 
-        // Initialize graphical worker
-        this.graphicalWorker = new Worker(
+    public static async create(
+        canvas: OffscreenCanvas,
+        config: Config
+    ): Promise<Engine> {
+
+        // Convert config to env-properties
+        const env = Engine.configToEnv(config);
+
+        const graphicalWorker = await new Actor(new Worker(
             './graph.ts',
             {type: 'module'}
+        )).create('Graph');
+
+        const universe = await UniverseWrapper.new(
+            env.rows,
+            env.cols
+        );
+
+        return new Engine(
+            canvas,
+            env,
+            graphicalWorker,
+            universe
         );
     }
 
-    public async mount(): Promise<void> {
+    public async recreateUniverse(): Promise<void> {
         const {rows, cols} = this.env;
 
         this.universe = await UniverseWrapper.new(
@@ -185,7 +211,7 @@ export class EngineWorker {
                 fpsBuffer[fpsBufferIndex++] = end - latestFrame;
 
                 // Rotate if out-of-bounds
-                if (fpsBufferIndex > EngineWorker.FPS_BUFFER) {
+                if (fpsBufferIndex > Engine.FPS_BUFFER) {
                     fpsBufferIndex = 0;
                 }
             }
@@ -221,7 +247,7 @@ export class EngineWorker {
 
         // Draw killed cells
         shadowCtx.beginPath();
-        const killed = universe!.killed();
+        const killed = universe.killed();
         for (let i = 0; i < killed.length; i += 2) {
             const row = killed[i] * block;
             const col = killed[i + 1] * block;
@@ -233,7 +259,7 @@ export class EngineWorker {
 
         // Draw living cells
         shadowCtx.beginPath();
-        const resurrected = universe!.resurrected();
+        const resurrected = universe.resurrected();
         for (let i = 0; i < resurrected.length; i += 2) {
             const row = resurrected[i] * block;
             const col = resurrected[i + 1] * block;
@@ -244,15 +270,12 @@ export class EngineWorker {
         shadowCtx.fill();
 
         // Transfer changes to graph-worker
-        this.graphicalWorker.postMessage({
-            type: 'update',
-            payload: {
-                killed: killed.length / 2,
-                resurrected: resurrected.length / 2
-            }
-        });
+        this.graphicalWorker.call('update',
+            killed.length / 2,
+            resurrected.length / 2
+        );
 
-        universe!.nextGen();
+        universe.nextGen();
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
         return performance.now() - start;
     }
@@ -272,11 +295,11 @@ export class EngineWorker {
     public async getFrameRate(): Promise<number> {
         let total = 0;
 
-        for (let i = 0; i < EngineWorker.FPS_BUFFER; i++) {
+        for (let i = 0; i < Engine.FPS_BUFFER; i++) {
             total += this.fpsBuffer[i];
         }
 
-        return ~~(1000 / (total / EngineWorker.FPS_BUFFER));
+        return ~~(1000 / (total / Engine.FPS_BUFFER));
     }
 
     public async transform(t: Transformation): Promise<void> {
@@ -297,7 +320,7 @@ export class EngineWorker {
     }
 
     public async updateConfig(config: Partial<Config>): Promise<void> {
-        this.env = EngineWorker.configToEnv({...this.env, ...config});
+        this.env = Engine.configToEnv({...this.env, ...config});
         const {env, canvas, shadowCanvas, shadowCtx, ctx, running} = this;
         const {width, height} = env;
 
@@ -314,9 +337,9 @@ export class EngineWorker {
         shadowCtx.fillRect(0, 0, width, height);
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
 
-        // Remount
+        // Stop and re-create universe
         await this.stop();
-        await this.mount();
+        await this.recreateUniverse();
 
         // Auto-play if simulation was active
         if (running) {
@@ -325,15 +348,11 @@ export class EngineWorker {
     }
 
     public async updateRuleset(resurrect: number, survive: number): Promise<void> {
-        this.universe!.setRuleset(resurrect, survive);
+        this.universe.setRuleset(resurrect, survive);
     }
 
     public async setGraphCanvas(canvas: OffscreenCanvas): Promise<void> {
-        this.graphicalWorker.postMessage({
-            type: 'canvas',
-            payload: canvas
-        }, [canvas]);
+        await this.graphicalWorker.call('setCanvas', transfer(canvas));
     }
 }
 
-expose(EngineWorker);
