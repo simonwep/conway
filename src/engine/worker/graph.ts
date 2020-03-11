@@ -4,13 +4,12 @@ import {calculateMaximums, drawGrid} from './graph.utils';
 @actor()
 export class Graph {
 
-    // Target canvas
-    private canvas: OffscreenCanvas | null = null;
-    private ctx: OffscreenCanvasRenderingContext2D | null = null;
-
     // Graph buffer
     private static GRAPH_PADDING = 10;
     private static BUFFER_SIZE = 250 * 3; // n * (killed, resurrected, alive)
+    // Target canvas
+    private canvas: OffscreenCanvas | null = null;
+    private ctx: OffscreenCanvasRenderingContext2D | null = null;
     private buffer = new Uint32Array(Graph.BUFFER_SIZE);
     private bufferOffset = 0;
     private alive = 0;

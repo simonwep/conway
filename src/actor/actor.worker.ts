@@ -1,11 +1,13 @@
 import {WorkerFunctionCall, WorkerFunctionCallReply, WorkerInstantiation, WorkerInstantiationReply} from './actor.main';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 type RegisteredClass = {
-    constructor: Function;
+    constructor: any;
     instantiationFunction?: string;
 };
 
 // Class instances and counter
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const instances = new Map<number, any>();
 let instanceIndex = 0;
 
@@ -18,24 +20,30 @@ self.addEventListener('message', async ev => {
 
     switch (data.type) {
         case 'call': {
-            const {id, fn, target, args} = data;
+            const {requestId, functionName, target, args} = data;
 
             // Validate call-target
             if (!instances.has(target)) {
                 throw new Error('Target instance ot found.');
             }
 
+            // If the response is ignored (eg. commit has be used), ignore the promise
+            if (requestId === null) {
+                instances.get(target)[functionName](...args);
+                break;
+            }
+
             try {
                 self.postMessage({
                     type: 'call',
-                    id,
+                    requestId,
                     ok: true,
-                    value: await instances.get(target)[fn](...args)
+                    value: await instances.get(target)[functionName](...args)
                 } as WorkerFunctionCallReply);
             } catch (e) {
                 self.postMessage({
                     type: 'call',
-                    id,
+                    requestId,
                     ok: false,
                     value: e.message
                 } as WorkerFunctionCallReply);
@@ -44,7 +52,7 @@ self.addEventListener('message', async ev => {
             break;
         }
         case 'instantiation': {
-            const {id, name, args} = data;
+            const {requestId, name, args} = data;
 
             // Lookup name
             if (!classes.has(name)) {
@@ -54,8 +62,8 @@ self.addEventListener('message', async ev => {
             // Try to create an instance
             const {constructor, instantiationFunction} = classes.get(name) as RegisteredClass;
             const instance = instantiationFunction ?
-                await (constructor as any)[instantiationFunction](...args) :
-                new (constructor as any)(...args);
+                await constructor[instantiationFunction](...args) :
+                new constructor(...args);
 
             // Check whenever the instance represents an actual class-instance
             if (!(instance instanceof constructor)) {
@@ -69,7 +77,7 @@ self.addEventListener('message', async ev => {
             // Return id of instance
             self.postMessage({
                 type: 'instantiation',
-                id,
+                requestId,
                 instanceId
             } as WorkerInstantiationReply);
         }

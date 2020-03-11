@@ -1,5 +1,5 @@
-import {actor}                          from '../../actor/actor.worker';
 import {Actor, ActorInstance, transfer} from '../../actor/actor.main';
+import {actor}                          from '../../actor/actor.worker';
 import {UniverseWrapper}                from '../wrapper';
 import {Graph}                          from './graph';
 
@@ -136,15 +136,6 @@ export class Engine {
         );
     }
 
-    public async recreateUniverse(): Promise<void> {
-        const {rows, cols} = this.env;
-
-        this.universe = await UniverseWrapper.new(
-            rows,
-            cols
-        );
-    }
-
     private static configToEnv(conf: Config): Environment {
         const {width, height, blockMargin, blockSize} = conf;
         const block = blockMargin + blockSize;
@@ -164,6 +155,15 @@ export class Engine {
             rows,
             cols
         };
+    }
+
+    public async recreateUniverse(): Promise<void> {
+        const {rows, cols} = this.env;
+
+        this.universe = await UniverseWrapper.new(
+            rows,
+            cols
+        );
     }
 
     public async pause(): Promise<void> {
@@ -270,7 +270,7 @@ export class Engine {
         shadowCtx.fill();
 
         // Transfer changes to graph-worker
-        this.graphicalWorker.call('update',
+        this.graphicalWorker.commit('update',
             killed.length / 2,
             resurrected.length / 2
         );
@@ -352,7 +352,7 @@ export class Engine {
     }
 
     public async setGraphCanvas(canvas: OffscreenCanvas): Promise<void> {
-        await this.graphicalWorker.call('setCanvas', transfer(canvas));
+        this.graphicalWorker.commit('setCanvas', transfer(canvas));
     }
 }
 

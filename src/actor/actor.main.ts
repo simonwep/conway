@@ -1,29 +1,29 @@
 export type WorkerInstantiation = {
-    id: number;
-    name: string;
     type: 'instantiation';
+    requestId: number;
+    name: string;
     args: Array<unknown>;
 };
 
 export type WorkerFunctionCall = {
-    id: number;
     type: 'call';
+    requestId: number | null;
     target: number;
-    fn: string;
+    functionName: string;
     args: Array<unknown>;
 };
 
 export type WorkerInstantiationReply = {
     type: 'instantiation';
+    requestId: number;
     instanceId: number;
-    id: number;
 };
 
 export type WorkerFunctionCallReply = {
     type: 'call';
-    id: number;
-    ok: boolean;
+    requestId: number;
     value: unknown;
+    ok: boolean;
 };
 
 const TRANSFER_KEY = Symbol('transfer.key');
@@ -81,20 +81,21 @@ export class ActorInstance {
 
             // Check whenever the request is a function-call return value
             if (data.type === 'call') {
+                const {ok, value, requestId} = data;
 
                 // Validate response id
-                if (!this.requests.has(data.id)) {
-                    throw new Error(`No such request with id ${data.id}`);
+                if (!this.requests.has(requestId)) {
+                    throw new Error(`No such request with id ${requestId}`);
                 }
 
-                const [resolve, reject] = this.requests.get(data.id) as [Function, Function];
-                const {ok, value} = data;
+                const [resolve, reject] = this.requests.get(requestId) as [Function, Function];
+
 
                 // Resolve or reject with given value
                 ok ? resolve(value) : reject(value);
 
                 // Clean up
-                this.requests.delete(data.id);
+                this.requests.delete(requestId);
             }
         });
     }
@@ -114,13 +115,30 @@ export class ActorInstance {
                 type: 'call',
                 args: rawArgs,
                 target: this.instanceId,
-                id,
-                fn
+                requestId: id,
+                functionName: fn
             } as WorkerFunctionCall, transferable);
 
             // Save resolver
             this.requests.set(id, [resolve, reject]);
         });
+    }
+
+    /**
+     * Calls a function without expecting or returning its return-value.
+     * It's faster than call since no promise needs to be fulfilled.
+     */
+    public commit(fn: string, ...args: Array<unknown>): void {
+        const [rawArgs, transferable] = resolveArguments(args);
+
+        // Send data to worker
+        this.worker.postMessage({
+            type: 'call',
+            args: rawArgs,
+            target: this.instanceId,
+            requestId: null,
+            functionName: fn
+        } as WorkerFunctionCall, transferable);
     }
 }
 
@@ -146,20 +164,20 @@ export class Actor {
 
             // Check whenever the request is related to an instantiation
             if (data.type === 'instantiation') {
+                const {instanceId, requestId} = data;
 
                 // Validate response id
-                if (!this.requests.has(data.id)) {
-                    throw new Error(`No such request with id ${data.id}`);
+                if (!this.requests.has(requestId)) {
+                    throw new Error(`No such request with id ${requestId}`);
                 }
 
-                const [resolve] = this.requests.get(data.id) as [Function, Function];
-                const {instanceId} = data;
+                const [resolve] = this.requests.get(requestId) as [Function, Function];
 
                 // Resolve with new actor instance
                 resolve(new ActorInstance(instanceId, worker));
 
                 // Clean up
-                this.requests.delete(data.id);
+                this.requests.delete(data.requestId);
             }
         });
     }
@@ -178,7 +196,8 @@ export class Actor {
             this.worker.postMessage({
                 type: 'instantiation',
                 args: rawArgs,
-                id, name
+                requestId: id,
+                name
             } as WorkerInstantiation, transferable);
 
             // Save resolver

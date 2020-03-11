@@ -1,6 +1,5 @@
 import {observer}        from 'mobx-react';
 import {Component, h}    from 'preact';
-import {engine}          from '../../../engine';
 import {bind, cn}        from '../../../lib/preact-utils';
 import {life}            from '../../../store';
 import * as widgetStyles from '../widget.module.scss';
