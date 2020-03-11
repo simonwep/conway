@@ -117,16 +117,17 @@ export class Engine {
 
         // Convert config to env-properties
         const env = Engine.configToEnv(config);
+        const [graphicalWorker, universe] = await Promise.all([
+            new Actor(new Worker(
+                './graph.ts',
+                {type: 'module'}
+            )).create('Graph'),
 
-        const graphicalWorker = await new Actor(new Worker(
-            './graph.ts',
-            {type: 'module'}
-        )).create('Graph');
-
-        const universe = await UniverseWrapper.new(
-            env.rows,
-            env.cols
-        );
+            UniverseWrapper.new(
+                env.rows,
+                env.cols
+            )
+        ]);
 
         return new Engine(
             canvas,
