@@ -76,10 +76,7 @@ module.exports = {
             {
                 test: /\.(js|ts|tsx)$/,
                 include: src,
-                use: [
-                    'ts-loader',
-                    'eslint-loader'
-                ]
+                use: 'ts-loader'
             }
         ]
     },
@@ -90,7 +87,8 @@ module.exports = {
             new TerserPlugin({
                 sourceMap: true,
                 terserOptions: {
-                    mangle: true
+                    mangle: true,
+                    keep_classnames: true
                 }
             }),
 
