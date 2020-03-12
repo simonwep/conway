@@ -7,7 +7,6 @@ export type Config = {
     width: number;
     height: number;
     blockSize: number;
-    blockMargin: number;
 };
 
 export type Environment = {
@@ -15,9 +14,9 @@ export type Environment = {
     height: number;
     cols: number;
     rows: number;
-    block: number;
-    blockSize: number;
-    blockMargin: number;
+    scale: number;
+    preScaleWidth: number;
+    preScaleHeight: number;
 };
 
 export type Transformation = {
@@ -25,10 +24,6 @@ export type Transformation = {
     x: number;
     y: number;
 };
-
-export interface EngineConstructor {
-    new(canvas: OffscreenCanvas, config: Config): Engine;
-}
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 @actor('create')
@@ -90,13 +85,16 @@ export class Engine {
         }) as OffscreenCanvasRenderingContext2D;
 
         // Reset canvas
-        const {width, height} = this.env;
+        const {scale, width, height} = this.env;
         canvas.width = width;
         canvas.height = height;
 
         // We're drawing the shadowCanvas with this context,
         // using image-smoothing would blur pixels.
         this.ctx.imageSmoothingEnabled = false;
+
+        // Pre-scale based on block-size
+        this.ctx.scale(scale, scale);
 
         // Create shadow canvas
         this.shadowCanvas = new OffscreenCanvas(width, height);
@@ -125,7 +123,7 @@ export class Engine {
 
             UniverseWrapper.new(
                 env.rows, env.cols,
-                env.width, env.height
+                env.preScaleWidth, env.preScaleHeight
             )
         ]);
 
@@ -138,32 +136,31 @@ export class Engine {
     }
 
     private static configToEnv(conf: Config): Environment {
-        const {width, height, blockMargin, blockSize} = conf;
-        const block = blockMargin + blockSize;
+        const {width, height, blockSize} = conf;
 
         // Recalculate grid and canvas dimensions
-        const realWidth = width - width % block;
-        const realHeight = height - height % block;
-        const cols = realWidth / block;
-        const rows = realHeight / block;
+        const realWidth = width - width % blockSize;
+        const realHeight = height - height % blockSize;
+        const cols = realWidth / blockSize;
+        const rows = realHeight / blockSize;
 
         return {
             width: realWidth,
             height: realHeight,
-            block,
-            blockMargin,
-            blockSize,
+            preScaleWidth: realWidth / blockSize,
+            preScaleHeight: realHeight / blockSize,
+            scale: blockSize,
             rows,
             cols
         };
     }
 
     public async recreateUniverse(): Promise<void> {
-        const {rows, cols, width, height} = this.env;
+        const {rows, cols, preScaleWidth, preScaleHeight} = this.env;
 
         this.universe = await UniverseWrapper.new(
             rows, cols,
-            width, height
+            preScaleWidth, preScaleHeight
         );
     }
 
@@ -243,7 +240,7 @@ export class Engine {
 
     public nextGeneration() {
         const {ctx, shadowCtx, shadowCanvas, universe, env} = this;
-        const {block, blockSize, width, height} = env;
+        const {width, height} = env;
         const start = performance.now();
         this.generation++;
 
@@ -252,8 +249,8 @@ export class Engine {
 
         // Transfer changes to graph-worker
         this.graphicalWorker.commit('update',
-            universe.resurrectedCells(),
-            universe.killedCells()
+            universe.killedCells(),
+            universe.resurrectedCells()
         );
 
         universe.nextGen();
@@ -285,23 +282,29 @@ export class Engine {
 
     public transform(t: Transformation): void {
         const {ctx, shadowCanvas, env} = this;
-        const {width, height} = env;
+        const {scale, width, height} = env;
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, width, height);
 
-        // Apply transformation
-        this.ctx.setTransform(
+        // Reset current transformations
+        this.ctx.resetTransform();
+
+        // Transform
+        this.ctx.transform(
             t.scale, 0,
             0, t.scale,
             t.x, t.y
         );
 
+        // Scale to current block-size
+        this.ctx.scale(scale, scale);
+
         // Redraw immediately
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
-    public async updateConfig(config: Partial<Config>): Promise<void> {
-        this.env = Engine.configToEnv({...this.env, ...config});
+    public async updateConfig(config: Config): Promise<void> {
+        this.env = Engine.configToEnv(config);
         const {env, canvas, shadowCanvas, shadowCtx, ctx, running} = this;
         const {width, height} = env;
 

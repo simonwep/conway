@@ -11,7 +11,7 @@ export const panning = (
     current: ActorInstance
 ) => {
     let scale = 1;
-    const zoomFactor = 2;
+    const zoomFactor = 1.25;
     let x = 0, y = 0;
     canvas.addEventListener('wheel', async e => {
         const delta = (e.deltaY < 0 ? zoomFactor : 1 / zoomFactor);

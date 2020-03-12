@@ -28,7 +28,6 @@ pub struct Universe {
 impl Universe {
     /// Creates a new game-of-life universe
     pub fn new(mut rows: usize, mut cols: usize) -> Universe {
-
         // Bit-map with (r,g,b,a) values
         let pixels = (rows * cols) * 4;
         let mut image_data: Vec<u8> = (0..pixels).map(|_| 255 as u8).collect();
@@ -42,6 +41,7 @@ impl Universe {
         let mut source: Vec<bool> = (0..total_cells).map(|_| false).collect();
 
         // Random initialization
+        let mut resurrected_cells = 0;
         for row in 1..(rows - 1) {
             let image_data_offset = (row - 1) * (cols - 2);
             let offset = row * cols;
@@ -51,7 +51,11 @@ impl Universe {
                     source[offset + col] = true;
 
                     // Toggle pixel
-                    image_data[(image_data_offset + (col - 1)) * 4] = 0 as u8;
+                    let image_data_index = (image_data_offset + (col - 1)) * 4;
+                    image_data[image_data_index] = 0;
+                    image_data[image_data_index + 1] = 0;
+                    image_data[image_data_index + 2] = 0;
+                    resurrected_cells += 1;
                 }
             }
         }
@@ -61,8 +65,8 @@ impl Universe {
             survive_rules: 0b000001100,
             resurrect_rules: 0b000001000,
             killed_cells: 0,
-            resurrected_cells: 0,
             image_size: pixels,
+            resurrected_cells,
             image_data,
             cols,
             rows,
@@ -139,7 +143,6 @@ impl Universe {
                 };
 
                 // Save state
-
                 tar[cell_index] = next;
 
                 // Save pixel

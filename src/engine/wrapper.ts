@@ -2,15 +2,13 @@ import {Universe} from '../../crate/pkg';
 
 export class UniverseWrapper {
 
+    // Bitmap
+    public readonly imageData: ImageData;
     private readonly cols: number;
     private readonly rows: number;
-
     /* eslint-disable @typescript-eslint/no-explicit-any */
     private readonly wasm: any;
     private readonly universe: Universe;
-
-    // Bitmap
-    public readonly imageData: ImageData;
 
     constructor(
         rows: number,
