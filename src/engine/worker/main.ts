@@ -124,8 +124,8 @@ export class Engine {
             )).create('Graph'),
 
             UniverseWrapper.new(
-                env.rows,
-                env.cols
+                env.rows, env.cols,
+                env.width, env.height
             )
         ]);
 
@@ -159,11 +159,11 @@ export class Engine {
     }
 
     public async recreateUniverse(): Promise<void> {
-        const {rows, cols} = this.env;
+        const {rows, cols, width, height} = this.env;
 
         this.universe = await UniverseWrapper.new(
-            rows,
-            cols
+            rows, cols,
+            width, height
         );
     }
 
@@ -244,38 +244,16 @@ export class Engine {
     public nextGeneration() {
         const {ctx, shadowCtx, shadowCanvas, universe, env} = this;
         const {block, blockSize, width, height} = env;
-        const {killed, resurrected, killedCellsBuffer, resurrectedCellsBuffer} = universe;
         const start = performance.now();
         this.generation++;
 
-        // Draw killed cells
-        shadowCtx.beginPath();
-        for (let i = 0; i < killed; i++) {
-            const cord = killedCellsBuffer[i];
-            const row = (cord >> 16) * block;
-            const col = (cord & 65535) * block;
-            shadowCtx.rect(col, row, blockSize, blockSize);
-        }
-
-        shadowCtx.fillStyle = '#fff';
-        shadowCtx.fill();
-
-        // Draw living cells
-        shadowCtx.beginPath();
-        for (let i = 0; i < resurrected; i++) {
-            const cord = resurrectedCellsBuffer[i];
-            const row = (cord >> 16) * block;
-            const col = (cord & 65535) * block;
-            shadowCtx.rect(col, row, blockSize, blockSize);
-        }
-
-        shadowCtx.fillStyle = '#000';
-        shadowCtx.fill();
+        // Draw bitmap
+        shadowCtx.putImageData(universe.imageData, 0, 0);
 
         // Transfer changes to graph-worker
         this.graphicalWorker.commit('update',
-            killed,
-            resurrected
+            universe.resurrectedCells(),
+            universe.killedCells()
         );
 
         universe.nextGen();

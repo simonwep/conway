@@ -13,13 +13,12 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub struct Universe {
     cols: usize,
     rows: usize,
-    total_cells: usize,
     source: Vec<bool>,
     target: Vec<bool>,
-    killed_cells_offset: usize,
-    resurrected_cells_offset: usize,
-    killed_cells: Vec<u32>,
-    resurrected_cells: Vec<u32>,
+    image_data: Vec<u8>,
+    image_size: usize,
+    killed_cells: u32,
+    resurrected_cells: u32,
     survive_rules: u16,
     resurrect_rules: u16,
     swap: bool,
@@ -29,6 +28,11 @@ pub struct Universe {
 impl Universe {
     /// Creates a new game-of-life universe
     pub fn new(mut rows: usize, mut cols: usize) -> Universe {
+
+        // Bit-map with (r,g,b,a) values
+        let pixels = (rows * cols) * 4;
+        let mut image_data: Vec<u8> = (0..pixels).map(|_| 255 as u8).collect();
+
         // Add padding
         cols += 2;
         rows += 2;
@@ -37,21 +41,17 @@ impl Universe {
         let target: Vec<bool> = (0..total_cells).map(|_| false).collect();
         let mut source: Vec<bool> = (0..total_cells).map(|_| false).collect();
 
-        // The first 16bit represent the x-coordinate and the other last one the y-coordinate.
-        let killed_cells: Vec<u32> = (0..total_cells).map(|_| 0).collect();
-        let mut resurrected_cells: Vec<u32> = (0..total_cells).map(|_| 0).collect();
-
-        // Update list of previously born cells
-        let mut resurrected_cells_offset: usize = 0;
+        // Random initialization
         for row in 1..(rows - 1) {
+            let image_data_offset = (row - 1) * (cols - 2);
             let offset = row * cols;
 
             for col in 1..(cols - 1) {
                 if js_sys::Math::random() > 0.45 {
                     source[offset + col] = true;
-                    resurrected_cells[resurrected_cells_offset] =
-                        (((row - 1) << 16) + (col - 1)) as u32;
-                    resurrected_cells_offset += 1;
+
+                    // Toggle pixel
+                    image_data[(image_data_offset + (col - 1)) * 4] = 0 as u8;
                 }
             }
         }
@@ -60,11 +60,10 @@ impl Universe {
             swap: false,
             survive_rules: 0b000001100,
             resurrect_rules: 0b000001000,
-            killed_cells_offset: 0,
-            resurrected_cells_offset,
-            killed_cells,
-            resurrected_cells,
-            total_cells,
+            killed_cells: 0,
+            resurrected_cells: 0,
+            image_size: pixels,
+            image_data,
             cols,
             rows,
             source,
@@ -74,10 +73,9 @@ impl Universe {
 
     /// Calculates the next generation
     pub fn next_gen(&mut self) {
-        let resurrected_cells = &mut self.resurrected_cells;
-        let killed_cells = &mut self.killed_cells;
-        self.resurrected_cells_offset = 0;
-        self.killed_cells_offset = 0;
+        let image_data = &mut self.image_data;
+        self.resurrected_cells = 0;
+        self.killed_cells = 0;
 
         let (src, tar) = if self.swap {
             (&mut self.target, &mut self.source)
@@ -95,6 +93,7 @@ impl Universe {
         // O X X X O
         // O O O O O
         for row in 1..(self.rows - 1) {
+            let image_data_offset = (row - 1) * (self.cols - 2);
             let top = (row - 1) * self.cols + 1;
             let middle = row * self.cols + 1;
             let bottom = (row + 1) * self.cols + 1;
@@ -140,21 +139,26 @@ impl Universe {
                 };
 
                 // Save state
+
                 tar[cell_index] = next;
 
-                // Check if cell has changed
+                // Save pixel
                 if cell != next {
-                    let coordinates = (((row - 1) << 16) + (col - 1)) as u32;
+                    let image_data_index = (image_data_offset + (col - 1)) * 4;
 
                     // Save changed cell
                     match next {
                         true => {
-                            resurrected_cells[self.resurrected_cells_offset] = coordinates;
-                            self.resurrected_cells_offset += 1;
+                            self.resurrected_cells += 1;
+                            image_data[image_data_index] = 0;
+                            image_data[image_data_index + 1] = 0;
+                            image_data[image_data_index + 2] = 0;
                         }
                         false => {
-                            killed_cells[self.killed_cells_offset] = coordinates;
-                            self.killed_cells_offset += 1;
+                            self.killed_cells += 1;
+                            image_data[image_data_index] = 255;
+                            image_data[image_data_index + 1] = 255;
+                            image_data[image_data_index + 2] = 255;
                         }
                     };
                 };
@@ -162,24 +166,20 @@ impl Universe {
         }
     }
 
-    pub fn resurrected_cells(&mut self) -> *const u32 {
-        self.resurrected_cells.as_ptr()
+    pub fn image_data(&mut self) -> *const u8 {
+        self.image_data.as_ptr()
     }
 
-    pub fn resurrected_cells_amount(&mut self) -> u32 {
-        self.resurrected_cells_offset as u32
+    pub fn image_size(&self) -> usize {
+        self.image_size
     }
 
-    pub fn killed_cells(&mut self) -> *const u32 {
-        self.killed_cells.as_ptr()
+    pub fn killed_cells(&mut self) -> u32 {
+        self.killed_cells
     }
 
-    pub fn killed_cells_amount(&mut self) -> u32 {
-        self.killed_cells_offset as u32
-    }
-
-    pub fn total_cells(&self) -> usize {
-        self.total_cells
+    pub fn resurrected_cells(&mut self) -> u32 {
+        self.resurrected_cells
     }
 
     pub fn set_ruleset(&mut self, resurrect: u16, survive: u16) {

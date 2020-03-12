@@ -9,36 +9,44 @@ export class UniverseWrapper {
     private readonly wasm: any;
     private readonly universe: Universe;
 
-    // Buffer containing coordinates for resurrected and killed cells
-    public readonly killedCellsBuffer: Uint32Array;
-    public readonly resurrectedCellsBuffer: Uint32Array;
+    // Bitmap
+    public readonly imageData: ImageData;
 
-    constructor(rows: number, cols: number, universe: Universe, wasm: any) {
+    constructor(
+        rows: number,
+        cols: number,
+        width: number,
+        height: number,
+        universe: Universe,
+        wasm: any
+    ) {
         this.rows = rows;
         this.cols = cols;
         this.universe = universe;
         this.wasm = wasm;
 
-        const bufferSize = universe.total_cells();
-        const wasmMemory = wasm.memory.buffer;
-
-        this.killedCellsBuffer = new Uint32Array(
-            wasmMemory, universe.killed_cells(), bufferSize
-        );
-
-        this.resurrectedCellsBuffer = new Uint32Array(
-            wasmMemory, universe.resurrected_cells(), bufferSize
+        this.imageData = new ImageData(
+            new Uint8ClampedArray(
+                this.wasm.memory.buffer,
+                this.universe.image_data(),
+                this.universe.image_size()
+            ), width, height
         );
     }
 
-    public static async new(rows: number, cols: number): Promise<UniverseWrapper> {
+    public static async new(
+        rows: number,
+        cols: number,
+        width: number,
+        height: number
+    ): Promise<UniverseWrapper> {
         const [{Universe}, wasm] = await Promise.all([
             import(/* webpackChunkName: "crate-wrapper" */ '../../crate/pkg'),
             import(/* webpackChunkName: "crate-wasm" */ '../../crate/pkg/index_bg.wasm')
         ]);
 
         return new UniverseWrapper(
-            rows, cols,
+            rows, cols, width, height,
             Universe.new(rows, cols),
             wasm
         );
@@ -52,15 +60,15 @@ export class UniverseWrapper {
         this.universe.set_ruleset(resurrect, survive);
     }
 
+    public killedCells(): number {
+        return this.universe.killed_cells();
+    }
+
+    public resurrectedCells(): number {
+        return this.universe.resurrected_cells();
+    }
+
     public nextGen(): void {
         this.universe.next_gen();
-    }
-
-    get resurrected() {
-        return this.universe.resurrected_cells_amount();
-    }
-
-    get killed() {
-        return this.universe.killed_cells_amount();
     }
 }
