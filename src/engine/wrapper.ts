@@ -9,11 +9,26 @@ export class UniverseWrapper {
     private readonly wasm: any;
     private readonly universe: Universe;
 
-    constructor(rows: number, cols: number, universe: Universe, wasm: unknown) {
+    // Buffer containing coordinates for resurrected and killed cells
+    public readonly killedCellsBuffer: Uint32Array;
+    public readonly resurrectedCellsBuffer: Uint32Array;
+
+    constructor(rows: number, cols: number, universe: Universe, wasm: any) {
         this.rows = rows;
         this.cols = cols;
         this.universe = universe;
         this.wasm = wasm;
+
+        const bufferSize = universe.total_cells();
+        const wasmMemory = wasm.memory.buffer;
+
+        this.killedCellsBuffer = new Uint32Array(
+            wasmMemory, universe.killed_cells(), bufferSize
+        );
+
+        this.resurrectedCellsBuffer = new Uint32Array(
+            wasmMemory, universe.resurrected_cells(), bufferSize
+        );
     }
 
     public static async new(rows: number, cols: number): Promise<UniverseWrapper> {
@@ -29,31 +44,23 @@ export class UniverseWrapper {
         );
     }
 
-    public nextGen(): void {
-        this.universe.next_gen();
-    }
-
-    public resurrected(): Uint32Array {
-        return new Uint32Array(
-            this.wasm.memory.buffer,
-            this.universe.resurrected_cells(),
-            this.universe.resurrected_cells_amount() * 2
-        );
-    }
-
-    public killed(): Uint32Array {
-        return new Uint32Array(
-            this.wasm.memory.buffer,
-            this.universe.killed_cells(),
-            this.universe.killed_cells_amount() * 2
-        );
-    }
-
     public free(): void {
         this.universe.free();
     }
 
     public setRuleset(resurrect: number, survive: number): void {
         this.universe.set_ruleset(resurrect, survive);
+    }
+
+    public nextGen(): void {
+        this.universe.next_gen();
+    }
+
+    get resurrected() {
+        return this.universe.resurrected_cells_amount();
+    }
+
+    get killed() {
+        return this.universe.killed_cells_amount();
     }
 }

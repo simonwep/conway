@@ -167,7 +167,7 @@ export class Engine {
         );
     }
 
-    public async pause(): Promise<void> {
+    public pause(): void {
         this.running = false;
 
         // Cancel next frame
@@ -177,7 +177,7 @@ export class Engine {
     }
 
     public async stop(): Promise<void> {
-        await this.pause();
+        this.pause();
 
         // Free memory
         if (this.universe) {
@@ -203,6 +203,7 @@ export class Engine {
 
         const renderLoop = async (): Promise<void> => {
             const end = performance.now();
+
             if (!this.running) {
                 return;
             }
@@ -220,7 +221,7 @@ export class Engine {
             latestFrame = end;
 
             // Draw next generation
-            const duration = await this.nextGeneration();
+            const duration = this.nextGeneration();
 
             // Check if fps-limit is enabled
             if (this.fpsLimit !== null) {
@@ -240,18 +241,19 @@ export class Engine {
         requestAnimationFrame(renderLoop);
     }
 
-    public async nextGeneration(): Promise<number> {
+    public nextGeneration() {
         const {ctx, shadowCtx, shadowCanvas, universe, env} = this;
         const {block, blockSize, width, height} = env;
+        const {killed, resurrected, killedCellsBuffer, resurrectedCellsBuffer} = universe;
         const start = performance.now();
         this.generation++;
 
         // Draw killed cells
         shadowCtx.beginPath();
-        const killed = universe.killed();
-        for (let i = 0; i < killed.length; i += 2) {
-            const row = killed[i] * block;
-            const col = killed[i + 1] * block;
+        for (let i = 0; i < killed; i++) {
+            const cord = killedCellsBuffer[i];
+            const row = (cord >> 16) * block;
+            const col = (cord & 65535) * block;
             shadowCtx.rect(col, row, blockSize, blockSize);
         }
 
@@ -260,10 +262,10 @@ export class Engine {
 
         // Draw living cells
         shadowCtx.beginPath();
-        const resurrected = universe.resurrected();
-        for (let i = 0; i < resurrected.length; i += 2) {
-            const row = resurrected[i] * block;
-            const col = resurrected[i + 1] * block;
+        for (let i = 0; i < resurrected; i++) {
+            const cord = resurrectedCellsBuffer[i];
+            const row = (cord >> 16) * block;
+            const col = (cord & 65535) * block;
             shadowCtx.rect(col, row, blockSize, blockSize);
         }
 
@@ -272,8 +274,8 @@ export class Engine {
 
         // Transfer changes to graph-worker
         this.graphicalWorker.commit('update',
-            killed.length / 2,
-            resurrected.length / 2
+            killed,
+            resurrected
         );
 
         universe.nextGen();
@@ -281,7 +283,7 @@ export class Engine {
         return performance.now() - start;
     }
 
-    public async limitFPS(limit: number | null): Promise<void> {
+    public limitFPS(limit: number | null) {
         if (limit !== null && limit <= 0) {
             throw new Error(`FPS Cannot be limited to a negative number or zero (got ${limit})`);
         }
@@ -289,11 +291,11 @@ export class Engine {
         this.fpsLimit = limit;
     }
 
-    public async getGeneration(): Promise<number> {
+    public getGeneration(): number {
         return this.generation;
     }
 
-    public async getFrameRate(): Promise<number> {
+    public getFrameRate(): number {
         let total = 0;
 
         for (let i = 0; i < Engine.FPS_BUFFER; i++) {
@@ -303,7 +305,7 @@ export class Engine {
         return ~~(1000 / (total / Engine.FPS_BUFFER));
     }
 
-    public async transform(t: Transformation): Promise<void> {
+    public transform(t: Transformation): void {
         const {ctx, shadowCanvas, env} = this;
         const {width, height} = env;
         ctx.fillStyle = 'white';
@@ -348,11 +350,11 @@ export class Engine {
         }
     }
 
-    public async updateRuleset(resurrect: number, survive: number): Promise<void> {
+    public updateRuleset(resurrect: number, survive: number): void {
         this.universe.setRuleset(resurrect, survive);
     }
 
-    public async setGraphCanvas(canvas: OffscreenCanvas): Promise<void> {
+    public setGraphCanvas(canvas: OffscreenCanvas): void {
         this.graphicalWorker.commit('setCanvas', transfer(canvas));
     }
 }
