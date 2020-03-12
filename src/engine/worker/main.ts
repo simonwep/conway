@@ -15,6 +15,7 @@ export type Environment = {
     cols: number;
     rows: number;
     scale: number;
+    blockSize: number;
     preScaleWidth: number;
     preScaleHeight: number;
 };
@@ -150,6 +151,7 @@ export class Engine {
             preScaleWidth: realWidth / blockSize,
             preScaleHeight: realHeight / blockSize,
             scale: blockSize,
+            blockSize,
             rows,
             cols
         };
@@ -303,8 +305,8 @@ export class Engine {
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
-    public async updateConfig(config: Config): Promise<void> {
-        this.env = Engine.configToEnv(config);
+    public async updateConfig(config: Partial<Config>): Promise<void> {
+        this.env = Engine.configToEnv({...this.env, ...config});
         const {env, canvas, shadowCanvas, shadowCtx, ctx, running} = this;
         const {width, height} = env;
 
