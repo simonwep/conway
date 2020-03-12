@@ -146,25 +146,42 @@ impl Universe {
                 tar[cell_index] = next;
 
                 // Save pixel
-                if cell != next {
-                    let image_data_index = (image_data_offset + (col - 1)) * 4;
+                let pixel_index = (image_data_offset + (col - 1)) * 4;
 
-                    // Save changed cell
+                if cell != next {
                     match next {
                         true => {
                             self.resurrected_cells += 1;
-                            image_data[image_data_index] = 0;
-                            image_data[image_data_index + 1] = 0;
-                            image_data[image_data_index + 2] = 0;
+                            image_data[pixel_index] = 0;
+                            image_data[pixel_index + 1] = 255;
+                            image_data[pixel_index + 2] = 0;
                         }
                         false => {
                             self.killed_cells += 1;
-                            image_data[image_data_index] = 255;
-                            image_data[image_data_index + 1] = 255;
-                            image_data[image_data_index + 2] = 255;
+                            image_data[pixel_index] = 255;
+                            image_data[pixel_index + 1] = 255;
+                            image_data[pixel_index + 2] = 255;
                         }
                     };
-                };
+                } else if next {
+                    // The color of the cell determines its age.
+                    // It goes from green over blue / turquoise to red
+                    let (r, g, b) = (
+                        image_data[pixel_index],
+                        image_data[pixel_index + 1],
+                        image_data[pixel_index + 2],
+                    );
+
+                    if r == 0 && g == 255 && b < 255 {
+                        image_data[pixel_index + 2] += 3;
+                    } else if r == 0 && g > 0 && b == 255 {
+                        image_data[pixel_index + 1] -= 3;
+                    } else if r < 255 && g == 0 && b == 255 {
+                        image_data[pixel_index] += 3;
+                    } else if r == 255 && g == 0 && b > 0 {
+                        image_data[pixel_index + 2] -= 3;
+                    }
+                }
             }
         }
     }
