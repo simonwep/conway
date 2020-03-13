@@ -65,7 +65,7 @@ function resolveArguments(args: Array<unknown>): [Array<unknown>, Array<Transfer
 // Used to give each request a unique id
 let requestIndex = 0;
 
-export class ActorInstance {
+export class ActorInstance<T extends Record<string | symbol | number, (...args: Array<unknown>) => unknown>> {
     private readonly requests: Map<number, [Function, Function]>;
     private readonly instanceId: number;
     private readonly worker: Worker;
@@ -105,7 +105,7 @@ export class ActorInstance {
      * @param fn
      * @param args
      */
-    public async call(fn: string, ...args: Array<unknown>): Promise<unknown> {
+    public async call<Func extends string, Args = Parameters<T[Func]>>(fn: Func, ...args: Array<Args>): Promise<ReturnType<T[Func]>> {
         return new Promise((resolve, reject) => {
             const [rawArgs, transferable] = resolveArguments(args);
             const id = requestIndex++;
@@ -128,7 +128,7 @@ export class ActorInstance {
      * Calls a function without expecting or returning its return-value.
      * It's faster than call since no promise needs to be fulfilled.
      */
-    public commit(fn: string, ...args: Array<unknown>): void {
+    public commit<Func extends keyof T, Args extends Parameters<T[Func]>>(fn: Func, ...args: Args): void {
         const [rawArgs, transferable] = resolveArguments(args);
 
         // Send data to worker
@@ -187,7 +187,7 @@ export class Actor {
      * @param name The classname
      * @param args Optional arguments passed to the factory-function or constructor
      */
-    public async create(name: string, ...args: Array<unknown>): Promise<ActorInstance> {
+    public async create<T extends {}>(name: string, ...args: Array<unknown>): Promise<ActorInstance<T>> {
         return new Promise((resolve, reject) => {
             const [rawArgs, transferable] = resolveArguments(args);
             const id = requestIndex++;

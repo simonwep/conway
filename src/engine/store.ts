@@ -1,7 +1,8 @@
 import {action, computed, observable} from 'mobx';
 import {ActorInstance}                from '../actor/actor.main';
-import {engine}                       from './';
+import {Engine}                       from './worker/main';
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 export default class Life {
     @observable public fps = 0;
     @observable public fpsLimitation: number | null = null;
@@ -12,15 +13,15 @@ export default class Life {
     @observable public zoomFactor = 1;
 
     // Engine to fetch data from
-    private source: ActorInstance | null = null;
+    private source: ActorInstance<Engine> | null = null;
 
     public constructor() {
         setInterval(async () => {
             const {source} = this;
 
             if (source) {
-                this.fps = await source.call('getFrameRate') as number;
-                this.generation = await source.call('getGeneration') as number;
+                this.fps = await source.call('getFrameRate');
+                this.generation = await source.call('getGeneration');
             }
         }, 1000);
     }
@@ -31,7 +32,7 @@ export default class Life {
     }
 
     @action
-    public setEngine(engine: ActorInstance): void {
+    public setEngine(engine: ActorInstance<Engine>): void {
         this.source = engine;
     }
 
@@ -43,31 +44,31 @@ export default class Life {
     @action
     public setFPSLimitation(num: number | null): void {
         this.fpsLimitation = num;
-        engine.call('limitFPS', num);
+        this.source!.call('limitFPS', num);
     }
 
     @action
     public updateSurviveRules(bitMap: number): void {
         this.surviveRules = bitMap;
-        engine.call('updateRuleset', this.resurrectRules, this.surviveRules);
+        this.source!.call('updateRuleset', this.resurrectRules, this.surviveRules);
     }
 
     @action
     public updateResurrectRules(bitMap: number): void {
         this.resurrectRules = bitMap;
-        engine.call('updateRuleset', this.resurrectRules, this.surviveRules);
+        this.source!.call('updateRuleset', this.resurrectRules, this.surviveRules);
     }
 
     public nextGeneration(): void {
-        engine.call('nextGeneration');
+        this.source!.call('nextGeneration');
     }
 
     public play(): void {
-        engine.call('play');
+        this.source!.call('play');
     }
 
     public pause(): void {
-        engine.call('pause');
+        this.source!.call('pause');
     }
 }
 

@@ -47,7 +47,7 @@ export class Engine {
     private readonly ctx: OffscreenCanvasRenderingContext2D;
 
     // Child-worker responsible for drawing the charts
-    private readonly graphicalWorker: ActorInstance;
+    private readonly graphicalWorker: ActorInstance<Graph>;
 
     // Rust wrapper
     private universe: UniverseWrapper;
@@ -70,7 +70,7 @@ export class Engine {
     private constructor(
         canvas: OffscreenCanvas,
         env: Environment,
-        graphicalWorker: ActorInstance,
+        graphicalWorker: ActorInstance<Graph>,
         universe: UniverseWrapper
     ) {
 
@@ -120,7 +120,7 @@ export class Engine {
             new Actor(new Worker(
                 './graph.ts',
                 {type: 'module'}
-            )).create('Graph'),
+            )).create<Graph>('Graph'),
 
             UniverseWrapper.new(
                 env.rows, env.cols,
@@ -240,7 +240,7 @@ export class Engine {
         requestAnimationFrame(renderLoop);
     }
 
-    public nextGeneration() {
+    public nextGeneration(): number {
         const {ctx, shadowCtx, shadowCanvas, universe, env} = this;
         const {width, height} = env;
         const start = performance.now();

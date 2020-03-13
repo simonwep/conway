@@ -5,10 +5,10 @@ import {resize}                         from './plugins/resize';
 import {Config, Engine}                 from './worker/main';
 
 // Engine instance
-export let engine: ActorInstance;
+export let engine: ActorInstance<Engine>;
 
 // Async way to retrieve the engine as soon as possible
-const engineMountListeners: Array<(engine: ActorInstance) => void> = [];
+const engineMountListeners: Array<(engine: ActorInstance<Engine>) => void> = [];
 export const getEngine = async (): Promise<typeof engine> => {
     return new Promise(resolve => {
         engineMountListeners.push(resolve);
@@ -28,7 +28,7 @@ export const init = async (): Promise<void> => {
     const current = engine = await new Actor(new Worker(
         './worker/main.ts',
         {type: 'module'}
-    )).create('Engine', transfer(offscreenCanvas), {
+    )).create<Engine>('Engine', transfer(offscreenCanvas), {
         blockSize,
         width: window.innerWidth,
         height: window.innerHeight
