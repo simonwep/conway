@@ -67,6 +67,10 @@ export class Engine {
     // FPS limiter, null means no limit
     private fpsLimit: number | null = null;
 
+    // Universe-config
+    private resurrectRules = 0b000001000;
+    private surviveRules = 0b000001100;
+
     private constructor(
         canvas: OffscreenCanvas,
         env: Environment,
@@ -159,11 +163,15 @@ export class Engine {
 
     public async recreateUniverse(): Promise<void> {
         const {rows, cols, preScaleWidth, preScaleHeight} = this.env;
+        const {resurrectRules, surviveRules} = this;
 
         this.universe = await UniverseWrapper.new(
             rows, cols,
             preScaleWidth, preScaleHeight
         );
+
+        // Apply config
+        this.universe.setRuleset(resurrectRules, surviveRules);
     }
 
     public pause(): void {
@@ -337,6 +345,8 @@ export class Engine {
     }
 
     public updateRuleset(resurrect: number, survive: number): void {
+        this.resurrectRules = resurrect;
+        this.surviveRules = survive;
         this.universe.setRuleset(resurrect, survive);
     }
 

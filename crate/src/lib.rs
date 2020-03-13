@@ -109,6 +109,7 @@ impl Universe {
                 + (src[bottom - 1] as u16 * 8)
                 + (src[bottom] as u16 * 1);
 
+            // TODO: Bug, some cells stay white forever
             for col in 1..(self.cols - 1) {
                 // Shift previously saved information to the left and make room
                 // For 3 additional bits (which will be used for the middle row).

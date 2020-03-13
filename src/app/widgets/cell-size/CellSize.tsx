@@ -21,7 +21,9 @@ export class CellSize extends Component {
         // TODO: Use custom-icons
         return (
             <VerticalNumberInput
-                class={styles.blockSize}
+                class={styles.cellSize}
+                increase={<button class={styles.largeBlock}/>}
+                decrease={<button class={styles.smallBlock}/>}
                 min={1}
                 max={10}
                 baseValue={2}

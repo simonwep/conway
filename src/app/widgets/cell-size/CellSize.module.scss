@@ -1,5 +1,25 @@
-.blockSize {
+.cellSize {
     position: absolute;
     bottom: 0;
     right: 0;
+}
+
+.largeBlock,
+.smallBlock {
+    @include size(14px);
+    background: var(--c-primary);
+    border-radius: 0.25em;
+    transition: all 0.3s;
+}
+
+.smallBlock {
+    transform: scale(0.75);
+
+    &:hover {
+        transform: scale(0.6);
+    }
+}
+
+.largeBlock:hover {
+    transform: scale(1.15);
 }
