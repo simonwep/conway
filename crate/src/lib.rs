@@ -90,12 +90,7 @@ impl Universe {
         // Swap source and target array
         self.swap = !self.swap;
 
-        // Update inner cells, the padding is used to prevent out-of-bounds access:
-        // O -> padding (always zero), X -> Cells which get updated
-        // O O O O O
-        // O X X X O
-        // O X X X O
-        // O O O O O
+        let mut mask: u16 = 0;
         for row in 1..(self.rows - 1) {
             let image_data_offset = (row - 1) * (self.cols - 2);
             let top = (row - 1) * self.cols + 1;
@@ -107,20 +102,20 @@ impl Universe {
             // TL TM X << X will be updated at each iteration (and others shifted to left)
             // ML MM X
             // BL BM X
-            let mut mask: u16 = (if src[top - 1] { 32 } else { 0 })
-                + (if src[top] { 4 } else { 0 })
-                + (if src[middle - 1] { 16 } else { 0 })
-                + (if src[middle] { 2 } else { 0 })
-                + (if src[bottom - 1] { 8 } else { 0 })
-                + (if src[bottom] { 1 } else { 0 });
+            mask = (src[top - 1] as u16 * 32)
+                + (src[top] as u16 * 4)
+                + (src[middle - 1] as u16 * 16)
+                + (src[middle] as u16 * 2)
+                + (src[bottom - 1] as u16 * 8)
+                + (src[bottom] as u16 * 1);
 
             for col in 1..(self.cols - 1) {
                 // Shift previously saved information to the left and make room
                 // For 3 additional bits (which will be used for the middle row).
                 mask = ((mask << 3) & 0b111111111)  // Make room for three more bits
-                    + (if src[top + col] { 4 } else { 0 }) // TR
-                    + (if src[middle + col] { 2 } else { 0 })  // MR
-                    + (if src[bottom + col] { 1 } else { 0 }); // BR
+                    + (src[top + col] as u16 * 4) // TR
+                    + (src[middle + col] as u16 * 2)  // MR
+                    + (src[bottom + col] as u16 * 1); // BR
 
                 // Count amount of living neighbors
                 let neighbors = (mask & 0b1)
