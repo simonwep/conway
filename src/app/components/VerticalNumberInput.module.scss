@@ -1,8 +1,14 @@
-.fpsLimiter {
-    @include flex(column, center, space-between);
+.verticalNumberInput {
+    @include inline-flex(column, center, space-between);
+    min-height: 5.55em;
 
     > p {
+        font-family: $font-family-display;
         cursor: ns-resize;
+    }
+
+    > div {
+        display: flex;
     }
 }
 

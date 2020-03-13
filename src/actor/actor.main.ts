@@ -107,7 +107,7 @@ export class ActorInstance<T extends Record<any, any>> {
      * @param fn
      * @param args
      */
-    public async call<Func extends string, Args = Parameters<T[Func]>>(fn: Func, ...args: Array<Args>): Promise<ReturnType<T[Func]>> {
+    public async call<Func extends keyof T, Args = Parameters<T[Func]>>(fn: Func, ...args: Array<Args>): Promise<ReturnType<T[Func]>> {
         return new Promise((resolve, reject) => {
             const [rawArgs, transferable] = resolveArguments(args);
             const id = requestIndex++;

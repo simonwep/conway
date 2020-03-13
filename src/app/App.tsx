@@ -2,6 +2,7 @@ import {Component, h}   from 'preact';
 import {JSXInternal}    from 'preact/src/jsx';
 import {bind}           from '../lib/preact-utils';
 import {LoadingOverlay} from './LoadingOverlay';
+import {CellSize}       from './widgets/cell-size/CellSize';
 import {Controls}       from './widgets/controls/Controls';
 import {Graph}          from './widgets/graph/Graph';
 import {LifeStats}      from './widgets/life-stats/LifeStats';
@@ -34,6 +35,7 @@ export class App extends Component<Props, State> {
                 <Controls/>
                 <Rules/>
                 <Graph/>
+                <CellSize/>
                 {!canvasInitialized ? <LoadingOverlay onLoaded={this.onLoaded}/> : ''}
             </div>
         );

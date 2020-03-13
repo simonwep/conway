@@ -6,7 +6,7 @@ import {Graph}                          from './graph';
 export type Config = {
     width: number;
     height: number;
-    blockSize: number;
+    cellSize: number;
 };
 
 export type Environment = {
@@ -15,7 +15,7 @@ export type Environment = {
     cols: number;
     rows: number;
     scale: number;
-    blockSize: number;
+    cellSize: number;
     preScaleWidth: number;
     preScaleHeight: number;
 };
@@ -137,21 +137,21 @@ export class Engine {
     }
 
     private static configToEnv(conf: Config): Environment {
-        const {width, height, blockSize} = conf;
+        const {width, height, cellSize} = conf;
 
         // Recalculate grid and canvas dimensions
-        const realWidth = width - width % blockSize;
-        const realHeight = height - height % blockSize;
-        const cols = realWidth / blockSize;
-        const rows = realHeight / blockSize;
+        const realWidth = width - width % cellSize;
+        const realHeight = height - height % cellSize;
+        const cols = realWidth / cellSize;
+        const rows = realHeight / cellSize;
 
         return {
             width: realWidth,
             height: realHeight,
-            preScaleWidth: realWidth / blockSize,
-            preScaleHeight: realHeight / blockSize,
-            scale: blockSize,
-            blockSize,
+            preScaleWidth: realWidth / cellSize,
+            preScaleHeight: realHeight / cellSize,
+            scale: cellSize,
+            cellSize,
             rows,
             cols
         };
@@ -308,7 +308,7 @@ export class Engine {
     public async updateConfig(config: Partial<Config>): Promise<void> {
         this.env = Engine.configToEnv({...this.env, ...config});
         const {env, canvas, shadowCanvas, shadowCtx, ctx, running} = this;
-        const {width, height} = env;
+        const {scale, width, height} = env;
 
         canvas.width = width;
         canvas.height = height;
@@ -322,6 +322,9 @@ export class Engine {
         shadowCtx.fillStyle = 'white';
         shadowCtx.fillRect(0, 0, width, height);
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
+
+        // Re-scale
+        this.ctx.scale(scale, scale);
 
         // Stop and re-create universe
         await this.stop();

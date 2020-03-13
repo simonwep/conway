@@ -4,32 +4,29 @@ import {JSXInternal}         from 'preact/src/jsx';
 import {bind}                from '../../../lib/preact-utils';
 import {life}                from '../../../store';
 import {VerticalNumberInput} from '../../components/VerticalNumberInput';
+import styles                from './CellSize.module.scss';
 import Element = JSXInternal.Element;
 
 @observer
-export class FPSLimiter extends Component {
+export class CellSize extends Component {
 
     @bind
     onChange(value: number): null | void {
-        const {fpsLimitation} = life;
-
-        if (fpsLimitation === null) {
-            return null;
-        }
-
-        life.setFPSLimitation(value);
+        life.setCellSize(value);
     }
 
     render(): Element {
-        const {fpsLimitation} = life;
+        const {cellSize} = life;
 
-        // TODO: Show whenever the fps-limit has been met or not
+        // TODO: Use custom-icons
         return (
             <VerticalNumberInput
+                class={styles.blockSize}
                 min={1}
-                baseValue={null}
+                max={10}
+                baseValue={2}
                 onChange={this.onChange}
-                useValue={fpsLimitation}
+                useValue={cellSize}
             />
         );
     }

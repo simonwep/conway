@@ -11,6 +11,7 @@ export default class Life {
     @observable public surviveRules = 0b000001100;
     @observable public resurrectRules = 0b000001000;
     @observable public zoomFactor = 1;
+    @observable public cellSize = 2;
 
     // Engine to fetch data from
     private source: ActorInstance<Engine> | null = null;
@@ -44,31 +45,45 @@ export default class Life {
     @action
     public setFPSLimitation(num: number | null): void {
         this.fpsLimitation = num;
-        this.source!.call('limitFPS', num);
+        this.source!.commit('limitFPS', num);
     }
 
     @action
     public updateSurviveRules(bitMap: number): void {
         this.surviveRules = bitMap;
-        this.source!.call('updateRuleset', this.resurrectRules, this.surviveRules);
+        this.source!.commit('updateRuleset', this.resurrectRules, this.surviveRules);
     }
 
     @action
     public updateResurrectRules(bitMap: number): void {
         this.resurrectRules = bitMap;
-        this.source!.call('updateRuleset', this.resurrectRules, this.surviveRules);
+        this.source!.commit('updateRuleset', this.resurrectRules, this.surviveRules);
+    }
+
+    @action
+    public setCellSize(size: number): void {
+        this.cellSize = size;
+
+        // Reset generation counter
+        this.generation = 0;
+        this.generationOffset = 0;
+
+        // Sync with worker
+        this.source!.commit('updateConfig', {
+            cellSize: size
+        });
     }
 
     public nextGeneration(): void {
-        this.source!.call('nextGeneration');
+        this.source!.commit('nextGeneration');
     }
 
     public play(): void {
-        this.source!.call('play');
+        this.source!.commit('play');
     }
 
     public pause(): void {
-        this.source!.call('pause');
+        this.source!.commit('pause');
     }
 }
 

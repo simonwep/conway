@@ -18,8 +18,6 @@ export const getEngine = async (): Promise<typeof engine> => {
 // Called only once to mount the canvas
 export const init = async (): Promise<void> => {
 
-    const blockSize = 1;
-
     // Prep offscreenCanvas
     const canvas = document.querySelector('body > canvas') as HTMLCanvasElement;
     const offscreenCanvas = canvas.transferControlToOffscreen();
@@ -29,7 +27,7 @@ export const init = async (): Promise<void> => {
         './worker/main.ts',
         {type: 'module'}
     )).create<Engine>('Engine', transfer(offscreenCanvas), {
-        blockSize,
+        cellSize: 2,
         width: window.innerWidth,
         height: window.innerHeight
     } as Config);
