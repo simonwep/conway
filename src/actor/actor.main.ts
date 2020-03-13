@@ -65,7 +65,9 @@ function resolveArguments(args: Array<unknown>): [Array<unknown>, Array<Transfer
 // Used to give each request a unique id
 let requestIndex = 0;
 
-export class ActorInstance<T extends Record<string | symbol | number, (...args: Array<unknown>) => unknown>> {
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export class ActorInstance<T extends Record<any, any>> {
     private readonly requests: Map<number, [Function, Function]>;
     private readonly instanceId: number;
     private readonly worker: Worker;

@@ -90,8 +90,8 @@ self.addEventListener('message', async ev => {
  * This class can be instantiated and used over the main-thread.
  * @param instantiationFunction Function used to create an instance.
  */
-export function actor(instantiationFunction?: string) {
-    return (constructor: Function) => {
+export function actor(instantiationFunction?: string): (c: Function) => void {
+    return (constructor: Function): void => {
 
         // Save class
         classes.set(constructor.name, {

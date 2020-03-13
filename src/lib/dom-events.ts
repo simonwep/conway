@@ -1,8 +1,12 @@
 type Methods = 'addEventListener' | 'removeEventListener';
 
+interface EventBinding {
+    (elements: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: Function, options?: object): Array<unknown>;
+}
+
 /* eslint-disable prefer-rest-params */
-function eventListener(method: Methods) {
-    return <T extends Function>(elements: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: T, options = {}) => {
+function eventListener(method: Methods): EventBinding {
+    return (elements: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: Function, options = {}): Array<unknown> => {
 
         // Normalize array
         if (elements instanceof HTMLCollection || elements instanceof NodeList) {
@@ -20,7 +24,7 @@ function eventListener(method: Methods) {
 
             for (const ev of events) {
                 /* eslint-disable @typescript-eslint/no-explicit-any */
-                action(ev, fn as any, {capture: false, ...options});
+                action(ev, fn as EventListener, {capture: false, ...options});
             }
         }
 

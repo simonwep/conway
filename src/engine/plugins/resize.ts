@@ -1,5 +1,6 @@
 import {ActorInstance} from '../../actor/actor.main';
 import {on}            from '../../lib/dom-events';
+import {Engine}        from '../worker/main';
 
 /**
  * Panning feature
@@ -8,10 +9,10 @@ import {on}            from '../../lib/dom-events';
  */
 export const resize = (
     canvas: HTMLCanvasElement,
-    current: ActorInstance
-) => {
+    current: ActorInstance<Engine>
+): void => {
     let timeout: unknown = 0;
-    on(window, 'resize', () => {
+    on(window, 'resize', (): void => {
         clearTimeout(timeout as number);
         timeout = setTimeout(async () => {
             await current.call('updateConfig', {

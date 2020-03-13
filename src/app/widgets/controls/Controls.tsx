@@ -1,9 +1,11 @@
 import {observer}        from 'mobx-react';
 import {Component, h}    from 'preact';
+import {JSXInternal}     from 'preact/src/jsx';
 import {bind, cn}        from '../../../lib/preact-utils';
 import {life}            from '../../../store';
 import * as widgetStyles from '../widget.module.scss';
 import * as styles       from './Controls.module.scss';
+import Element = JSXInternal.Element;
 
 type Props = {};
 type State = {
@@ -18,7 +20,7 @@ export class Controls extends Component<Props, State> {
     };
 
     @bind
-    toggleRunState() {
+    toggleRunState(): void {
         const {paused} = this.state;
 
         if (paused) {
@@ -34,11 +36,11 @@ export class Controls extends Component<Props, State> {
     }
 
     @bind
-    nextGeneration() {
+    nextGeneration(): void {
         life.nextGeneration();
     }
 
-    render() {
+    render(): Element {
 
         // TODO: Render gets called without args?
         const {paused} = this.state;

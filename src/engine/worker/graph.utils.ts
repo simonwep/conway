@@ -34,7 +34,7 @@ export function drawGrid(
     ctx: OffscreenCanvasRenderingContext2D,
     width: number,
     height: number
-) {
+): void {
     const gx = width / 2;
     const gy = height / 2;
     const gradient = ctx.createRadialGradient(gx, gy, 0, gx, gy, Math.max(width, height) * 0.75);

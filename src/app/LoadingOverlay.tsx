@@ -1,7 +1,9 @@
 import {Component, h} from 'preact';
+import {JSXInternal}  from 'preact/src/jsx';
 import {init}         from '../engine';
 import {random}       from '../lib/random';
 import styles         from './LoadingOverlay.module.scss';
+import Element = JSXInternal.Element;
 
 const frames = [
     [
@@ -44,7 +46,7 @@ export class LoadingOverlay extends Component<Props, State> {
         randomTarget: []
     };
 
-    componentDidMount() {
+    componentDidMount(): void {
         const start = performance.now() + 350 * 4;
 
         const interval = setInterval(() => {
@@ -56,12 +58,12 @@ export class LoadingOverlay extends Component<Props, State> {
         }, 250);
 
         // TODO: What about errors?
-        init().then(() => {
+        init().then((): void => {
 
             // Wait at lease two seconds to increase the perceived performance
             const remainingTime = Math.max(0, start - performance.now());
 
-            setTimeout(() => {
+            setTimeout((): void => {
 
                 clearInterval(interval);
                 const randomTarget = [];
@@ -82,14 +84,14 @@ export class LoadingOverlay extends Component<Props, State> {
                 });
 
                 // Wait until animation is over
-                setTimeout(() => {
+                setTimeout((): void => {
                     this.props.onLoaded();
                 }, 1500);
             }, remainingTime);
         });
     }
 
-    render(_: Props, {frameIndex, finish, randomTarget}: State) {
+    render(_: Props, {frameIndex, finish, randomTarget}: State): Element {
         const frame = frames[frameIndex];
 
         const tiles = frame.map((cell, index) => {

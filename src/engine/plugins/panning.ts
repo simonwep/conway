@@ -1,5 +1,6 @@
 import {ActorInstance} from '../../actor/actor.main';
 import {on}            from '../../lib/dom-events';
+import {Engine}        from '../worker/main';
 
 /**
  * Panning feature
@@ -8,8 +9,8 @@ import {on}            from '../../lib/dom-events';
  */
 export const panning = (
     canvas: HTMLCanvasElement,
-    current: ActorInstance
-) => {
+    current: ActorInstance<Engine>
+): void => {
     let scale = 1;
     const zoomFactor = 1.25;
     let x = 0, y = 0;
@@ -40,7 +41,7 @@ export const panning = (
 
     let dragging = false;
     let sx = 0, sy = 0;
-    on(canvas, 'mousemove', async (e: MouseEvent) => {
+    on(canvas, 'mousemove', (e: MouseEvent): void => {
         if (dragging && scale > 1) {
             x = Math.round(x + (e.pageX - sx));
             y = Math.round(y + (e.pageY - sy));
@@ -49,20 +50,20 @@ export const panning = (
             sy = e.pageY;
 
             // TODO: Lock on edges
-            await current.call('transform', {
+            current.call('transform', {
                 scale, x, y
             });
         }
     });
 
-    on(canvas, 'mousedown', (e: MouseEvent) => {
+    on(canvas, 'mousedown', (e: MouseEvent): void => {
         canvas.style.cursor = 'grabbing';
         dragging = true;
         sx = e.pageX;
         sy = e.pageY;
     });
 
-    on(canvas, ['mouseup', 'mouseleave'], () => {
+    on(canvas, ['mouseup', 'mouseleave'], (): void => {
         canvas.style.cursor = 'grab';
         dragging = false;
     });

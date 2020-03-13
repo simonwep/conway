@@ -1,9 +1,11 @@
 import {observer}        from 'mobx-react';
 import {Component, h}    from 'preact';
+import {JSXInternal}     from 'preact/src/jsx';
 import {bind, cn}        from '../../../lib/preact-utils';
 import {life}            from '../../../store';
 import * as widgetStyles from '../widget.module.scss';
 import * as styles       from './Rules.module.scss';
+import Element = JSXInternal.Element;
 
 type UpdateRulesFunction = (n: number) => () => void;
 
@@ -11,31 +13,31 @@ type UpdateRulesFunction = (n: number) => () => void;
 export class Rules extends Component {
 
     @bind
-    updateSurviveRules(index: number) {
-        return () => {
+    updateSurviveRules(index: number): () => void {
+        return (): void => {
             life.updateSurviveRules(life.surviveRules ^ (1 << index));
         };
     }
 
     @bind
-    updateResurrectRules(index: number) {
-        return () => {
+    updateResurrectRules(index: number): () => void {
+        return (): void => {
             life.updateResurrectRules(life.resurrectRules ^ (1 << index));
         };
     }
 
     @bind
-    inverseSurviveRules() {
+    inverseSurviveRules(): void {
         life.updateSurviveRules(~life.surviveRules);
     }
 
     @bind
-    inverseResurrectRules() {
+    inverseResurrectRules(): void {
         life.updateResurrectRules(~life.resurrectRules);
     }
 
-    generateNumberedList(fn: UpdateRulesFunction, rules: number) {
-        return [...new Array(10)].map((_, index) => {
+    generateNumberedList(fn: UpdateRulesFunction, rules: number): Array<Element> {
+        return [...new Array(10)].map((_, index): Element => {
             return <button onClick={fn(index)}
                            key={index}
                            data-bit-index={index}
@@ -47,7 +49,7 @@ export class Rules extends Component {
         });
     }
 
-    render() {
+    render(): Element {
         const {surviveRules, resurrectRules} = life;
         const surviveList = this.generateNumberedList(this.updateSurviveRules, surviveRules);
         const resurrectList = this.generateNumberedList(this.updateResurrectRules, resurrectRules);

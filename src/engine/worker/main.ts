@@ -260,7 +260,7 @@ export class Engine {
         return performance.now() - start;
     }
 
-    public limitFPS(limit: number | null) {
+    public limitFPS(limit: number | null): void {
         if (limit !== null && limit <= 0) {
             throw new Error(`FPS Cannot be limited to a negative number or zero (got ${limit})`);
         }

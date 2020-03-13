@@ -43,7 +43,7 @@ export function bind(target: Component<any, any>, propertyKey: string, descripto
         // the first time the prototype property is accessed for an instance,
         // define an instance property pointing to the bound function.
         // This effectively "caches" the bound prototype method as an instance property.
-        get() {
+        get(): any {
             const bound = descriptor.value.bind(this);
 
             Object.defineProperty(this, propertyKey, {

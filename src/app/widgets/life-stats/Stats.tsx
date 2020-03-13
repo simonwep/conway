@@ -1,25 +1,27 @@
 import {observer}        from 'mobx-react';
 import {Component, h}    from 'preact';
+import {JSXInternal}     from 'preact/src/jsx';
 import {bind, cn}        from '../../../lib/preact-utils';
 import {life}            from '../../../store';
 import Icon              from '../../components/Icon';
 import * as widgetStyles from '../widget.module.scss';
 import * as styles       from './Stats.module.scss';
+import Element = JSXInternal.Element;
 
 @observer
 export class Stats extends Component {
 
     @bind
-    resetGenerationCounter() {
+    resetGenerationCounter(): void {
         life.offsetGenerationCounter();
     }
 
     @bind
-    toggleFramerateLimiter() {
+    toggleFramerateLimiter(): void {
         life.setFPSLimitation(life.fpsLimitation === null ? 30 : null);
     }
 
-    render() {
+    render(): Element {
         const {fpsLimitation} = life;
 
         return (

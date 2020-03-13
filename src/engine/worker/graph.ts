@@ -30,7 +30,7 @@ export class Graph {
         }
     }
 
-    private render(killed: number, resurrected: number) {
+    private render(killed: number, resurrected: number): void {
         const {canvas, ctx, buffer} = this;
 
         if (!canvas || !ctx) {
@@ -85,7 +85,7 @@ export class Graph {
          * @param offset Array offset, where to start
          * @param step
          */
-        const drawLineChart = (color: string, offset: number, step: number) => {
+        const drawLineChart = (color: string, offset: number, step: number): void => {
             ctx.strokeStyle = color;
             ctx.beginPath();
 

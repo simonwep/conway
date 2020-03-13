@@ -1,10 +1,12 @@
 import {observer}                from 'mobx-react';
 import {Component, createRef, h} from 'preact';
+import {JSXInternal}             from 'preact/src/jsx';
 import {transfer}                from '../../../actor/actor.main';
 import {getEngine}               from '../../../engine';
 import {cn}                      from '../../../lib/preact-utils';
 import * as widgetStyles         from '../widget.module.scss';
 import * as styles               from './Graph.module.scss';
+import Element = JSXInternal.Element;
 
 @observer
 export class Graph extends Component {
@@ -18,7 +20,7 @@ export class Graph extends Component {
         });
     }
 
-    render() {
+    render(): Element {
         return (
             <div className={cn(
                 widgetStyles.widget,

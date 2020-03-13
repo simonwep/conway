@@ -1,10 +1,12 @@
 import {Component, h}   from 'preact';
+import {JSXInternal}    from 'preact/src/jsx';
 import {bind}           from '../lib/preact-utils';
 import {LoadingOverlay} from './LoadingOverlay';
 import {Controls}       from './widgets/controls/Controls';
 import {Graph}          from './widgets/graph/Graph';
 import {LifeStats}      from './widgets/life-stats/LifeStats';
 import {Rules}          from './widgets/rules/Rules';
+import Element = JSXInternal.Element;
 
 type Props = {};
 type State = {
@@ -18,14 +20,14 @@ export class App extends Component<Props, State> {
     };
 
     @bind
-    onLoaded() {
+    onLoaded(): void {
         this.setState({
             ...this.state,
             canvasInitialized: true
         });
     }
 
-    render(_: Props, {canvasInitialized}: State) {
+    render(_: Props, {canvasInitialized}: State): Element {
         return (
             <div>
                 <LifeStats/>

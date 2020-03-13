@@ -1,25 +1,27 @@
 import {observer}        from 'mobx-react';
 import {Component, h}    from 'preact';
+import {JSXInternal}     from 'preact/src/jsx';
 import {bind, cn}        from '../../../lib/preact-utils';
 import {life}            from '../../../store';
 import * as widgetStyles from '../widget.module.scss';
 import * as styles       from './FPSLimiter.module.scss';
+import Element = JSXInternal.Element;
 
 @observer
 export class FPSLimiter extends Component {
 
     @bind
-    increaseLimit(e: MouseEvent) {
+    increaseLimit(e: MouseEvent): void {
         this.updateLimit(e, false);
     }
 
     @bind
-    decreaseLimit(e: MouseEvent) {
+    decreaseLimit(e: MouseEvent): void {
         this.updateLimit(e, true);
     }
 
     @bind
-    handleWheelEvent(e: WheelEvent) {
+    handleWheelEvent(e: WheelEvent): void {
         if (e.deltaY < 0) {
             this.increaseLimit(e);
         } else {
@@ -30,7 +32,7 @@ export class FPSLimiter extends Component {
     }
 
     @bind
-    updateLimit(event: MouseEvent, negative: boolean) {
+    updateLimit(event: MouseEvent, negative: boolean): void {
         const {fpsLimitation} = life;
 
         if (fpsLimitation === null) {
@@ -48,7 +50,7 @@ export class FPSLimiter extends Component {
         );
     }
 
-    render() {
+    render(): Element {
         const {fpsLimitation} = life;
 
         // TODO: Show whenever the fps-limit has been met or not
