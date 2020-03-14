@@ -9,7 +9,13 @@
 
     > div {
         display: flex;
+        transition: all 0.3s;
     }
+}
+
+.disabled {
+    pointer-events: none;
+    filter: grayscale(1);
 }
 
 .arrowUp,

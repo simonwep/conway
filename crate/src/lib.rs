@@ -90,7 +90,8 @@ impl Universe {
         // Swap source and target array
         self.swap = !self.swap;
 
-        let mut mask: u16 = 0;
+        let mut mask: u16;
+
         for row in 1..(self.rows - 1) {
             let image_data_offset = (row - 1) * (self.cols - 2);
             let top = (row - 1) * self.cols + 1;

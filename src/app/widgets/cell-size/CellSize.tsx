@@ -22,8 +22,8 @@ export class CellSize extends Component {
         return (
             <VerticalNumberInput
                 class={styles.cellSize}
-                increase={<button class={styles.largeBlock}/>}
-                decrease={<button class={styles.smallBlock}/>}
+                increase={<button className={styles.largeBlock}/>}
+                decrease={<button className={styles.smallBlock}/>}
                 min={1}
                 max={10}
                 baseValue={2}

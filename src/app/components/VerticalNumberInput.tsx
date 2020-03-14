@@ -100,8 +100,9 @@ export class VerticalNumberInput extends Component<Props, State> {
     }
 
     render(): Element {
-        const {increase, decrease, useValue} = this.props;
+        const {increase, decrease, useValue, shiftKey, ctrlKey, wheelStep, step, min, max} = this.props;
         const value = useValue === undefined ? this.state.value : useValue;
+        const minChange = Math.min(shiftKey, ctrlKey, wheelStep, step);
 
         return (
             <div className={cn(
@@ -110,9 +111,15 @@ export class VerticalNumberInput extends Component<Props, State> {
                 styles.verticalNumberInput,
                 {[widgetStyles.disabled]: value === null}
             )} onWheel={this.handleWheelEvent}>
-                <div onClick={this.increaseLimit}>{increase}</div>
+                <div onClick={this.increaseLimit} className={cn({
+                    [styles.disabled]: value !== null && (value + minChange) > max
+                })}>{increase}</div>
+
                 <p>{value === null ? '-' : value}</p>
-                <div onClick={this.decreaseLimit}>{decrease}</div>
+
+                <div onClick={this.decreaseLimit} className={cn({
+                    [styles.disabled]: value !== null && (value - minChange) < min
+                })}>{decrease}</div>
             </div>
         );
     }
