@@ -37,7 +37,7 @@ export class Rules extends Component {
     }
 
     generateNumberedList(fn: UpdateRulesFunction, rules: number): Array<Element> {
-        return [...new Array(10)].map((_, index): Element => {
+        return [...new Array(9)].map((_, index): Element => {
             return <button onClick={fn(index)}
                            key={index}
                            data-bit-index={index}
