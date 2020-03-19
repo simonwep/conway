@@ -1,33 +1,29 @@
 [package]
-name = "wasm_conways_game_of_life"
-description = "Rust code"
+name = "life"
 version = "0.0.0"
 authors = ["Simon Reinisch <trash@reinisch.io>"]
 edition = "2018"
-license = "MIT"
 
 [lib]
+name = "life"
+path = "src/lib.rs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-wasm-bindgen = "0.2.58"
-js-sys = "0.3"
+wasm-bindgen = "0.2.59"
+getrandom = { version="0.1.14", features = ["wasm-bindgen"]}
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
-console_error_panic_hook = { version = "0.1.6", optional = true }
+console_error_panic_hook = "0.1.6"
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. It is slower than the default
 # allocator, however.
-#
-# Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
-wee_alloc = { version = "0.4.2", optional = true }
-
-[dev-dependencies]
-wasm-bindgen-test = "0.3.8"
+wee_alloc = "0.4.5"
 
 [profile.release]
+lto = true
 opt-level = "s"

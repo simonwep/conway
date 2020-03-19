@@ -1,11 +1,9 @@
-extern crate js_sys;
-
+extern crate wee_alloc;
+use crate::utils::random_bool;
 use wasm_bindgen::prelude::*;
+mod utils;
 
-// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-// allocator.
-// Taken from https://github.com/rustwasm/wasm-pack-template/blob/master/src/lib.rs
-#[cfg(feature = "wee_alloc")]
+// Use `wee_alloc` as the global allocator.
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
@@ -47,7 +45,7 @@ impl Universe {
             let offset = row * cols;
 
             for col in 1..(cols - 1) {
-                if js_sys::Math::random() > 0.45 {
+                if random_bool(0.5) {
                     source[offset + col] = true;
 
                     // Toggle pixel
