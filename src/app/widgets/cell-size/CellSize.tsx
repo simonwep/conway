@@ -1,8 +1,8 @@
 import {observer}            from 'mobx-react';
 import {Component, h}        from 'preact';
-import {JSXInternal}         from 'preact/src/jsx';
-import {bind}                from '../../../lib/preact-utils';
-import {life}                from '../../../store';
+import {JSXInternal} from 'preact/src/jsx';
+import {bind, cn}    from '../../../lib/preact-utils';
+import {life}        from '../../../store';
 import {VerticalNumberInput} from '../../components/VerticalNumberInput';
 import styles                from './CellSize.module.scss';
 import Element = JSXInternal.Element;
@@ -16,9 +16,6 @@ export class CellSize extends Component {
     }
 
     render(): Element {
-        const {cellSize} = life;
-
-        // TODO: Use custom-icons
         return (
             <VerticalNumberInput
                 class={styles.cellSize}
@@ -28,7 +25,7 @@ export class CellSize extends Component {
                 max={10}
                 baseValue={2}
                 onChange={this.onChange}
-                useValue={cellSize}
+                useValue={life.cellSize}
             />
         );
     }

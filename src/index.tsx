@@ -7,7 +7,6 @@ render(
     document.getElementById('app') as HTMLElement
 );
 
-
 /* eslint-disable no-console */
 if (process.env.NODE_ENV === 'production') {
     navigator.serviceWorker.register(
@@ -18,3 +17,4 @@ if (process.env.NODE_ENV === 'production') {
         console.log('[SW] Registration failed:', reason);
     });
 }
+

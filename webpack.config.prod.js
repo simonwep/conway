@@ -127,6 +127,7 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: crate,
             extraArgs: '--target browser --mode normal',
+            args: "--log-level warn",
             forceMode: 'production'
         }),
 

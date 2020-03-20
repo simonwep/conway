@@ -22,6 +22,7 @@ module.exports = {
 
     devServer: {
         port: 3008,
+        liveReload: false,
         disableHostCheck: true,
         historyApiFallback: true,
         stats: 'errors-only',
@@ -125,6 +126,7 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: crate,
             extraArgs: '--target browser --mode normal',
+            args: "--log-level warn",
             forceMode: 'production'
         }),
 

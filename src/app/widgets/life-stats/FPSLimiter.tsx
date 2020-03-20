@@ -23,11 +23,10 @@ export class FPSLimiter extends Component {
     render(): Element {
         const {fpsLimitation} = life;
 
-        // TODO: Show whenever the fps-limit has been met or not
         return (
             <VerticalNumberInput
                 min={1}
-                baseValue={null}
+                baseValue={30}
                 onChange={this.onChange}
                 useValue={fpsLimitation}
             />
