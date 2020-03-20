@@ -8,8 +8,8 @@
     "scripts": {
         "debug:build": "webpack --debug --display-error-details --config webpack.config.prod.js",
         "debug:dev": "webpack-dev-server --debug --display-error-details --config webpack.config.dev.js",
-        "build": "webpack --config webpack.config.prod.js",
-        "dev": "webpack-dev-server --config webpack.config.dev.js",
+        "build": "webpack --config webpack.config.prod.js --progress",
+        "dev": "webpack-dev-server --config webpack.config.dev.js --progress",
         "lint:ts": "eslint src/ --ext .js,.ts,.tsx --fix",
         "lint:rs": "cd crate && cargo fmt",
         "lint:all": "run-p lint:ts lint:rs"
