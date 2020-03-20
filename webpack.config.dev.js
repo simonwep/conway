@@ -1,5 +1,6 @@
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const WorkerPlugin = require('worker-plugin');
 const webpack = require('webpack');
 const path = require('path');
@@ -25,7 +26,6 @@ module.exports = {
         historyApiFallback: true,
         stats: 'errors-only',
         host: '0.0.0.0',
-        liveReload: false,
         hot: true
     },
 
@@ -128,10 +128,13 @@ module.exports = {
             forceMode: 'production'
         }),
 
+        new CopyPlugin([{
+            context: 'src',
+            from: 'assets'
+        }]),
+
         new WorkerPlugin({
             globalObject: 'self'
-        }),
-
-        new webpack.HotModuleReplacementPlugin()
+        })
     ]
 };

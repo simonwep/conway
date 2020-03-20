@@ -1,4 +1,4 @@
-import {Actor, ActorInstance, transfer} from '../actor/actor.main';
+import {Actor, ActorInstance, transfer} from '../lib/actor/actor.main';
 import {life}                           from '../store';
 import {panning}                        from './plugins/panning';
 import {resize}                         from './plugins/resize';

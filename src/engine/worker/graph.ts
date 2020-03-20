@@ -1,4 +1,4 @@
-import {actor}                       from '../../actor/actor.worker';
+import {actor}                       from '../../lib/actor/actor.worker';
 import {calculateMaximums, drawGrid} from './graph.utils';
 
 @actor()

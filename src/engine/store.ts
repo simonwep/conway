@@ -1,5 +1,5 @@
 import {action, computed, observable} from 'mobx';
-import {ActorInstance}                from '../actor/actor.main';
+import {ActorInstance}                from '../lib/actor/actor.main';
 import {Engine}                       from './worker/main';
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */

@@ -1,5 +1,5 @@
-import {Actor, ActorInstance, transfer} from '../../actor/actor.main';
-import {actor}                          from '../../actor/actor.worker';
+import {Actor, ActorInstance, transfer} from '../../lib/actor/actor.main';
+import {actor}                          from '../../lib/actor/actor.worker';
 import {UniverseWrapper}                from '../wrapper';
 import {Graph}                          from './graph';
 

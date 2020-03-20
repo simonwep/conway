@@ -1,4 +1,4 @@
-import {ActorInstance} from '../../actor/actor.main';
+import {ActorInstance} from '../../lib/actor/actor.main';
 import {on}            from '../../lib/dom-events';
 import {Engine}        from '../worker/main';
 

@@ -3,7 +3,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const WorkerPlugin = require('worker-plugin');
 const webpack = require('webpack');
 const path = require('path');
@@ -20,7 +22,8 @@ module.exports = {
 
     output: {
         path: dist,
-        filename: '[name].[contenthash:8].bundle.js'
+        filename: 'js/[contenthash:8].bundle.js',
+        publicPath: '/'
     },
 
     resolve: {
@@ -106,7 +109,14 @@ module.exports = {
             filename: 'index.html',
             template: 'public/index.html',
             inject: true,
-            minify: true
+            minify: {
+                collapseWhitespace: true,
+                removeComments: true,
+                removeRedundantAttributes: true,
+                removeScriptTypeAttributes: true,
+                removeStyleLinkTypeAttributes: true,
+                useShortDoctype: true
+            }
         }),
 
         new MiniCssExtractPlugin({
@@ -120,7 +130,20 @@ module.exports = {
             forceMode: 'production'
         }),
 
-        new WorkerPlugin(),
+        new WorkerPlugin({
+            globalObject: 'self'
+        }),
+
+        new WorkboxPlugin.GenerateSW({
+            clientsClaim: true,
+            skipWaiting: true
+        }),
+
+        new CopyPlugin([{
+            context: 'src',
+            from: 'assets'
+        }]),
+
         new CleanWebpackPlugin()
     ]
 };
