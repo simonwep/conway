@@ -69,4 +69,8 @@ export class UniverseWrapper {
     public nextGen(): void {
         this.universe.next_gen();
     }
+
+    public setCell(x: number, y: number, state: boolean): void {
+        this.universe.set_cell(x, y, state);
+    }
 }

@@ -12,8 +12,11 @@
 </head>
 <body>
 
-<!-- GOL Canvas, independently managed -->
-<canvas></canvas>
+<!-- Main canvas - independently managed by a worker -->
+<canvas id="main-canvas"></canvas>
+
+<!-- Draw-overlay - managed by the main thread -->
+<canvas id="draw-overlay"></canvas>
 
 <!-- Application -->
 <div id="app"></div>

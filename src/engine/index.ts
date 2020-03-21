@@ -1,5 +1,6 @@
 import {Actor, ActorInstance, transfer} from '../lib/actor/actor.main';
 import {life}                           from '../store';
+import {draw}                           from './plugins/draw';
 import {panning}                        from './plugins/panning';
 import {resize}                         from './plugins/resize';
 import {Config, Engine}                 from './worker/main';
@@ -18,9 +19,12 @@ export const getEngine = async (): Promise<typeof engine> => {
 // Called only once to mount the canvas
 export const init = async (): Promise<void> => {
 
+    // Grab canvases
+    const overlayCanvas = document.getElementById('draw-overlay') as HTMLCanvasElement;
+    const mainCanvas = document.getElementById('main-canvas') as HTMLCanvasElement;
+
     // Prep offscreenCanvas
-    const canvas = document.querySelector('body > canvas') as HTMLCanvasElement;
-    const offscreenCanvas = canvas.transferControlToOffscreen();
+    const offscreenCanvas = mainCanvas.transferControlToOffscreen();
 
     // Mount worker
     const current = engine = await new Actor(new Worker(
@@ -39,8 +43,14 @@ export const init = async (): Promise<void> => {
     await current.call('play');
 
     // Launch modules
-    panning(canvas, current);
-    resize(canvas, current);
+    resize(mainCanvas, current);
+
+    // Drawing requires up-to-date data from how the canvas is transformed / scaled
+    draw(
+        panning(mainCanvas, current),
+        overlayCanvas,
+        current
+    );
 
     // Fire awaiting requests
     for (const req of engineMountListeners) {

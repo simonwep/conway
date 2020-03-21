@@ -201,4 +201,23 @@ impl Universe {
         self.resurrect_rules = resurrect;
         self.survive_rules = survive;
     }
+
+    pub fn set_cell(&mut self, x: usize, y: usize, state: bool) {
+        let pixel_index = (y * (self.cols - 2) + x) * 4;
+
+        // Update pixel
+        self.image_data[pixel_index] = if state { 0 } else { 255 };
+        self.image_data[pixel_index + 1] = 255;
+        self.image_data[pixel_index + 2] = if state { 0 } else { 255 };
+
+        // Update list
+        let vector_index = (y + 1) * self.cols + x + 1;
+        let source = if self.swap {
+            &mut self.target
+        } else {
+            &mut self.source
+        };
+
+        source[vector_index] = state;
+    }
 }

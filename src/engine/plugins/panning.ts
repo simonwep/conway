@@ -1,42 +1,59 @@
 import {ActorInstance} from '../../lib/actor/actor.main';
 import {on}            from '../../lib/dom-events';
+import {isKeyPressed}  from '../keyboard';
 import {Engine}        from '../worker/main';
 
-/**
- * Panning feature
- * @param canvas
- * @param current
- */
+export type PanningInfo = {
+    onZoomListeners: Array<Function>;
+    getTransformation(): {
+        scale: number;
+        x: number;
+        y: number;
+    };
+};
+
+// TODO: Create class-based plugins
 export const panning = (
     canvas: HTMLCanvasElement,
     current: ActorInstance<Engine>
-): void => {
+): PanningInfo => {
+    const onZoomListeners: Array<Function> = [];
+    const zoomFactor = 1.2; // TODO: Adjust zoom-rate
     let scale = 1;
-    const zoomFactor = 1.25;
     let x = 0, y = 0;
-    canvas.addEventListener('wheel', async e => {
+
+    const updateTransformation = (): void => {
+        current.commit('transform', {
+            scale, x, y
+        });
+
+        for (const listener of onZoomListeners) {
+            listener();
+        }
+    };
+
+    canvas.addEventListener('wheel', e => {
         const delta = (e.deltaY < 0 ? zoomFactor : 1 / zoomFactor);
 
         if (scale === 1 && scale * delta < 1) {
             return;
         }
 
-        scale *= delta;
+        scale = Math.round(scale * delta / 0.1) * 0.1;
         x = Math.round(e.pageX - (e.pageX - x) * delta);
         y = Math.round(e.pageY - (e.pageY - y) * delta);
 
         // Lock fullscreen
+        // TODO: Weird cursor behaviour
         if (scale === 1) {
-            canvas.style.cursor = 'default';
             x = 0;
             y = 0;
-        } else {
+            canvas.style.cursor = 'default';
+        } else if (isKeyPressed('Space')) {
             canvas.style.cursor = 'grab';
         }
 
-        await current.call('transform', {
-            scale, x, y
-        });
+        updateTransformation();
     });
 
     let dragging = false;
@@ -45,26 +62,30 @@ export const panning = (
         if (dragging && scale > 1) {
             x = Math.round(x + (e.pageX - sx));
             y = Math.round(y + (e.pageY - sy));
-
             sx = e.pageX;
             sy = e.pageY;
-
-            // TODO: Lock on edges
-            current.call('transform', {
-                scale, x, y
-            });
+            updateTransformation();
         }
     });
 
     on(canvas, 'mousedown', (e: MouseEvent): void => {
-        canvas.style.cursor = 'grabbing';
-        dragging = true;
-        sx = e.pageX;
-        sy = e.pageY;
+        if (isKeyPressed('Space')) {
+            canvas.style.cursor = 'grabbing';
+            dragging = true;
+            sx = e.pageX;
+            sy = e.pageY;
+        }
     });
 
     on(canvas, ['mouseup', 'mouseleave'], (): void => {
         canvas.style.cursor = 'grab';
         dragging = false;
     });
+
+    return {
+        onZoomListeners,
+        getTransformation(): {scale: number; x: number; y: number} {
+            return {scale, x, y};
+        }
+    };
 };

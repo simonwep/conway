@@ -353,5 +353,18 @@ export class Engine {
     public setGraphCanvas(canvas: OffscreenCanvas): void {
         this.graphicalWorker.commit('setCanvas', transfer(canvas));
     }
+
+    public setCell(x: number, y: number, state: boolean): void {
+        const {env, universe, shadowCtx, ctx, shadowCanvas} = this;
+        universe.setCell(x, y, state);
+
+        // Redraw
+        if (!this.running) {
+            const {width, height} = env;
+
+            shadowCtx.putImageData(universe.imageData, 0, 0);
+            ctx.drawImage(shadowCanvas, 0, 0, width, height);
+        }
+    }
 }
 
