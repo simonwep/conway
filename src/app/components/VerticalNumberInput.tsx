@@ -23,7 +23,6 @@ type Props = {
 
 type State = {
     value: number | null;
-
 };
 
 @observer
@@ -46,6 +45,11 @@ export class VerticalNumberInput extends Component<Props, State> {
     state = {
         value: 0
     };
+
+    constructor(props: Props) {
+        super();
+        this.state.value = props.baseValue || 0;
+    }
 
     @bind
     increaseLimit(e: MouseEvent): void {

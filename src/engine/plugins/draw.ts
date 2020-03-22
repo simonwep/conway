@@ -71,7 +71,7 @@ export const draw = (
 
         // Check if user wants to drag stuff around
         if (isKeyPressed('Space')) {
-           return;
+            return;
         }
 
         switch (e.button) {
