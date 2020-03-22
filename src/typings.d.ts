@@ -2,5 +2,8 @@ declare module '*.wasm';
 declare module '*.scss';
 declare module '*.svg';
 
-// Current environment
-declare const env: 'development' | 'production';
+// Environment
+declare const env: {
+    NODE_ENV: 'development' | 'production';
+    VERSION: string;
+};

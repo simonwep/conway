@@ -9,7 +9,9 @@ render(
 );
 
 /* eslint-disable no-console */
-if (process.env.NODE_ENV === 'production') {
+if (env.NODE_ENV === 'production') {
+    console.log(`[INFO] Launching app v${env.VERSION}`);
+
     navigator.serviceWorker.register(
         '/service-worker.js'
     ).then(() => {

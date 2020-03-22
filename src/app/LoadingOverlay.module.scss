@@ -9,6 +9,7 @@
         display: grid;
         grid-gap: 0.5vmin;
         grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr;
+        margin-top: auto;
     }
 
     &[data-finish=true] {
@@ -30,4 +31,12 @@
     &[data-active=true] {
         background: var(--c-primary);
     }
+}
+
+.bottomText {
+    @include font(500, 0.85em);
+    font-family: $font-family;
+    margin-top: auto;
+    margin-bottom: 0.5em;
+    color: var(--c-primary);
 }

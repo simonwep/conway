@@ -8,6 +8,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const WorkerPlugin = require('worker-plugin');
 const webpack = require('webpack');
+const pkg = require('./package');
 const path = require('path');
 
 const dist = path.resolve(__dirname, 'dist');
@@ -101,7 +102,10 @@ module.exports = {
 
     plugins: [
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('production')
+            'env': {
+                'NODE_ENV': JSON.stringify('production'),
+                'VERSION': JSON.stringify(pkg.version)
+            }
         }),
 
         // new BundleAnalyzerPlugin(),
@@ -127,7 +131,7 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: crate,
             extraArgs: '--target browser --mode normal',
-            args: "--log-level warn",
+            args: '--log-level warn',
             forceMode: 'production'
         }),
 
