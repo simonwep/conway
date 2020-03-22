@@ -1,7 +1,7 @@
-import {ActorInstance} from '../../lib/actor/actor.main';
-import {on}            from '../../lib/dom-events';
-import {isKeyPressed}  from '../keyboard';
-import {Engine}        from '../worker/main';
+import {ActorInstance}              from '../../lib/actor/actor.main';
+import {on}                         from '../../lib/dom-events';
+import {isKeyPressed, onKeyPressed} from '../keyboard';
+import {Engine}                     from '../worker/main';
 
 export type PanningInfo = {
     onZoomListeners: Array<Function>;
@@ -18,7 +18,7 @@ export const panning = (
     current: ActorInstance<Engine>
 ): PanningInfo => {
     const onZoomListeners: Array<Function> = [];
-    const zoomFactor = 1.2; // TODO: Adjust zoom-rate
+    const zoomFactor = 1.5; // TODO: Adjust zoom-rate
     let scale = 1;
     let x = 0, y = 0;
 
@@ -39,7 +39,7 @@ export const panning = (
             return;
         }
 
-        scale = Math.round(scale * delta / 0.1) * 0.1;
+        scale = Math.round(scale * delta / 0.5) * 0.5;
         x = Math.round(e.pageX - (e.pageX - x) * delta);
         y = Math.round(e.pageY - (e.pageY - y) * delta);
 
@@ -48,9 +48,6 @@ export const panning = (
         if (scale === 1) {
             x = 0;
             y = 0;
-            canvas.style.cursor = 'default';
-        } else if (isKeyPressed('Space')) {
-            canvas.style.cursor = 'grab';
         }
 
         updateTransformation();
@@ -70,7 +67,6 @@ export const panning = (
 
     on(canvas, 'mousedown', (e: MouseEvent): void => {
         if (isKeyPressed('Space')) {
-            canvas.style.cursor = 'grabbing';
             dragging = true;
             sx = e.pageX;
             sy = e.pageY;
@@ -78,8 +74,11 @@ export const panning = (
     });
 
     on(canvas, ['mouseup', 'mouseleave'], (): void => {
-        canvas.style.cursor = 'grab';
         dragging = false;
+    });
+
+    onKeyPressed('Space', state => {
+        canvas.style.cursor = state ? 'grab' : 'default';
     });
 
     return {

@@ -15,6 +15,10 @@ export const draw = (
         antialias: false
     }) as CanvasRenderingContext2D;
 
+    // Green for new cells :)
+    context.fillStyle = 'rgb(0, 255, 0)';
+    context.strokeStyle = 'rgb(0, 255, 0)';
+
     let apply = false;
     let prevX = 0, prevY = 0;
     const drawRect = (x: number = prevX, y: number = prevY): void => {
@@ -22,6 +26,7 @@ export const draw = (
 
         // Total scale
         const scale = transformation.scale * life.cellSize;
+        const roundedScale = Math.round(scale);
 
         // Relative transformation of each pixel
         const ox = (transformation.x % scale);
@@ -34,13 +39,13 @@ export const draw = (
         // Clear previous rect and draw new one
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        context.fillStyle = 'green';
-        context.fillRect(
-            Math.round(rx * scale + ox),
-            Math.round(ry * scale + oy),
-            Math.round(scale),
-            Math.round(scale)
-        );
+        // Draw cursor
+        const cx = Math.round(rx * scale + ox);
+        const cy = Math.round(ry * scale + oy + 0.5);
+        const th = Math.max(1, Math.ceil(scale / 10));
+        const th2 = th * 2;
+        context.fillRect(cx - th, cy - th, roundedScale + th2, roundedScale + th2);
+        context.clearRect(cx + th, cy + th, roundedScale - th2, roundedScale - th2);
 
         // Apply new pixel to life
         if (apply) {
@@ -59,6 +64,7 @@ export const draw = (
 
     on(canvas, ['mousedown', 'touchstart'], () => {
         apply = !isKeyPressed('Space');
+        drawRect();
     });
 
     on(canvas, ['mouseup', 'touchend', 'touchcancel'], () => {
@@ -72,13 +78,10 @@ export const draw = (
     const resize = (): void => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        drawRect(prevX, prevY);
+        drawRect();
     };
 
-    panning.onZoomListeners.push(() => {
-        drawRect(prevX, prevY);
-    });
-
+    panning.onZoomListeners.push(drawRect);
     on(window, 'resize', resize);
     resize();
 };
