@@ -1,6 +1,7 @@
 import {ActorInstance} from '../../lib/actor/actor.main';
 import {on}            from '../../lib/dom-events';
 import {life}          from '../../store';
+import {isKeyPressed}  from '../keyboard';
 import {Engine}        from '../worker/main';
 import {PanningInfo}   from './panning';
 
@@ -16,7 +17,7 @@ export const draw = (
 
     let apply = false;
     let prevX = 0, prevY = 0;
-    const drawRect = (x: number, y: number): void => {
+    const drawRect = (x: number = prevX, y: number = prevY): void => {
         const transformation = panning.getTransformation();
 
         // Total scale
@@ -26,30 +27,27 @@ export const draw = (
         const ox = (transformation.x % scale);
         const oy = (transformation.y % scale);
 
-        // Final coordinates
-        const bx = Math.round(x / scale) * scale + ox;
-        const by = Math.round(y / scale) * scale + oy;
+        // Resolve coordinates in current space
+        const rx = Math.floor((x - ox) / scale);
+        const ry = Math.floor((y - oy) / scale);
 
         // Clear previous rect and draw new one
         context.clearRect(0, 0, canvas.width, canvas.height);
 
+        context.fillStyle = 'green';
         context.fillRect(
-            Math.round(bx),
-            Math.round(by),
+            Math.round(rx * scale + ox),
+            Math.round(ry * scale + oy),
             Math.round(scale),
             Math.round(scale)
         );
 
         // Apply new pixel to life
         if (apply) {
-            const vx = x / scale;
-            const vy = y / scale;
-
-            // TODO: Buggy while zoomed in
             current.commit(
                 'setCell',
-                Math.floor(vx),
-                Math.floor(vy),
+                Math.floor(-transformation.x / scale + rx),
+                Math.floor(-transformation.y / scale + ry),
                 true
             );
         }
@@ -58,11 +56,15 @@ export const draw = (
         prevY = y;
     };
 
-    context.fillStyle = 'red';
 
-    // TODO: Add hotkey?
-    on(canvas, ['mousedown', 'touchstart'], () => apply = true);
-    on(canvas, ['mouseup', 'touchend', 'touchcancel'], () => apply = false);
+    on(canvas, ['mousedown', 'touchstart'], () => {
+        apply = !isKeyPressed('Space');
+    });
+
+    on(canvas, ['mouseup', 'touchend', 'touchcancel'], () => {
+        apply = false;
+    });
+
     on(canvas, 'mousemove', (e: MouseEvent) => {
         drawRect(e.pageX, e.pageY);
     });
