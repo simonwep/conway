@@ -5,6 +5,11 @@ import {isKeyPressed}  from '../keyboard';
 import {Engine}        from '../worker/main';
 import {PanningInfo}   from './panning';
 
+enum Mode {
+    Resurrect = 'Set',
+    Kill = 'Kill'
+}
+
 export const draw = (
     panning: PanningInfo,
     canvas: HTMLCanvasElement,
@@ -19,7 +24,7 @@ export const draw = (
     context.fillStyle = 'rgb(0, 255, 0)';
     context.strokeStyle = 'rgb(0, 255, 0)';
 
-    let apply = false;
+    let mode: Mode | null = null;
     let prevX = 0, prevY = 0;
     const drawRect = (x: number = prevX, y: number = prevY): void => {
         const transformation = panning.getTransformation();
@@ -48,12 +53,12 @@ export const draw = (
         context.clearRect(cx + th, cy + th, roundedScale - th2, roundedScale - th2);
 
         // Apply new pixel to life
-        if (apply) {
+        if (mode) {
             current.commit(
                 'setCell',
                 Math.floor(-transformation.x / scale + rx),
                 Math.floor(-transformation.y / scale + ry),
-                true
+                mode === Mode.Resurrect
             );
         }
 
@@ -62,13 +67,28 @@ export const draw = (
     };
 
 
-    on(canvas, ['mousedown', 'touchstart'], () => {
-        apply = !isKeyPressed('Space');
-        drawRect();
+    on(canvas, ['mousedown', 'touchstart'], (e: MouseEvent) => {
+
+        // Check if user wants to drag stuff around
+        if (isKeyPressed('Space')) {
+           return;
+        }
+
+        switch (e.button) {
+            case 0: {
+                mode = Mode.Resurrect;
+                drawRect();
+                break;
+            }
+            case 2: {
+                mode = Mode.Kill;
+                drawRect();
+            }
+        }
     });
 
     on(canvas, ['mouseup', 'touchend', 'touchcancel'], () => {
-        apply = false;
+        mode = null;
     });
 
     on(canvas, 'mousemove', (e: MouseEvent) => {

@@ -1,5 +1,6 @@
 import {h, render} from 'preact';
 import {App}       from './app/App';
+import {on}        from './lib/dom-events';
 import './styles/_global.scss';
 
 render(
@@ -18,3 +19,5 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
+// Disallow the context-menu entirely
+on(window, 'contextmenu', (e: MouseEvent) => e.preventDefault());
