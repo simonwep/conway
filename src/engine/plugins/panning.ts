@@ -66,7 +66,7 @@ export const panning = (
     });
 
     on(canvas, 'mousedown', (e: MouseEvent): void => {
-        if (isKeyPressed('Space')) {
+        if (isKeyPressed(' ')) {
             dragging = true;
             sx = e.pageX;
             sy = e.pageY;
@@ -77,7 +77,7 @@ export const panning = (
         dragging = false;
     });
 
-    onKeyPressed('Space', state => {
+    onKeyPressed(' ', state => {
         canvas.style.cursor = state ? 'grab' : 'default';
     });
 

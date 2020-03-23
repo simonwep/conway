@@ -60,7 +60,7 @@ export class KeyBinding extends Component<Props, State> {
             listener = [
 
                 on(window, 'keydown', (e: KeyboardEvent) => {
-                    const key = e.code;
+                    const key = !e.key.trim().length ? e.code : e.key; // TODO: Move to util
 
                     if (!keyNamesCopy.includes(key)) {
                         if (init) {
@@ -80,7 +80,7 @@ export class KeyBinding extends Component<Props, State> {
                 }),
 
                 on(window, 'keyup', (e: KeyboardEvent) => {
-                    const index = keyNamesCopy.indexOf(e.code);
+                    const index = keyNamesCopy.indexOf(e.key);
 
                     if (~index) {
                         keyNamesCopy.splice(index, 1);

@@ -11,13 +11,13 @@ const fireListenersFor = (key: string, state: boolean): void => {
 };
 
 window.addEventListener('keydown', e => {
-    fireListenersFor(e.code, true);
-    keysPressed.add(e.code);
+    fireListenersFor(e.key, true);
+    keysPressed.add(e.key);
 });
 
 window.addEventListener('keyup', e => {
-    fireListenersFor(e.code, false);
-    keysPressed.delete(e.code);
+    fireListenersFor(e.key, false);
+    keysPressed.delete(e.key);
 });
 
 export const isKeyPressed = (name: string): boolean => {

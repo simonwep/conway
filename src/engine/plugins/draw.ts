@@ -70,7 +70,7 @@ export const draw = (
     on(canvas, ['mousedown', 'touchstart'], (e: MouseEvent) => {
 
         // Check if user wants to drag stuff around
-        if (isKeyPressed('Space') || (e.target as HTMLElement).parentElement !== document.body) {
+        if (isKeyPressed(' ') || (e.target as HTMLElement).parentElement !== document.body) {
             return;
         }
 

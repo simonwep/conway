@@ -9,6 +9,10 @@ export type KeyboardShortcut = {
     binding: Array<string>;
 };
 
+export type KeyboardShortcutRegistration = KeyboardShortcut & {
+    callbacks?: Array<KeyboardShortcutListener>;
+};
+
 type InternalKeyboardShortcut = KeyboardShortcut & {
     callbacks: Array<KeyboardShortcutListener>;
 };
@@ -22,12 +26,28 @@ export class KeyboardShortcuts {
         const keys = new Set<string>();
 
         on(window, 'keydown', (e: KeyboardEvent) => {
-            keys.add(e.code);
+            const key = !e.key.trim().length ? e.code : e.key;
+
+            // Block default browser shortcuts
+            if (key === 'Control' || key === '+' || key === '-') {
+                e.preventDefault();
+            }
+
+            keys.add(key);
             KeyboardShortcuts.consume([...keys]);
         });
 
-        on(window, 'keyup', (e: KeyboardEvent) => keys.delete(e.code));
+        on(window, 'keyup', (e: KeyboardEvent) => keys.delete(e.key));
         on(window, 'blur', () => keys.clear());
+    }
+
+    @computed
+    get list(): Array<KeyboardShortcut> {
+        return this.listeners.map(value => ({
+            name: value.name,
+            description: value.description,
+            binding: [...value.binding]
+        }));
     }
 
     public static getInstance(): KeyboardShortcuts {
@@ -38,15 +58,6 @@ export class KeyboardShortcuts {
         }
 
         return this.instance;
-    }
-
-    @computed
-    get list(): Array<KeyboardShortcut> {
-        return this.listeners.map(value => ({
-            name: value.name,
-            description: value.description,
-            binding: [...value.binding]
-        }));
     }
 
     @action
@@ -91,7 +102,14 @@ export class KeyboardShortcuts {
     }
 
     @action
-    public register(name: string, description: string, binding: Array<string>, ...callbacks: Array<KeyboardShortcutListener>): void {
+    public register(
+        {
+            name,
+            description,
+            binding,
+            callbacks = []
+        }: KeyboardShortcutRegistration
+    ): void {
         const existing = this.listeners.find(value => value.name === name);
 
         if (existing) {
@@ -107,6 +125,13 @@ export class KeyboardShortcuts {
                 binding,
                 callbacks
             });
+        }
+    }
+
+    @action
+    public registerAll(registrations: Array<KeyboardShortcutRegistration>): void {
+        for (const reg of registrations) {
+            this.register(reg);
         }
     }
 

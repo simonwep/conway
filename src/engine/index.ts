@@ -57,12 +57,25 @@ export const init = async (): Promise<void> => {
         req(current);
     }
 
-    // Register keyboard-shortcut
-    shortcuts.register(
-        'play-pause',
-        'Pause / Resume Simulation',
-        ['Space'],
-        () => life.paused ? life.play() : life.pause()
-    );
-
+    // Register keyboard-shortcuts
+    shortcuts.registerAll([
+        {
+            name: 'play-pause',
+            description: 'Pause / Resume Simulation',
+            binding: ['Space'],
+            callbacks: [(): void => life.toggle()]
+        },
+        {
+            name: 'increase-cell-size',
+            description: 'Increase the cell-size',
+            binding: ['Control', '+'],
+            callbacks: [(): void => life.increaseCellSize()]
+        },
+        {
+            name: 'decrease-cell-size',
+            description: 'Decrease the cell-size',
+            binding: ['Control', '-'],
+            callbacks: [(): void => life.decreaseCellSize()]
+        }
+    ]);
 };

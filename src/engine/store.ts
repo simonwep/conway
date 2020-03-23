@@ -18,6 +18,7 @@ export class Life {
     private source: ActorInstance<Engine> | null = null;
 
     public constructor() {
+
         setInterval(async () => {
             const {source} = this;
 
@@ -75,18 +76,45 @@ export class Life {
         });
     }
 
+    @action
+    public increaseCellSize(): void {
+        const next = Math.max(1, Math.min(this.cellSize + 1, 10));
+        if (next !== this.cellSize) {
+            this.setCellSize(next);
+        }
+    }
+
+    @action
+    public decreaseCellSize(): void {
+        const next = Math.max(1, Math.min(this.cellSize - 1, 10));
+        if (next !== this.cellSize) {
+            this.setCellSize(next);
+        }
+    }
+
     public nextGeneration(): void {
         this.source!.commit('nextGeneration');
     }
 
+    @action
     public play(): void {
         this.source!.commit('play');
         this.paused = false;
     }
 
+    @action
     public pause(): void {
         this.source!.commit('pause');
         this.paused = true;
+    }
+
+    @action
+    public toggle(): void {
+        if (this.paused) {
+            this.play();
+        } else {
+            this.pause();
+        }
     }
 }
 
