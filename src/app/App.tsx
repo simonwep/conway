@@ -24,7 +24,6 @@ export class App extends Component<Props, State> {
     @bind
     onLoaded(): void {
         this.setState({
-            ...this.state,
             canvasInitialized: true
         });
     }

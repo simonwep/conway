@@ -1,0 +1,76 @@
+.keyBinding {
+    display: grid;
+    grid-template: 1fr / 1fr 1fr;
+    align-items: center;
+    grid-gap: 2em;
+
+
+    &:not(:first-child) {
+        margin-top: 0.75em;
+    }
+
+    p {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    &.recording {
+        .keys {
+            color: var(--c-red);
+            border-color: var(--c-red);
+            box-shadow: 0 0.1em 0.35em var(--c-red);
+
+            @include animate('0.75s ease-in-out infinite alternate') {
+                from {
+                    box-shadow: 0 0.1em 0.35em var(--c-red);
+                }
+                to {
+                    box-shadow: 0 0 0 var(--c-red);
+                }
+            }
+
+            button {
+                color: var(--c-red);
+                transform: none;
+            }
+        }
+    }
+}
+
+.keys {
+    @include flex(row, center);
+    @include font(500, 0.9em);
+    position: relative;
+    font-family: $font-family-display;
+    background: var(--c-primary-bg);
+    border: 1px solid var(--c-secondary-bg);
+    transition: all 0.3s;
+    border-radius: 0.15em;
+    padding: 0.5em 0.75em;
+    overflow: hidden;
+    cursor: pointer;
+    min-width: 15em;
+
+    &:hover {
+        button {
+            transform: none;
+        }
+    }
+
+    span {
+        text-transform: uppercase;
+    }
+
+    button {
+        @include font(600, 0.85em);
+        font-family: $font-family;
+        position: absolute;
+        padding: 0 0.75em;
+        height: 100%;
+        right: 0;
+        color: var(--c-primary);
+        background: var(--c-secondary-bg);
+        transform: translateX(100%);
+        transition: all 0.3s;
+    }
+}

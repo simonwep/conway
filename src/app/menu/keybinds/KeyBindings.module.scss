@@ -1,0 +1,4 @@
+.keyBindings {
+    @include flex(column);
+    flex-shrink: 0;
+}

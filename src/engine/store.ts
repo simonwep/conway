@@ -12,6 +12,7 @@ export class Life {
     @observable public resurrectRules = 0b000001000;
     @observable public zoomFactor = 1;
     @observable public cellSize = 2;
+    @observable public paused = false;
 
     // Engine to fetch data from
     private source: ActorInstance<Engine> | null = null;
@@ -80,10 +81,12 @@ export class Life {
 
     public play(): void {
         this.source!.commit('play');
+        this.paused = false;
     }
 
     public pause(): void {
         this.source!.commit('pause');
+        this.paused = true;
     }
 }
 

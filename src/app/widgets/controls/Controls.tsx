@@ -31,7 +31,6 @@ export class Controls extends Component<Props, State> {
         }
 
         this.setState({
-            ...this.state,
             paused: !paused
         });
     }

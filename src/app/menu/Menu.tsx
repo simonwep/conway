@@ -3,6 +3,7 @@ import {Component, h} from 'preact';
 import {JSXInternal}  from 'preact/src/jsx';
 import {bind, cn}     from '../../lib/preact-utils';
 import {menu}         from '../../store';
+import {KeyBindings}  from './keybinds/KeyBindings';
 import styles         from './Menu.module.scss';
 import Element = JSXInternal.Element;
 
@@ -23,9 +24,12 @@ export class Menu extends Component {
 
                     <div className={styles.menuHeader}>
                         <h2>Settings</h2>
-                        <div onClick={this.close}/>
+                        <button onClick={this.close}/>
                     </div>
 
+                    <div className={styles.content}>
+                        <KeyBindings/>
+                    </div>
                 </div>
             </div>
         );

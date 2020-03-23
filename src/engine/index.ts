@@ -1,5 +1,5 @@
 import {Actor, ActorInstance, transfer} from '../lib/actor/actor.main';
-import {life}                           from '../store';
+import {life, shortcuts}                from '../store';
 import {draw}                           from './plugins/draw';
 import {panning}                        from './plugins/panning';
 import {resize}                         from './plugins/resize';
@@ -56,4 +56,13 @@ export const init = async (): Promise<void> => {
     for (const req of engineMountListeners) {
         req(current);
     }
+
+    // Register keyboard-shortcut
+    shortcuts.register(
+        'play-pause',
+        'Pause / Resume Simulation',
+        ['Space'],
+        () => life.paused ? life.play() : life.pause()
+    );
+
 };

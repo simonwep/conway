@@ -1,6 +1,6 @@
 .wrapper {
     @include position(0, 0, 0, 0);
-    @include flex(column, center, center);
+    @include flex(row, center, center);
     margin: auto;
     position: fixed;
     z-index: 10;
@@ -16,37 +16,53 @@
 }
 
 .menu {
-    background: var(--c-secondary-bg);
+    @include flex(column);
+    background: var(--c-primary-bg);
     color: var(--c-text-secondary);
-    padding: 0.5em 1em;
     border-radius: 0.5em;
     font-family: $font-family;
 }
 
+.content {
+    padding: 1em;
+}
+
 .menuHeader {
     @include flex(row, center, space-between);
+    border-bottom: 1px solid var(--c-secondary-bg);
+    padding: 1em 1em;
 
     > h2 {
         @include font(300, 1.15em);
     }
 
-    > div {
+    > button {
         @include size(1em);
         position: relative;
         margin-left: 1em;
+        cursor: pointer;
 
         &::before,
         &::after {
             @include pseudo();
             @include size(100%, 2px);
-            background: var(--c-primary);
+            top: 0;
+            background: var(--c-text-primary);
             left: 50%;
             border-radius: 2em;
             transform: rotate(45deg);
+            transition: all 0.15s;
         }
 
         &::after {
             transform: rotate(-45deg);
+        }
+
+        &:hover {
+            &::before,
+            &::after {
+                background: var(--c-primary);
+            }
         }
     }
 }

@@ -1,12 +1,19 @@
 type Methods = 'addEventListener' | 'removeEventListener';
 
+export type EventBindingArgs = [
+    EventTarget | Array<EventTarget>,
+    string | Array<string>,
+    Function,
+    object?
+];
+
 interface EventBinding {
-    (elements: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: Function, options?: object): Array<unknown>;
+    (elements: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: Function, options?: object): EventBindingArgs;
 }
 
 /* eslint-disable prefer-rest-params */
 function eventListener(method: Methods): EventBinding {
-    return (elements: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: Function, options = {}): Array<unknown> => {
+    return (elements: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: Function, options = {}): EventBindingArgs => {
 
         // Normalize array
         if (elements instanceof HTMLCollection || elements instanceof NodeList) {
@@ -28,7 +35,7 @@ function eventListener(method: Methods): EventBinding {
             }
         }
 
-        return Array.prototype.slice.call(arguments, 1);
+        return [elements, events, fn, options];
     };
 }
 

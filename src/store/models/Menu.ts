@@ -2,7 +2,7 @@ import {action, observable} from 'mobx';
 import {Life}               from '../../engine/store';
 
 export class Menu {
-    @observable open = false;
+    @observable open = true;
     private life: Life;
 
     constructor(life: Life) {

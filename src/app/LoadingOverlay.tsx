@@ -52,7 +52,6 @@ export class LoadingOverlay extends Component<Props, State> {
         const interval = setInterval(() => {
             const next = this.state.frameIndex + 1;
             this.setState({
-                ...this.state,
                 frameIndex: (next + 1) > frames.length ? 0 : next
             });
         }, 250);
@@ -78,7 +77,6 @@ export class LoadingOverlay extends Component<Props, State> {
                 }
 
                 this.setState({
-                    ...this.state,
                     finish: true,
                     randomTarget
                 });
