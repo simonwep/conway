@@ -3,12 +3,16 @@ import {JSXInternal} from 'preact/src/jsx';
 import Element = JSXInternal.Element;
 
 const icons = new Map();
+
+/* eslint-disable @typescript-eslint/no-var-requires */
 const paths = require.context('../icons').keys();
 
 // Load icons dynamically
 for (const path of paths) {
     const nameWithExt = path.slice(2);
     const name = nameWithExt.slice(0, -4);
+
+    /* eslint-disable @typescript-eslint/no-var-requires */
     icons.set(name, require(`../icons/${nameWithExt}`));
 }
 

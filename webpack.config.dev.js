@@ -142,6 +142,8 @@ module.exports = {
 
         new WorkerPlugin({
             globalObject: 'self'
-        })
+        }),
+
+        new webpack.HotModuleReplacementPlugin()
     ]
 };
