@@ -14,11 +14,30 @@ type InternalKeyboardShortcut = KeyboardShortcut & {
 };
 
 export class KeyboardShortcuts {
-    private static instances: Array<KeyboardShortcuts> = [];
+    private static instance: KeyboardShortcuts | null = null;
     @observable private listeners: Array<InternalKeyboardShortcut> = [];
+    @observable private locked = false;
 
-    constructor() {
-        KeyboardShortcuts.instances.push(this);
+    private constructor() {
+        const keys = new Set<string>();
+
+        on(window, 'keydown', (e: KeyboardEvent) => {
+            keys.add(e.code);
+            KeyboardShortcuts.consume([...keys]);
+        });
+
+        on(window, 'keyup', (e: KeyboardEvent) => keys.delete(e.code));
+        on(window, 'blur', () => keys.clear());
+    }
+
+    public static getInstance(): KeyboardShortcuts {
+
+        // Initial setup
+        if (!this.instance) {
+            this.instance = new KeyboardShortcuts();
+        }
+
+        return this.instance;
     }
 
     @computed
@@ -33,23 +52,27 @@ export class KeyboardShortcuts {
     @action
     public static consume(state: Array<string>): void {
         const pressedKeys = state.length;
+        const inst = this.getInstance();
 
-        for (const inst of KeyboardShortcuts.instances) {
-            listeners: for (const {binding, callbacks} of inst.listeners) {
+        // Skip locked instances
+        if (inst.locked) {
+            return;
+        }
 
-                if (binding.length === pressedKeys) {
+        listeners: for (const {binding, callbacks} of inst.listeners) {
 
-                    // Check if shortcut matches the binding
-                    for (let i = 0; i < pressedKeys; i++) {
-                        if (!binding.includes(state[i])) {
-                            continue listeners;
-                        }
+            if (binding.length === pressedKeys) {
+
+                // Check if shortcut matches the binding
+                for (let i = 0; i < pressedKeys; i++) {
+                    if (!binding.includes(state[i])) {
+                        continue listeners;
                     }
+                }
 
-                    // Fire listener
-                    for (const cb of callbacks) {
-                        cb();
-                    }
+                // Fire listener
+                for (const cb of callbacks) {
+                    cb();
                 }
             }
         }
@@ -69,12 +92,22 @@ export class KeyboardShortcuts {
 
     @action
     public register(name: string, description: string, binding: Array<string>, ...callbacks: Array<KeyboardShortcutListener>): void {
-        this.listeners.push({
-            name,
-            description,
-            binding,
-            callbacks
-        });
+        const existing = this.listeners.find(value => value.name === name);
+
+        if (existing) {
+            Object.assign(existing, {
+                description,
+                binding,
+                callbacks: existing.callbacks.concat(callbacks)
+            });
+        } else {
+            this.listeners.push({
+                name,
+                description,
+                binding,
+                callbacks
+            });
+        }
     }
 
     @action
@@ -93,14 +126,14 @@ export class KeyboardShortcuts {
 
         this.listeners.splice(index, 1);
     }
+
+    @action
+    public lock(): void {
+        this.locked = true;
+    }
+
+    @action
+    public unlock(): void {
+        this.locked = false;
+    }
 }
-
-const keys = new Set<string>();
-
-on(window, 'keydown', (e: KeyboardEvent) => {
-    keys.add(e.code);
-    KeyboardShortcuts.consume([...keys]);
-});
-
-on(window, 'keyup', (e: KeyboardEvent) => keys.delete(e.code));
-on(window, 'blur', () => keys.clear());

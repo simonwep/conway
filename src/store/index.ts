@@ -4,4 +4,4 @@ import {Menu}              from './models/Menu';
 
 export const life = new Life();
 export const menu = new Menu(life);
-export const shortcuts = new KeyboardShortcuts();
+export const shortcuts = KeyboardShortcuts.getInstance();

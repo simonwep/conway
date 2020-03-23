@@ -6,26 +6,6 @@ import {KeyBinding}   from './KeyBinding';
 import styles         from './KeyBindings.module.scss';
 import Element = JSXInternal.Element;
 
-export type KeyBindingObj = {
-    description: string;
-    binding: Array<string>;
-};
-
-const availableBindings = [
-    {
-        description: 'Pause Simulation',
-        binding: ['Space']
-    },
-    {
-        description: 'Increase Cell Size',
-        binding: ['ControlLeft', 'R']
-    },
-    {
-        description: 'Decrease Cell Size',
-        binding: ['ControlLeft', 'F']
-    }
-];
-
 @observer
 export class KeyBindings extends Component {
     render(): Element {

@@ -39,6 +39,7 @@ export class KeyBinding extends Component<Props, State> {
         let {listener} = this.state;
 
         if (recording) {
+            shortcuts.unlock();
 
             // Unbind listeners
             for (const args of listener) {
@@ -51,6 +52,7 @@ export class KeyBinding extends Component<Props, State> {
                 this.state.keyNames
             );
         } else {
+            shortcuts.lock();
             let keyNamesCopy = [...this.state.keyNames];
             let init = true;
 

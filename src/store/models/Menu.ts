@@ -2,8 +2,9 @@ import {action, observable} from 'mobx';
 import {Life}               from '../../engine/store';
 
 export class Menu {
-    @observable open = true;
+    @observable public open = false;
     private life: Life;
+    private lifeWasPaused = false;
 
     constructor(life: Life) {
         this.life = life;
@@ -11,12 +12,16 @@ export class Menu {
 
     @action
     public show(): void {
-        this.life.pause();
+        this.lifeWasPaused = this.life.paused;
         this.open = true;
+        this.life.pause();
     }
 
     @action
     public hide(): void {
         this.open = false;
+        if (!this.lifeWasPaused) {
+            this.life.play();
+        }
     }
 }
