@@ -70,7 +70,7 @@ export const draw = (
     on(canvas, ['mousedown', 'touchstart'], (e: MouseEvent) => {
 
         // Check if user wants to drag stuff around
-        if (isKeyPressed('Space')) {
+        if (isKeyPressed('Space') || (e.target as HTMLElement).parentElement !== document.body) {
             return;
         }
 
@@ -91,9 +91,10 @@ export const draw = (
         mode = null;
     });
 
-    // TODO: Don't draw over child-elements
-    on(canvas, 'mousemove', (e: MouseEvent) => {
-        drawRect(e.pageX, e.pageY);
+    on(canvas, ['mousemove', 'touchmove'], (e: MouseEvent) => {
+        if ((e.target as HTMLElement).parentElement === document.body) {
+            drawRect(e.pageX, e.pageY);
+        }
     });
 
     const resize = (): void => {
