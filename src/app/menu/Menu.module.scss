@@ -1,0 +1,52 @@
+.wrapper {
+    @include position(0, 0, 0, 0);
+    @include flex(column, center, center);
+    margin: auto;
+    position: fixed;
+    z-index: 10;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+
+    &.open {
+        pointer-events: all;
+        background: rgba(black, 0.5);
+        opacity: 1;
+    }
+}
+
+.menu {
+    background: var(--c-secondary-bg);
+    color: var(--c-text-secondary);
+    padding: 0.5em 1em;
+    border-radius: 0.5em;
+    font-family: $font-family;
+}
+
+.menuHeader {
+    @include flex(row, center, space-between);
+
+    > h2 {
+        @include font(300, 1.15em);
+    }
+
+    > div {
+        @include size(1em);
+        position: relative;
+        margin-left: 1em;
+
+        &::before,
+        &::after {
+            @include pseudo();
+            @include size(100%, 2px);
+            background: var(--c-primary);
+            left: 50%;
+            border-radius: 2em;
+            transform: rotate(45deg);
+        }
+
+        &::after {
+            transform: rotate(-45deg);
+        }
+    }
+}

@@ -125,3 +125,11 @@
         opacity: 0.45;
     }
 }
+
+.settingsBtn {
+    @include size(1.35em);
+
+    svg {
+        fill: var(--c-primary);
+    }
+}

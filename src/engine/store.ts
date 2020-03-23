@@ -3,7 +3,7 @@ import {ActorInstance}                from '../lib/actor/actor.main';
 import {Engine}                       from './worker/main';
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-export default class Life {
+export class Life {
     @observable public fps = 0;
     @observable public fpsLimitation: number | null = null;
     @observable public generation = 0;

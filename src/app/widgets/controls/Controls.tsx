@@ -2,7 +2,8 @@ import {observer}        from 'mobx-react';
 import {Component, h}    from 'preact';
 import {JSXInternal}     from 'preact/src/jsx';
 import {bind, cn}        from '../../../lib/preact-utils';
-import {life}            from '../../../store';
+import {life, menu}      from '../../../store';
+import Icon              from '../../components/Icon';
 import * as widgetStyles from '../widget.module.scss';
 import * as styles       from './Controls.module.scss';
 import Element = JSXInternal.Element;
@@ -40,6 +41,11 @@ export class Controls extends Component<Props, State> {
         life.nextGeneration();
     }
 
+    @bind
+    showMenu(): void {
+        menu.show();
+    }
+
     render(): Element {
 
         // TODO: Render gets called without args?
@@ -51,6 +57,12 @@ export class Controls extends Component<Props, State> {
                     widgetStyles.widget,
                     styles.container
                 )}>
+
+                    <button className={styles.settingsBtn}
+                            onClick={this.showMenu}>
+                        <Icon name="settings"/>
+                    </button>
+                    <p/>
 
                     <button className={styles.playPauseBtn}
                             data-state={paused ? 'playing' : 'paused'}

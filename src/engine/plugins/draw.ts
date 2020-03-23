@@ -91,6 +91,7 @@ export const draw = (
         mode = null;
     });
 
+    // TODO: Don't draw over child-elements
     on(canvas, 'mousemove', (e: MouseEvent) => {
         drawRect(e.pageX, e.pageY);
     });
