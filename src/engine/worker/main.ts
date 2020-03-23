@@ -255,6 +255,7 @@ export class Engine {
         this.generation++;
 
         // Draw bitmap
+        universe.nextGen();
         shadowCtx.putImageData(universe.imageData, 0, 0);
 
         // Transfer changes to graph-worker
@@ -263,7 +264,6 @@ export class Engine {
             universe.resurrectedCells()
         );
 
-        universe.nextGen();
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
         return performance.now() - start;
     }
