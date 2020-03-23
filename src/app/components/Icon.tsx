@@ -1,23 +1,30 @@
 import {h}           from 'preact';
 import {JSXInternal} from 'preact/src/jsx';
-import lock          from '../icons/lock.svg';
-import reset         from '../icons/reset.svg';
-import settings      from '../icons/settings.svg';
 import Element = JSXInternal.Element;
 
-// TODO: Auto-load icons!
-const icons = {
-    settings,
-    reset,
-    lock
-};
+const icons = new Map();
+const paths = require.context('../icons').keys();
+
+// Load icons dynamically
+for (const path of paths) {
+    const nameWithExt = path.slice(2);
+    const name = nameWithExt.slice(0, -4);
+    icons.set(name, require(`../icons/${nameWithExt}`));
+}
+
 
 type Props = {
-    name: keyof typeof icons;
+    name: string;
 };
 
 export default ({name}: Props): Element => {
+    const svg = icons.get(name);
+
+    if (!svg) {
+        throw new Error(`Icon not found: ${name}`);
+    }
+
     return (
-        <div className="icon" dangerouslySetInnerHTML={{__html: icons[name]}}/>
+        <div className="icon" dangerouslySetInnerHTML={{__html: svg}}/>
     );
 };
