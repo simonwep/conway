@@ -59,6 +59,11 @@
 
     span {
         text-transform: uppercase;
+
+        code {
+            @include font(bolder, 1em, 0.01em);
+            padding: 0.25em 0.65em;
+        }
     }
 
     button {
