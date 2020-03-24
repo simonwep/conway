@@ -161,34 +161,12 @@ export class Engine {
         };
     }
 
-    public async recreateUniverse(): Promise<void> {
-        const {rows, cols, preScaleWidth, preScaleHeight} = this.env;
-        const {resurrectRules, surviveRules} = this;
-
-        this.universe = await UniverseWrapper.new(
-            rows, cols,
-            preScaleWidth, preScaleHeight
-        );
-
-        // Apply config
-        this.universe.setRuleset(resurrectRules, surviveRules);
-    }
-
     public pause(): void {
         this.running = false;
 
         // Cancel next frame
         if (this.activeAnimationFrame !== null) {
             cancelAnimationFrame(this.activeAnimationFrame);
-        }
-    }
-
-    public async stop(): Promise<void> {
-        this.pause();
-
-        // Free memory
-        if (this.universe) {
-            this.universe.free();
         }
     }
 
@@ -314,9 +292,10 @@ export class Engine {
     }
 
     public async updateConfig(config: Partial<Config>): Promise<void> {
-        this.env = Engine.configToEnv({...this.env, ...config});
-        const {env, canvas, shadowCanvas, shadowCtx, ctx, running} = this;
-        const {scale, width, height} = env;
+        const {universe, canvas, shadowCanvas, shadowCtx, ctx, running} = this;
+        const {rows, cols, preScaleWidth, preScaleHeight, scale, width, height} = (
+            this.env = Engine.configToEnv({...this.env, ...config})
+        );
 
         canvas.width = width;
         canvas.height = height;
@@ -326,17 +305,20 @@ export class Engine {
         // Restore option
         ctx.imageSmoothingEnabled = false;
 
-        // Clear
-        shadowCtx.fillStyle = 'white';
-        shadowCtx.fillRect(0, 0, width, height);
-        ctx.drawImage(shadowCanvas, 0, 0, width, height);
-
         // Re-scale
         this.ctx.scale(scale, scale);
 
-        // Stop and re-create universe
-        await this.stop();
-        await this.recreateUniverse();
+        // Pause and resize universe
+        this.pause();
+        universe.resize(
+            rows, cols,
+            preScaleWidth,
+            preScaleHeight
+        );
+
+        // Redraw
+        shadowCtx.putImageData(universe.imageData, 0, 0);
+        ctx.drawImage(shadowCanvas, 0, 0);
 
         // Auto-play if simulation was active
         if (running) {
@@ -355,15 +337,13 @@ export class Engine {
     }
 
     public setCell(x: number, y: number, state: boolean): void {
-        const {env, universe, shadowCtx, ctx, shadowCanvas} = this;
+        const {universe, shadowCtx, ctx, shadowCanvas} = this;
         universe.setCell(x, y, state);
 
         // Redraw
         if (!this.running) {
-            const {width, height} = env;
-
             shadowCtx.putImageData(universe.imageData, 0, 0);
-            ctx.drawImage(shadowCanvas, 0, 0, width, height);
+            ctx.drawImage(shadowCanvas, 0, 0);
         }
     }
 }

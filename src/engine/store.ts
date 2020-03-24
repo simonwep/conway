@@ -66,10 +66,6 @@ export class Life {
     public setCellSize(size: number): void {
         this.cellSize = size;
 
-        // Reset generation counter
-        this.generation = 0;
-        this.generationOffset = 0;
-
         // Sync with worker
         this.source!.commit('updateConfig', {
             cellSize: size

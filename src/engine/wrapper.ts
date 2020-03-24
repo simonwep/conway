@@ -3,9 +3,10 @@ import {Universe} from '../../crate/pkg';
 export class UniverseWrapper {
 
     // Bitmap
-    public readonly imageData: ImageData;
-    private readonly cols: number;
-    private readonly rows: number;
+    public imageData: ImageData;
+    private cols: number;
+    private rows: number;
+
     /* eslint-disable @typescript-eslint/no-explicit-any */
     private readonly wasm: any;
     private readonly universe: Universe;
@@ -47,6 +48,25 @@ export class UniverseWrapper {
             rows, cols, width, height,
             Universe.new(rows, cols),
             wasm
+        );
+    }
+
+    public resize(
+        rows: number,
+        cols: number,
+        width: number,
+        height: number
+    ): void {
+        this.universe.resize(rows, cols);
+        this.rows = rows;
+        this.cols = cols;
+
+        this.imageData = new ImageData(
+            new Uint8ClampedArray(
+                this.wasm.memory.buffer,
+                this.universe.image_data(),
+                this.universe.image_size()
+            ), width, height
         );
     }
 

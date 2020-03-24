@@ -1,5 +1,5 @@
 extern crate wee_alloc;
-use crate::utils::random_bool;
+use crate::utils::{copy_2d, random_bool};
 use wasm_bindgen::prelude::*;
 mod utils;
 
@@ -26,9 +26,9 @@ pub struct Universe {
 impl Universe {
     /// Creates a new game-of-life universe
     pub fn new(mut rows: usize, mut cols: usize) -> Universe {
-        // Bit-map with (r,g,b,a) values
-        let pixels = (rows * cols) * 4;
-        let mut image_data: Vec<u8> = (0..pixels).map(|_| 255 as u8).collect();
+        // Bit-map with (r, g, b, a) values
+        let image_size = (rows * cols) * 4;
+        let mut image_data: Vec<u8> = (0..image_size).map(|_| 255 as u8).collect();
 
         // Add padding
         cols += 2;
@@ -63,14 +63,45 @@ impl Universe {
             survive_rules: 0b000001100,
             resurrect_rules: 0b000001000,
             killed_cells: 0,
-            image_size: pixels,
             resurrected_cells,
+            image_size,
             image_data,
             cols,
             rows,
             source,
             target,
         }
+    }
+
+    /// Resize this universe
+    pub fn resize(&mut self, rows: usize, cols: usize) {
+        // Update amount of pixels
+        let new_image_size = (rows * cols) * 4;
+        let new_rows = rows + 2;
+        let new_cols = cols + 2;
+        let total_cells = new_cols * new_rows;
+
+        // Create new vectors and copy content into it
+        let mut new_image_data: Vec<u8> = (0..new_image_size).map(|_| 255 as u8).collect();
+        let mut new_target: Vec<bool> = (0..total_cells).map(|_| false).collect();
+        let mut new_source: Vec<bool> = (0..total_cells).map(|_| false).collect();
+
+        copy_2d(
+            &mut self.image_data,
+            &mut new_image_data,
+            (self.cols - 2) * 4,
+            cols * 4,
+        );
+
+        copy_2d(&mut self.target, &mut new_target, self.cols, new_cols);
+        copy_2d(&mut self.source, &mut new_source, self.cols, new_cols);
+
+        self.source = new_source;
+        self.target = new_target;
+        self.image_data = new_image_data;
+        self.rows = new_rows;
+        self.cols = new_cols;
+        self.image_size = new_image_size;
     }
 
     /// Calculates the next generation
@@ -89,7 +120,6 @@ impl Universe {
         self.swap = !self.swap;
 
         let mut mask: u16;
-
         for row in 1..(self.rows - 1) {
             let image_data_offset = (row - 1) * (self.cols - 2);
             let top = (row - 1) * self.cols + 1;
@@ -181,7 +211,7 @@ impl Universe {
         }
     }
 
-    pub fn image_data(&mut self) -> *const u8 {
+    pub fn image_data(&self) -> *const u8 {
         self.image_data.as_ptr()
     }
 
@@ -189,11 +219,11 @@ impl Universe {
         self.image_size
     }
 
-    pub fn killed_cells(&mut self) -> u32 {
+    pub fn killed_cells(&self) -> u32 {
         self.killed_cells
     }
 
-    pub fn resurrected_cells(&mut self) -> u32 {
+    pub fn resurrected_cells(&self) -> u32 {
         self.resurrected_cells
     }
 
