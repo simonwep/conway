@@ -29,7 +29,8 @@
             }
 
             button {
-                color: var(--c-red);
+                color: var(--c-text-secondary);
+                background: var(--c-red);
                 transform: none;
             }
         }
@@ -71,15 +72,17 @@
     }
 
     button {
-        @include font(600, 0.85em);
+        @include font(600, 0.8em);
         font-family: $font-family;
         position: absolute;
-        padding: 0 0.75em;
-        height: 100%;
+        padding: 0 1em;
+        height: calc(100% - 4px);
+        margin-right: 2px;
+        border-radius: 0.25em;
         right: 0;
-        color: var(--c-primary);
+        color: var(--c-text-primary);
         background: var(--c-secondary-bg);
-        transform: translateX(100%);
+        transform: translateX(120%);
         transition: all 0.3s;
     }
 }

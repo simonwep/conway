@@ -61,13 +61,13 @@ export class Rules extends Component {
             )}>
                 <header>
                     <button onClick={this.inverseSurviveRules}/>
-                    <h3>Cell survives with <code>n</code> neighbors:</h3>
+                    <p>Cell survives with <code>n</code> neighbors:</p>
                 </header>
                 <div>{surviveList}</div>
 
                 <header>
                     <button onClick={this.inverseResurrectRules}/>
-                    <h3>Resurrect cells with <code>n</code> neighbors:</h3>
+                    <p>Resurrect cells with <code>n</code> neighbors:</p>
                 </header>
                 <div>{resurrectList}</div>
             </div>

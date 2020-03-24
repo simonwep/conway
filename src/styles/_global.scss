@@ -44,6 +44,14 @@ body > canvas {
     margin: auto;
 }
 
+h2 {
+    @include font(400, 18px);
+}
+
+h3 {
+    @include font(500, 14px);
+}
+
 #app {
     user-select: none;
 
@@ -53,7 +61,7 @@ body > canvas {
     --c-primary: #388dff;
     --c-primary-accent: #87baff;
     --c-primary-bg: #fff;
-    --c-secondary-bg: #fff;
+    --c-secondary-bg: #edeef0;
 }
 
 // TODO: Add button to manually switch

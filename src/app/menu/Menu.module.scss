@@ -18,7 +18,7 @@
 .menu {
     @include flex(column);
     background: var(--c-primary-bg);
-    color: var(--c-text-secondary);
+    color: var(--c-text-primary);
     border-radius: 0.5em;
     font-family: $font-family;
 }
@@ -27,10 +27,6 @@
     @include flex(row, center, space-between);
     border-bottom: 1px solid var(--c-secondary-bg);
     padding: 1em 1em;
-
-    > h2 {
-        @include font(300, 1.15em);
-    }
 
     > button {
         @include size(1em);
@@ -83,6 +79,7 @@
 
         &.openPage {
             opacity: 1;
+            z-index: 2;
         }
     }
 }
@@ -99,6 +96,7 @@
 
         &.openTab {
             background: var(--c-primary);
+            color: var(--c-text-secondary);
         }
 
         &:hover:not(.openTab) {

@@ -43,7 +43,7 @@
             }
         }
 
-        > h3 {
+        > p {
             @include font(400, 1em);
             @include flex(row, center);
             color: var(--c-text-primary);
