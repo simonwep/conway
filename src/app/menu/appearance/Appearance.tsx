@@ -1,7 +1,7 @@
 import {observer}     from 'mobx-react';
 import {Component, h} from 'preact';
-import {JSXInternal} from 'preact/src/jsx';
-import styles        from './Appearance.module.scss';
+import {JSXInternal}  from 'preact/src/jsx';
+import styles         from './Appearance.module.scss';
 import Element = JSXInternal.Element;
 
 @observer

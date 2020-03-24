@@ -1,4 +1,24 @@
 .keyBindings {
     @include flex(column);
     flex-shrink: 0;
+    height: 100%;
+}
+
+.header {
+    display: grid;
+    grid-template: 1fr / 1fr 1fr;
+    align-items: center;
+    grid-gap: 2em;
+    flex-shrink: 0;
+    margin-bottom: 0.75em;
+
+    p {
+        font-size: 0.85em;
+    }
+}
+
+.list {
+    @include flex(column);
+    overflow: auto;
+    flex-grow: 1;
 }

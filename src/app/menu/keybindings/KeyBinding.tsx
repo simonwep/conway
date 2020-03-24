@@ -120,7 +120,7 @@ export class KeyBinding extends Component<Props, State> {
             // Prettify key-names
             return value.replace(/key/gi, '')
                 .replace(/Control(left)?/gi, 'ctrl');
-        }).map((value, index) => <code key={index}>{value}</code>);
+        }).map((value, index) => <span key={index}>{value}</span>);
 
         return (
             <div className={cn(styles.keyBinding, {
@@ -131,7 +131,7 @@ export class KeyBinding extends Component<Props, State> {
                 <div className={styles.keys}>
                     <span>{keys}</span>
                     <button onClick={this.toggleState}>
-                        {recording ? 'Stop' : 'Change'}
+                        {recording ? 'Update' : 'Edit Shortcut'}
                     </button>
                 </div>
             </div>

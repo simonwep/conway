@@ -4,7 +4,6 @@
     align-items: center;
     grid-gap: 2em;
 
-
     &:not(:first-child) {
         margin-top: 0.75em;
     }
@@ -60,9 +59,14 @@
     span {
         text-transform: uppercase;
 
-        code {
-            @include font(bolder, 1em, 0.01em);
-            padding: 0.25em 0.65em;
+        > span {
+            @include font(600, 1em, 0.01em);
+
+            &:not(:first-child)::before {
+                font-weight: 400;
+                margin: 0 0.25em;
+                content: '+';
+            }
         }
     }
 

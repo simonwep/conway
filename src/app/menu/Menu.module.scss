@@ -68,15 +68,17 @@
     padding: 1em;
 }
 
-.page {
+.pages {
     @include height(30vh, 5em, 50em);
     @include width(60vw, 20em, 50em);
     position: relative;
+    overflow: hidden;
 
     .pageWrapper {
         @include position(0, 0, 0, 0);
         transition: all 0.15s;
         position: absolute;
+        overflow: hidden;
         opacity: 0;
 
         &.openPage {

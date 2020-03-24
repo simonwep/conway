@@ -13,11 +13,17 @@ export class KeyBindings extends Component {
 
         return (
             <div className={styles.keyBindings}>
-                {
-                    list.map((value, index) => {
+
+                <div className={styles.header}>
+                    <p>Action</p>
+                    <p>Shortcut</p>
+                </div>
+
+                <div className={styles.list}>
+                    {list.map((value, index) => {
                         return <KeyBinding key={index} id={index} shortcut={value}/>;
-                    })
-                }
+                    })}
+                </div>
             </div>
         );
     }

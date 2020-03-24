@@ -15,14 +15,13 @@ type State = {
 
 @observer
 export class Menu extends Component<Props, State> {
+    state = {
+        currentPage: 'Key Bindings'
+    };
     private readonly pages = new Map([
         ['Key Bindings', (<KeyBindings key={1}/>)],
         ['Appearance', (<Appearance key={2}/>)]
     ]);
-
-    state = {
-        currentPage: 'Key Bindings'
-    };
 
     /* eslint-disable @typescript-eslint/no-var-requires */
     constructor() {
@@ -70,11 +69,9 @@ export class Menu extends Component<Props, State> {
             );
 
             pages.push(
-                <div className={styles.page}
+                <div className={cn(styles.pageWrapper, [styles.openPage, open])}
                      key={name}>
-                    <div className={cn(styles.pageWrapper, [styles.openPage, open])}>
-                        {page}
-                    </div>
+                    {page}
                 </div>
             );
         }
@@ -92,7 +89,7 @@ export class Menu extends Component<Props, State> {
 
                     <div className={styles.content}>
                         <div className={styles.navigation}>{navigation}</div>
-                        <div>{pages}</div>
+                        <div className={styles.pages}>{pages}</div>
                     </div>
                 </div>
             </div>
