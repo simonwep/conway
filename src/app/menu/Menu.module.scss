@@ -23,10 +23,6 @@
     font-family: $font-family;
 }
 
-.content {
-    padding: 1em;
-}
-
 .menuHeader {
     @include flex(row, center, space-between);
     border-bottom: 1px solid var(--c-secondary-bg);
@@ -63,6 +59,52 @@
             &::after {
                 background: var(--c-primary);
             }
+        }
+    }
+}
+
+.content {
+    @include flex(row);
+    padding: 1em;
+}
+
+.page {
+    @include height(30vh, 5em, 50em);
+    @include width(60vw, 20em, 50em);
+    position: relative;
+
+    .pageWrapper {
+        @include position(0, 0, 0, 0);
+        transition: all 0.15s;
+        position: absolute;
+        opacity: 0;
+
+        &.openPage {
+            opacity: 1;
+        }
+    }
+}
+
+.navigation {
+    @include flex(column);
+    padding-right: 1em;
+
+    button {
+        border-radius: 0.25em;
+        padding: 0.5em 0.75em;
+        color: var(--c-text-primary);
+        transition: all 0.3s;
+
+        &.openTab {
+            background: var(--c-primary);
+        }
+
+        &:hover:not(.openTab) {
+            background: var(--c-secondary-bg);
+        }
+
+        &:not(:first-child) {
+            margin-top: 0.75em;
         }
     }
 }

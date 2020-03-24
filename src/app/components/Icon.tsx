@@ -1,21 +1,18 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import {h}           from 'preact';
 import {JSXInternal} from 'preact/src/jsx';
 import Element = JSXInternal.Element;
 
 const icons = new Map();
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const paths = require.context('../icons').keys();
-
 // Load icons dynamically
-for (const path of paths) {
+const svgContext = require.context('../icons');
+for (const path of svgContext.keys()) {
     const nameWithExt = path.slice(2);
     const name = nameWithExt.slice(0, -4);
 
-    /* eslint-disable @typescript-eslint/no-var-requires */
     icons.set(name, require(`../icons/${nameWithExt}`));
 }
-
 
 type Props = {
     name: string;

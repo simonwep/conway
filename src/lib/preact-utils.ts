@@ -5,12 +5,21 @@ import {Component} from 'preact';
  * Utility to create a single class-name based on an object or array.
  * @param values
  */
-export function cn(...values: Array<string | {[key: string]: boolean}>): string {
+export function cn(...values: Array<string | {[key: string]: boolean} | Array<[string, boolean]>>): string {
     let str = '';
 
     for (const item of values) {
         switch (typeof item) {
             case 'object': {
+
+                if (Array.isArray(item)) {
+                    if (item[1]) {
+                        str += `${item[0]} `;
+                    }
+
+                    break;
+                }
+
                 for (const [key, val] of Object.entries(item)) {
                     if (val) {
                         str += `${key} `;
