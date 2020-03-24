@@ -20,7 +20,8 @@ pub fn copy_2d<T: Clone>(
     old_cols: usize,
     new_cols: usize,
 ) {
-    let min_limit = min(target.len(), source.len());
+    let source_len = source.len();
+    let target_len = target.len();
     let min_cols = min(old_cols, new_cols);
 
     for i in 0.. {
@@ -31,7 +32,7 @@ pub fn copy_2d<T: Clone>(
             let src_index = src_offset + col;
             let tar_index = tar_offset + col;
 
-            if tar_index < min_limit {
+            if tar_index < target_len && src_index < source_len {
                 target[tar_index] = source[src_index].clone();
             } else {
                 return;
