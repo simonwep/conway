@@ -92,9 +92,7 @@ export const draw = (
     });
 
     on(canvas, ['mousemove', 'touchmove'], (e: MouseEvent) => {
-        if ((e.target as HTMLElement).parentElement === document.body) {
-            drawRect(e.pageX, e.pageY);
-        }
+        drawRect(e.pageX, e.pageY);
     });
 
     const resize = (): void => {
