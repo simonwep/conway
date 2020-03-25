@@ -14,7 +14,6 @@ pub struct Universe {
     source: Vec<bool>,
     target: Vec<bool>,
     image_data: Vec<u8>,
-    image_size: usize,
     killed_cells: u32,
     resurrected_cells: u32,
     survive_rules: u16,
@@ -64,7 +63,6 @@ impl Universe {
             resurrect_rules: 0b000001000,
             killed_cells: 0,
             resurrected_cells,
-            image_size,
             image_data,
             cols,
             rows,
@@ -75,33 +73,39 @@ impl Universe {
 
     /// Resize this universe
     pub fn resize(&mut self, rows: usize, cols: usize) {
-        // Update amount of pixels
+        // Create new image bit-map and copy current one into it
         let new_image_size = (rows * cols) * 4;
-        let new_rows = rows + 2;
-        let new_cols = cols + 2;
-        let total_cells = new_cols * new_rows;
-
-        // Create new vectors and copy content into it
         let mut new_image_data: Vec<u8> = (0..new_image_size).map(|_| 255 as u8).collect();
-        let mut new_target: Vec<bool> = (0..total_cells).map(|_| false).collect();
-        let mut new_source: Vec<bool> = (0..total_cells).map(|_| false).collect();
 
         copy_2d(
             &mut self.image_data,
             &mut new_image_data,
             (self.cols - 2) * 4,
             cols * 4,
+            4,
+            0,
         );
 
-        copy_2d(&mut self.target, &mut new_target, self.cols, new_cols);
-        copy_2d(&mut self.source, &mut new_source, self.cols, new_cols);
+        // Create new source-cell-map and copy current source into it
+        let new_rows = rows + 2;
+        let new_cols = cols + 2;
+        let total_cells = new_cols * new_rows;
 
-        self.source = new_source;
-        self.target = new_target;
-        self.image_data = new_image_data;
+        let source = if self.swap {
+            &self.target
+        } else {
+            &self.source
+        };
+        let mut new_source: Vec<bool> = (0..total_cells).map(|_| false).collect();
+
+        copy_2d(source, &mut new_source, self.cols, new_cols, 1, 1);
+
+        self.swap = false;
         self.rows = new_rows;
         self.cols = new_cols;
-        self.image_size = new_image_size;
+        self.source = new_source;
+        self.target = (0..total_cells).map(|_| false).collect();
+        self.image_data = new_image_data;
     }
 
     /// Calculates the next generation
@@ -216,7 +220,7 @@ impl Universe {
     }
 
     pub fn image_size(&self) -> usize {
-        self.image_size
+        self.image_data.len()
     }
 
     pub fn killed_cells(&self) -> u32 {
