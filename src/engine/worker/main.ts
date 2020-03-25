@@ -232,15 +232,15 @@ export class Engine {
         const start = performance.now();
         this.generation++;
 
-        // Draw bitmap
-        universe.nextGen();
-        shadowCtx.putImageData(universe.imageData, 0, 0);
-
-        // Transfer changes to graph-worker
+        // Transfer previous changes to graph-worker
         this.graphicalWorker.commit('update',
             universe.killedCells(),
             universe.resurrectedCells()
         );
+
+        // Draw bitmap
+        universe.nextGen();
+        shadowCtx.putImageData(universe.imageData, 0, 0);
 
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
         return performance.now() - start;
