@@ -1,9 +1,8 @@
-import {ActorInstance} from '../../lib/actor/actor.main';
-import {on}            from '../../lib/dom-events';
-import {life}          from '../../store';
-import {isKeyPressed}  from '../keyboard';
-import {Engine}        from '../worker/main';
-import {PanningInfo}   from './panning';
+import {ActorInstance}   from '../../lib/actor/actor.main';
+import {on}              from '../../lib/dom-events';
+import {life, shortcuts} from '../../store';
+import {Engine}          from '../worker/main';
+import {PanningInfo}     from './panning';
 
 enum Mode {
     Resurrect = 'Set',
@@ -69,8 +68,11 @@ export const draw = (
 
     on(canvas, ['mousedown', 'touchstart'], (e: MouseEvent) => {
 
-        // Check if user wants to drag stuff around
-        if (isKeyPressed(' ') || (e.target as HTMLElement).parentElement !== document.body) {
+        // Check if user is currently dragging stuff around or clicked another element
+        if (
+            shortcuts.isActive('panning') ||
+            (e.target as HTMLElement).parentElement !== document.body
+        ) {
             return;
         }
 

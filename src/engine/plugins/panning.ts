@@ -1,7 +1,7 @@
-import {ActorInstance}              from '../../lib/actor/actor.main';
-import {on}                         from '../../lib/dom-events';
-import {isKeyPressed, onKeyPressed} from '../keyboard';
-import {Engine}                     from '../worker/main';
+import {ActorInstance} from '../../lib/actor/actor.main';
+import {on}            from '../../lib/dom-events';
+import {shortcuts}     from '../../store';
+import {Engine}        from '../worker/main';
 
 export type PanningInfo = {
     onZoomListeners: Array<Function>;
@@ -66,7 +66,7 @@ export const panning = (
     });
 
     on(canvas, 'mousedown', (e: MouseEvent): void => {
-        if (isKeyPressed(' ')) {
+        if (shortcuts.isActive('panning')) {
             dragging = true;
             sx = e.pageX;
             sy = e.pageY;
@@ -77,7 +77,13 @@ export const panning = (
         dragging = false;
     });
 
-    onKeyPressed(' ', state => {
+    shortcuts.register({
+        name: 'panning',
+        description: 'Drag with mouse',
+        binding: ['Control']
+    });
+
+    shortcuts.onChange('panning', state => {
         canvas.style.cursor = state ? 'grab' : 'default';
     });
 

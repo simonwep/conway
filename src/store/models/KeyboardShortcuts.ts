@@ -2,6 +2,7 @@ import {action, computed, observable} from 'mobx';
 import {on}                           from '../../lib/dom-events';
 
 export type KeyboardShortcutListener = () => void;
+export type KeyboardShortcutStateChangeListener = (state: boolean) => void;
 
 export type KeyboardShortcut = {
     name: string;
@@ -10,16 +11,19 @@ export type KeyboardShortcut = {
 };
 
 export type KeyboardShortcutRegistration = KeyboardShortcut & {
+    stateChange?: Array<KeyboardShortcutStateChangeListener>;
     callbacks?: Array<KeyboardShortcutListener>;
 };
 
-type InternalKeyboardShortcut = KeyboardShortcut & {
+type InternalKeyboardShortcut = Omit<KeyboardShortcut, 'name'> & {
+    stateChange: Array<KeyboardShortcutStateChangeListener>;
     callbacks: Array<KeyboardShortcutListener>;
+    active: boolean;
 };
 
 export class KeyboardShortcuts {
     private static instance: KeyboardShortcuts | null = null;
-    @observable private listeners: Array<InternalKeyboardShortcut> = [];
+    @observable private shortcuts: Map<string, InternalKeyboardShortcut> = new Map();
     @observable private locked = false;
 
     private constructor() {
@@ -37,17 +41,32 @@ export class KeyboardShortcuts {
             KeyboardShortcuts.consume([...keys]);
         });
 
-        on(window, 'keyup', (e: KeyboardEvent) => keys.delete(e.key));
-        on(window, 'blur', () => keys.clear());
+        on(window, 'keyup', (e: KeyboardEvent) => {
+            const key = !e.key.trim().length ? e.code : e.key;
+
+            keys.delete(key);
+            KeyboardShortcuts.consume([...keys]);
+        });
+
+        on(window, 'blur', () => {
+            keys.clear();
+            KeyboardShortcuts.consume([]);
+        });
     }
 
     @computed
     get list(): Array<KeyboardShortcut> {
-        return this.listeners.map(value => ({
-            name: value.name,
-            description: value.description,
-            binding: [...value.binding]
-        }));
+        const list = [];
+
+        for (const [name, item] of this.shortcuts.entries()) {
+            list.push({
+                name,
+                description: item.description,
+                binding: [...item.binding]
+            });
+        }
+
+        return list;
     }
 
     public static getInstance(): KeyboardShortcuts {
@@ -70,35 +89,43 @@ export class KeyboardShortcuts {
             return;
         }
 
-        listeners: for (const {binding, callbacks} of inst.listeners) {
+        for (const shortcut of inst.shortcuts.values()) {
+            const {active, binding, callbacks, stateChange} = shortcut;
+            let nowActive = binding.length === pressedKeys;
 
-            if (binding.length === pressedKeys) {
+            if (nowActive) {
 
                 // Check if shortcut matches the binding
                 for (let i = 0; i < pressedKeys; i++) {
                     if (!binding.includes(state[i])) {
-                        continue listeners;
+                        nowActive = false;
+                        break;
                     }
                 }
+            }
 
-                // Fire listener
-                for (const cb of callbacks) {
-                    cb();
+            // Check if state changed
+            if (active !== nowActive) {
+                shortcut.active = nowActive;
+
+                // Fire change listener
+                for (const cb of stateChange) {
+                    cb(nowActive);
+                }
+
+                // Fire normal listener if the shortcut is now active
+                if (nowActive) {
+                    for (const cb of callbacks) {
+                        cb();
+                    }
                 }
             }
         }
     }
 
-
     @action
     public updateBinding(name: string, binding: Array<string>): void {
-        const shortcut = this.listeners.find(value => value.name === name);
-
-        if (!shortcut) {
-            throw new Error(`No such shortcut: ${name}`);
-        }
-
-        shortcut.binding = binding;
+        this.getShortcut(name).binding = binding;
     }
 
     @action
@@ -107,23 +134,21 @@ export class KeyboardShortcuts {
             name,
             description,
             binding,
-            callbacks = []
+            callbacks = [],
+            stateChange = []
         }: KeyboardShortcutRegistration
     ): void {
-        const existing = this.listeners.find(value => value.name === name);
+        const existing = this.shortcuts.get(name);
 
         if (existing) {
-            Object.assign(existing, {
-                description,
-                binding,
-                callbacks: existing.callbacks.concat(callbacks)
-            });
+            throw new Error(`A shortcut with the name ${name} already exists`);
         } else {
-            this.listeners.push({
-                name,
+            this.shortcuts.set(name, {
+                active: false,
                 description,
                 binding,
-                callbacks
+                callbacks,
+                stateChange
             });
         }
     }
@@ -136,20 +161,8 @@ export class KeyboardShortcuts {
     }
 
     @action
-    public unregister(shortcut: number | string): void {
-        let index;
-
-        if (typeof shortcut === 'string') {
-            index = this.listeners.findIndex(v => v.name === shortcut);
-        } else {
-            index = shortcut;
-        }
-
-        if (index < 0 || index > this.listeners.length) {
-            throw new Error(`Invalid shortcut index ${index}`);
-        }
-
-        this.listeners.splice(index, 1);
+    public unregister(name: string): void {
+        this.shortcuts.delete(name);
     }
 
     @action
@@ -160,5 +173,53 @@ export class KeyboardShortcuts {
     @action
     public unlock(): void {
         this.locked = false;
+    }
+
+    @action
+    public onChange(name: string, cb: KeyboardShortcutStateChangeListener): void {
+        this.getShortcut(name).stateChange.push(cb);
+    }
+
+    @action
+    public on(name: string, cb: KeyboardShortcutListener): void {
+        this.getShortcut(name).callbacks.push(cb);
+    }
+
+    @action
+    public offChange(name: string, cb: KeyboardShortcutStateChangeListener): void {
+        const {stateChange} = this.getShortcut(name);
+        const index = stateChange.indexOf(cb);
+
+        if (~index) {
+            stateChange.push(cb);
+        } else {
+            throw new Error(`Tried to unbind a function which wasn't bind to ${name} in the first place.`);
+        }
+    }
+
+    @action
+    public off(name: string, cb: KeyboardShortcutListener): void {
+        const {callbacks} = this.getShortcut(name);
+        const index = callbacks.indexOf(cb);
+
+        if (~index) {
+            callbacks.push(cb);
+        } else {
+            throw new Error(`Tried to unbind a function which wasn't bind to ${name} in the first place.`);
+        }
+    }
+
+    public isActive(name: string): boolean {
+        return this.getShortcut(name).active;
+    }
+
+    private getShortcut(name: string): InternalKeyboardShortcut {
+        const shortcut = this.shortcuts.get(name);
+
+        if (!shortcut) {
+            throw new Error(`No such shortcut: ${name}`);
+        }
+
+        return shortcut;
     }
 }
