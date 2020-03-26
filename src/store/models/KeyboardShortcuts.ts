@@ -38,7 +38,12 @@ export class KeyboardShortcuts {
             }
 
             keys.add(key);
-            KeyboardShortcuts.consume([...keys]);
+
+            // A key might be used as shortcut and trigger native browser
+            // actions - in case the key triggered a shortcut prevent default actions.
+            if (KeyboardShortcuts.consume([...keys])) {
+                e.preventDefault();
+            }
         });
 
         on(window, 'keyup', (e: KeyboardEvent) => {
@@ -80,13 +85,14 @@ export class KeyboardShortcuts {
     }
 
     @action
-    public static consume(state: Array<string>): void {
+    public static consume(state: Array<string>): boolean {
         const pressedKeys = state.length;
         const inst = this.getInstance();
+        let matched = false;
 
         // Skip locked instances
         if (inst.locked) {
-            return;
+            return false;
         }
 
         for (const shortcut of inst.shortcuts.values()) {
@@ -115,12 +121,16 @@ export class KeyboardShortcuts {
 
                 // Fire normal listener if the shortcut is now active
                 if (nowActive) {
+                    matched = true;
+
                     for (const cb of callbacks) {
                         cb();
                     }
                 }
             }
         }
+
+        return matched;
     }
 
     @action
