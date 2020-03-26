@@ -51,30 +51,28 @@ export class Controls extends Component<Props, State> {
         const {paused} = this.state;
 
         return (
-            <div className={styles.controls}>
-                <div className={cn(
-                    widgetStyles.widget,
-                    styles.container
-                )}>
+            <div className={cn(
+                widgetStyles.widget,
+                styles.controls
+            )}>
 
-                    <button className={styles.settingsBtn}
-                            onClick={this.showMenu}>
-                        <Icon name="settings"/>
-                    </button>
-                    <p/>
+                <button className={styles.settingsBtn}
+                        onClick={this.showMenu}>
+                    <Icon name="settings"/>
+                </button>
+                <p/>
 
-                    <button className={styles.playPauseBtn}
-                            data-state={paused ? 'playing' : 'paused'}
-                            onClick={this.toggleRunState}/>
-                    <p/>
+                <button className={styles.playPauseBtn}
+                        data-state={paused ? 'playing' : 'paused'}
+                        onClick={this.toggleRunState}/>
+                <p/>
 
-                    <button className={styles.forwardBtn}
-                            data-state={paused ? 'enabled' : 'disabled'}
-                            onClick={this.nextGeneration}>
-                        <div/>
-                        <div/>
-                    </button>
-                </div>
+                <button className={styles.forwardBtn}
+                        data-state={paused ? 'enabled' : 'disabled'}
+                        onClick={this.nextGeneration}>
+                    <div/>
+                    <div/>
+                </button>
             </div>
         );
     }
