@@ -1,5 +1,5 @@
 import {action, computed, observable} from 'mobx';
-import {on}                           from '../../lib/dom-events';
+import {on}                           from '../../lib/events';
 
 export type KeyboardShortcutListener = () => void;
 export type KeyboardShortcutStateChangeListener = (state: boolean) => void;

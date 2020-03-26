@@ -1,4 +1,4 @@
-type Methods = 'addEventListener' | 'removeEventListener';
+type Method = 'addEventListener' | 'removeEventListener';
 
 export type EventBindingArgs = [
     EventTarget | Array<EventTarget>,
@@ -12,30 +12,27 @@ interface EventBinding {
 }
 
 /* eslint-disable prefer-rest-params */
-function eventListener(method: Methods): EventBinding {
-    return (elements: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: Function, options = {}): EventBindingArgs => {
+function eventListener(method: Method): EventBinding {
+    return (items: EventTarget | Array<EventTarget>, events: string | Array<string>, fn: Function, options = {}): EventBindingArgs => {
 
         // Normalize array
-        if (elements instanceof HTMLCollection || elements instanceof NodeList) {
-            elements = Array.from(elements);
-        } else if (!Array.isArray(elements)) {
-            elements = [elements];
+        if (items instanceof HTMLCollection || items instanceof NodeList) {
+            items = Array.from(items);
+        } else if (!Array.isArray(items)) {
+            items = [items];
         }
 
         if (!Array.isArray(events)) {
             events = [events];
         }
 
-        for (const el of elements) {
-            const action = el[method];
-
+        for (const el of items) {
             for (const ev of events) {
-                /* eslint-disable @typescript-eslint/no-explicit-any */
-                action(ev, fn as EventListener, {capture: false, ...options});
+                el[method](ev, fn as EventListener, {capture: false, ...options});
             }
         }
 
-        return [elements, events, fn, options];
+        return [items, events, fn, options];
     };
 }
 

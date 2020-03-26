@@ -1,5 +1,5 @@
 import {ActorInstance}   from '../../lib/actor/actor.main';
-import {on}              from '../../lib/dom-events';
+import {on}              from '../../lib/events';
 import {life, shortcuts} from '../../store';
 import {Engine}          from '../worker/main';
 import {Panning}         from './panning';

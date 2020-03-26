@@ -1,7 +1,7 @@
 import {ActorInstance}          from '../../lib/actor/actor.main';
-import {debounce}               from '../../lib/debounce';
-import {on}                     from '../../lib/dom-events';
-import {shortcuts}              from '../../store';
+import {debounce}  from '../../lib/debounce';
+import {on}        from '../../lib/events';
+import {shortcuts} from '../../store';
 import {Engine, Transformation} from '../worker/main';
 
 export class PanningEvent extends Event {
@@ -36,7 +36,7 @@ export class Panning extends EventTarget {
         });
 
         shortcuts.onChange('panning', state => {
-            canvas.style.cursor = state ? 'grab' : 'default';
+            canvas.style.cursor = state && this.transformation.scale !== 1 ? 'grab' : 'default';
         });
 
         this.bindListeners();
@@ -64,6 +64,7 @@ export class Panning extends EventTarget {
                 transformation.y = 0;
             }
 
+            e.preventDefault();
             this.pushTransformation();
         });
 

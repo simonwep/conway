@@ -1,7 +1,7 @@
 import {observer}                  from 'mobx-react';
 import {Component, h}              from 'preact';
 import {JSXInternal}               from 'preact/src/jsx';
-import {EventBindingArgs, off, on} from '../../../lib/dom-events';
+import {EventBindingArgs, off, on} from '../../../lib/events';
 import {eventPath}                 from '../../../lib/event-path';
 import {bind, cn}                  from '../../../lib/preact-utils';
 import {shortcuts}                 from '../../../store';
