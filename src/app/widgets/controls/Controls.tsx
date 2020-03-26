@@ -8,31 +8,12 @@ import * as widgetStyles from '../widget.module.scss';
 import * as styles       from './Controls.module.scss';
 import Element = JSXInternal.Element;
 
-type Props = {};
-type State = {
-    paused: boolean; // TODO: Move to store
-};
-
 @observer
-export class Controls extends Component<Props, State> {
-
-    state = {
-        paused: false
-    };
+export class Controls extends Component {
 
     @bind
     toggleRunState(): void {
-        const {paused} = this.state;
-
-        if (paused) {
-            life.play();
-        } else {
-            life.pause();
-        }
-
-        this.setState({
-            paused: !paused
-        });
+        life.toggle();
     }
 
     @bind
@@ -46,9 +27,7 @@ export class Controls extends Component<Props, State> {
     }
 
     render(): Element {
-
-        // TODO: Render gets called without args?
-        const {paused} = this.state;
+        const {paused} = life;
 
         return (
             <div className={cn(
