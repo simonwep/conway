@@ -1,5 +1,6 @@
 import {action, computed, observable} from 'mobx';
 import {on}                           from '../../lib/events';
+import {prettyKeyCode}                from '../../lib/pretty-key-code';
 
 export type KeyboardShortcutListener = () => void;
 export type KeyboardShortcutStateChangeListener = (state: boolean) => void;
@@ -21,6 +22,13 @@ type InternalKeyboardShortcut = Omit<KeyboardShortcut, 'name'> & {
     active: boolean;
 };
 
+// Key-codes to be blocked (they represent standard browser shortcuts)
+const preventDefaultCodes = [
+    'Slash',
+    'BracketRight',
+    'ControlLeft'
+];
+
 export class KeyboardShortcuts {
     private static instance: KeyboardShortcuts | null = null;
     @observable private shortcuts: Map<string, InternalKeyboardShortcut> = new Map();
@@ -30,14 +38,13 @@ export class KeyboardShortcuts {
         const keys = new Set<string>();
 
         on(window, 'keydown', (e: KeyboardEvent) => {
-            const key = !e.key.trim().length ? e.code : e.key;
 
             // Block default browser shortcuts
-            if (key === 'Control' || key === '+' || key === '-') {
+            if (preventDefaultCodes.includes(e.code)) {
                 e.preventDefault();
             }
 
-            keys.add(key);
+            keys.add(prettyKeyCode(e));
 
             // A key might be used as shortcut and trigger native browser
             // actions - in case the key triggered a shortcut prevent default actions.
@@ -47,9 +54,7 @@ export class KeyboardShortcuts {
         });
 
         on(window, 'keyup', (e: KeyboardEvent) => {
-            const key = !e.key.trim().length ? e.code : e.key;
-
-            keys.delete(key);
+            keys.delete(prettyKeyCode(e));
             KeyboardShortcuts.consume([...keys]);
         });
 

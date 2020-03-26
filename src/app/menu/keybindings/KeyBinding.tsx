@@ -4,6 +4,7 @@ import {JSXInternal}               from 'preact/src/jsx';
 import {EventBindingArgs, off, on} from '../../../lib/events';
 import {eventPath}                 from '../../../lib/event-path';
 import {bind, cn}                  from '../../../lib/preact-utils';
+import {prettyKeyCode}             from '../../../lib/pretty-key-code';
 import {shortcuts}                 from '../../../store';
 import {KeyboardShortcut}          from '../../../store/models/KeyboardShortcuts';
 import styles                      from './KeyBinding.module.scss';
@@ -60,7 +61,7 @@ export class KeyBinding extends Component<Props, State> {
             listener = [
 
                 on(window, 'keydown', (e: KeyboardEvent) => {
-                    const key = !e.key.trim().length ? e.code : e.key; // TODO: Move to util
+                    const key = prettyKeyCode(e);
 
                     if (!keyNamesCopy.includes(key)) {
                         if (init) {
@@ -80,7 +81,7 @@ export class KeyBinding extends Component<Props, State> {
                 }),
 
                 on(window, 'keyup', (e: KeyboardEvent) => {
-                    const index = keyNamesCopy.indexOf(e.key);
+                    const index = keyNamesCopy.indexOf( prettyKeyCode(e));
 
                     if (~index) {
                         keyNamesCopy.splice(index, 1);

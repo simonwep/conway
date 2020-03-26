@@ -61,7 +61,7 @@ export const init = async (): Promise<void> => {
         {
             name: 'next-generation',
             description: 'Generate next generation',
-            binding: ['ArrowRight'],
+            binding: ['Arrow Right'],
             callbacks: [(): void => life.nextGeneration()]
         },
         {
