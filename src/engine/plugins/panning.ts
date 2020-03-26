@@ -1,4 +1,5 @@
 import {ActorInstance}          from '../../lib/actor/actor.main';
+import {debounce}               from '../../lib/debounce';
 import {on}                     from '../../lib/dom-events';
 import {shortcuts}              from '../../store';
 import {Engine, Transformation} from '../worker/main';
@@ -95,18 +96,14 @@ export class Panning extends EventTarget {
             dragging = false;
         });
 
-        let timeout: unknown = 0;
-        on(window, 'resize', (): void => {
-            clearTimeout(timeout as number);
-            timeout = setTimeout(() => {
+        on(window, 'resize', debounce((): void => {
 
-                // Update canvas living inside of the worker
-                this.engine.commit('updateConfig', {
-                    width: window.innerWidth,
-                    height: window.innerHeight
-                });
-            }, 1000);
-        });
+            // Update canvas living inside of the worker
+            this.engine.commit('updateConfig', {
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        }));
     }
 
     private pushTransformation(): void {
