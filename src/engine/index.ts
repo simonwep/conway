@@ -43,7 +43,7 @@ export const init = async (): Promise<void> => {
 
     // Drawing requires up-to-date data from how the canvas is transformed / scaled
     const panning = new Panning(mainCanvas, current);
-    new Draw(panning, overlayCanvas, current);
+    new Draw(panning, overlayCanvas, mainCanvas, current);
 
     // Fire awaiting requests
     for (const req of engineMountListeners) {

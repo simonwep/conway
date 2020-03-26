@@ -11,6 +11,7 @@ enum Mode {
 
 export class Draw {
     private readonly panning: Panning;
+    private readonly mainCanvas: HTMLCanvasElement;
     private readonly canvas: HTMLCanvasElement;
     private readonly engine: ActorInstance<Engine>;
     private readonly ctx: CanvasRenderingContext2D;
@@ -18,8 +19,14 @@ export class Draw {
     private prevX = 0;
     private prevY = 0;
 
-    constructor(panning: Panning, canvas: HTMLCanvasElement, engine: ActorInstance<Engine>) {
+    constructor(
+        panning: Panning,
+        canvas: HTMLCanvasElement,
+        mainCanvas: HTMLCanvasElement,
+        engine: ActorInstance<Engine>
+    ) {
         this.panning = panning;
+        this.mainCanvas = mainCanvas;
         this.canvas = canvas;
         this.engine = engine;
         this.ctx = canvas.getContext('2d', {
@@ -39,9 +46,9 @@ export class Draw {
     }
 
     private bindListeners(): void {
-        const {canvas, panning} = this;
+        const {mainCanvas, panning} = this;
 
-        on(canvas, ['mousedown', 'touchstart'], (e: MouseEvent) => {
+        on(mainCanvas, ['mousedown', 'touchstart'], (e: MouseEvent) => {
 
             // Check if user is currently dragging stuff around or clicked another element
             if (
@@ -64,11 +71,11 @@ export class Draw {
             }
         });
 
-        on(canvas, ['mouseup', 'touchend', 'touchcancel'], () => {
+        on(mainCanvas, ['mouseup', 'touchend', 'touchcancel'], () => {
             this.mode = null;
         });
 
-        on(canvas, ['mousemove', 'touchmove'], (e: MouseEvent) => {
+        on(mainCanvas, ['mousemove', 'touchmove'], (e: MouseEvent) => {
             this.redraw(e.pageX, e.pageY);
         });
 
