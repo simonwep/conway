@@ -1,8 +1,7 @@
 import {Actor, ActorInstance, transfer} from '../lib/actor/actor.main';
 import {life, shortcuts}                from '../store';
-import {draw}                           from './plugins/draw';
-import {panning}                        from './plugins/panning';
-import {resize}                         from './plugins/resize';
+import {Draw}                           from './plugins/draw';
+import {Panning}                        from './plugins/panning';
 import {Config, Engine}                 from './worker/main';
 
 // Engine instance
@@ -42,15 +41,9 @@ export const init = async (): Promise<void> => {
     // Auto-play
     await current.call('play');
 
-    // Launch modules
-    resize(mainCanvas, current);
-
     // Drawing requires up-to-date data from how the canvas is transformed / scaled
-    draw(
-        panning(mainCanvas, current),
-        overlayCanvas,
-        current
-    );
+    const panning = new Panning(mainCanvas, current);
+    new Draw(panning, overlayCanvas, current);
 
     // Fire awaiting requests
     for (const req of engineMountListeners) {

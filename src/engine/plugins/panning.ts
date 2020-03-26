@@ -1,96 +1,117 @@
-import {ActorInstance} from '../../lib/actor/actor.main';
-import {on}            from '../../lib/dom-events';
-import {shortcuts}     from '../../store';
-import {Engine}        from '../worker/main';
+import {ActorInstance}          from '../../lib/actor/actor.main';
+import {on}                     from '../../lib/dom-events';
+import {shortcuts}              from '../../store';
+import {Engine, Transformation} from '../worker/main';
 
-export type PanningInfo = {
-    onZoomListeners: Array<Function>;
-    getTransformation(): {
-        scale: number;
-        x: number;
-        y: number;
-    };
-};
+export class PanningEvent extends Event {
+    public readonly transformation: Transformation;
 
-// TODO: Create class-based plugins
-export const panning = (
-    canvas: HTMLCanvasElement,
-    current: ActorInstance<Engine>
-): PanningInfo => {
-    const onZoomListeners: Array<Function> = [];
-    const zoomFactor = 1.5; // TODO: Adjust zoom-rate
-    let scale = 1;
-    let x = 0, y = 0;
+    constructor(transformation: Transformation) {
+        super('panning');
+        this.transformation = transformation;
+    }
+}
 
-    const updateTransformation = (): void => {
-        current.commit('transform', {
-            scale, x, y
+export class Panning extends EventTarget {
+    private static readonly ZOOM_FACTOR = 1.5;
+    private readonly canvas: HTMLCanvasElement;
+    private readonly engine: ActorInstance<Engine>;
+    public readonly transformation: Transformation;
+
+    constructor(canvas: HTMLCanvasElement, engine: ActorInstance<Engine>) {
+        super();
+        this.canvas = canvas;
+        this.engine = engine;
+        this.transformation = {
+            scale: 1,
+            x: 0,
+            y: 0
+        };
+
+        shortcuts.register({
+            name: 'panning',
+            description: 'Drag with mouse',
+            binding: ['Control']
         });
 
-        for (const listener of onZoomListeners) {
-            listener();
-        }
-    };
+        shortcuts.onChange('panning', state => {
+            canvas.style.cursor = state ? 'grab' : 'default';
+        });
 
-    canvas.addEventListener('wheel', e => {
-        const delta = (e.deltaY < 0 ? zoomFactor : 1 / zoomFactor);
+        this.bindListeners();
+    }
 
-        if (scale === 1 && scale * delta < 1) {
-            return;
-        }
+    private bindListeners(): void {
+        const {ZOOM_FACTOR} = Panning;
+        const {canvas, transformation} = this;
 
-        scale = Math.round(scale * delta / 0.5) * 0.5;
-        x = Math.round(e.pageX - (e.pageX - x) * delta);
-        y = Math.round(e.pageY - (e.pageY - y) * delta);
+        canvas.addEventListener('wheel', e => {
+            const delta = (e.deltaY < 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR);
+            const {scale, x, y} = transformation;
 
-        // Lock fullscreen
-        // TODO: Weird cursor behaviour
-        if (scale === 1) {
-            x = 0;
-            y = 0;
-        }
+            if (scale === 1 && scale * delta < 1) {
+                return;
+            }
 
-        updateTransformation();
-    });
+            transformation.scale = Math.round(scale * delta / 0.5) * 0.5;
+            transformation.x = Math.round(e.pageX - (e.pageX - x) * delta);
+            transformation.y = Math.round(e.pageY - (e.pageY - y) * delta);
 
-    let dragging = false;
-    let sx = 0, sy = 0;
-    on(canvas, 'mousemove', (e: MouseEvent): void => {
-        if (dragging && scale > 1) {
-            x = Math.round(x + (e.pageX - sx));
-            y = Math.round(y + (e.pageY - sy));
-            sx = e.pageX;
-            sy = e.pageY;
-            updateTransformation();
-        }
-    });
+            // Lock fullscreen
+            if (transformation.scale === 1) {
+                transformation.x = 0;
+                transformation.y = 0;
+            }
 
-    on(canvas, 'mousedown', (e: MouseEvent): void => {
-        if (shortcuts.isActive('panning')) {
-            dragging = true;
-            sx = e.pageX;
-            sy = e.pageY;
-        }
-    });
+            this.pushTransformation();
+        });
 
-    on(canvas, ['mouseup', 'mouseleave'], (): void => {
-        dragging = false;
-    });
+        let dragging = false;
+        let sx = 0, sy = 0;
+        on(canvas, 'mousemove', (e: MouseEvent): void => {
 
-    shortcuts.register({
-        name: 'panning',
-        description: 'Drag with mouse',
-        binding: ['Control']
-    });
+            if (dragging && transformation.scale > 1) {
+                const {x, y} = transformation;
 
-    shortcuts.onChange('panning', state => {
-        canvas.style.cursor = state ? 'grab' : 'default';
-    });
+                transformation.x = Math.round(x + (e.pageX - sx));
+                transformation.y = Math.round(y + (e.pageY - sy));
 
-    return {
-        onZoomListeners,
-        getTransformation(): {scale: number; x: number; y: number} {
-            return {scale, x, y};
-        }
-    };
-};
+                sx = e.pageX;
+                sy = e.pageY;
+
+                this.pushTransformation();
+            }
+        });
+
+        on(canvas, 'mousedown', (e: MouseEvent): void => {
+            if (shortcuts.isActive('panning')) {
+                dragging = true;
+                sx = e.pageX;
+                sy = e.pageY;
+            }
+        });
+
+        on(canvas, ['mouseup', 'mouseleave'], (): void => {
+            dragging = false;
+        });
+
+        let timeout: unknown = 0;
+        on(window, 'resize', (): void => {
+            clearTimeout(timeout as number);
+            timeout = setTimeout(() => {
+
+                // Update canvas living inside of the worker
+                this.engine.commit('updateConfig', {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                });
+            }, 1000);
+        });
+    }
+
+    private pushTransformation(): void {
+        const {transformation} = this;
+        this.engine.commit('transform', transformation);
+        this.dispatchEvent(new PanningEvent(transformation));
+    }
+}

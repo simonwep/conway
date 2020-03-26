@@ -2,31 +2,87 @@ import {ActorInstance}   from '../../lib/actor/actor.main';
 import {on}              from '../../lib/dom-events';
 import {life, shortcuts} from '../../store';
 import {Engine}          from '../worker/main';
-import {PanningInfo}     from './panning';
+import {Panning}         from './panning';
 
 enum Mode {
     Resurrect = 'Set',
     Kill = 'Kill'
 }
 
-export const draw = (
-    panning: PanningInfo,
-    canvas: HTMLCanvasElement,
-    current: ActorInstance<Engine>
-): void => {
-    canvas.style.pointerEvents = 'none';
-    const context = canvas.getContext('2d', {
-        antialias: false
-    }) as CanvasRenderingContext2D;
+export class Draw {
+    private readonly panning: Panning;
+    private readonly canvas: HTMLCanvasElement;
+    private readonly engine: ActorInstance<Engine>;
+    private readonly ctx: CanvasRenderingContext2D;
+    private mode: Mode | null = null;
+    private prevX = 0;
+    private prevY = 0;
 
-    // Green for new cells :)
-    context.fillStyle = 'rgb(0, 255, 0)';
-    context.strokeStyle = 'rgb(0, 255, 0)';
+    constructor(panning: Panning, canvas: HTMLCanvasElement, engine: ActorInstance<Engine>) {
+        this.panning = panning;
+        this.canvas = canvas;
+        this.engine = engine;
+        this.ctx = canvas.getContext('2d', {
+            antialias: false
+        }) as CanvasRenderingContext2D;
 
-    let mode: Mode | null = null;
-    let prevX = 0, prevY = 0;
-    const drawRect = (x: number = prevX, y: number = prevY): void => {
-        const transformation = panning.getTransformation();
+        // Green for new cells :)
+        this.ctx.fillStyle = 'rgb(0, 255, 0)';
+        this.ctx.strokeStyle = 'rgb(0, 255, 0)';
+
+        // The canvas acts as overlay but the main-canvas below this one
+        // should still be able to interact with.
+        canvas.style.pointerEvents = 'none';
+
+        this.bindListeners();
+        this.fitToWindow();
+    }
+
+    private bindListeners(): void {
+        const {canvas, panning} = this;
+
+        on(canvas, ['mousedown', 'touchstart'], (e: MouseEvent) => {
+
+            // Check if user is currently dragging stuff around or clicked another element
+            if (
+                shortcuts.isActive('panning') ||
+                (e.target as HTMLElement).parentElement !== document.body
+            ) {
+                return;
+            }
+
+            switch (e.button) {
+                case 0: {
+                    this.mode = Mode.Resurrect;
+                    this.redraw();
+                    break;
+                }
+                case 2: {
+                    this.mode = Mode.Kill;
+                    this.redraw();
+                }
+            }
+        });
+
+        on(canvas, ['mouseup', 'touchend', 'touchcancel'], () => {
+            this.mode = null;
+        });
+
+        on(canvas, ['mousemove', 'touchmove'], (e: MouseEvent) => {
+            this.redraw(e.pageX, e.pageY);
+        });
+
+        on(window, 'resize', () => this.fitToWindow());
+        on(panning, 'panning', () => this.redraw());
+    }
+
+    private fitToWindow(): void {
+        this.canvas.height = window.innerHeight;
+        this.canvas.width = window.innerWidth;
+    }
+
+    private redraw(x: number = this.prevX, y: number = this.prevY): void {
+        const {panning: {transformation}, canvas, ctx, mode, engine} = this;
 
         // Total scale
         const scale = transformation.scale * life.cellSize;
@@ -41,19 +97,19 @@ export const draw = (
         const ry = Math.floor((y - oy) / scale);
 
         // Clear previous rect and draw new one
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Draw cursor
         const cx = Math.round(rx * scale + ox);
         const cy = Math.round(ry * scale + oy + 0.5);
         const th = Math.max(1, Math.ceil(scale / 10));
         const th2 = th * 2;
-        context.fillRect(cx - th, cy - th, roundedScale + th2, roundedScale + th2);
-        context.clearRect(cx + th, cy + th, roundedScale - th2, roundedScale - th2);
+        ctx.fillRect(cx - th, cy - th, roundedScale + th2, roundedScale + th2);
+        ctx.clearRect(cx + th, cy + th, roundedScale - th2, roundedScale - th2);
 
         // Apply new pixel to life
         if (mode) {
-            current.commit(
+            engine.commit(
                 'setCell',
                 Math.floor(-transformation.x / scale + rx),
                 Math.floor(-transformation.y / scale + ry),
@@ -61,49 +117,7 @@ export const draw = (
             );
         }
 
-        prevX = x;
-        prevY = y;
-    };
-
-
-    on(canvas, ['mousedown', 'touchstart'], (e: MouseEvent) => {
-
-        // Check if user is currently dragging stuff around or clicked another element
-        if (
-            shortcuts.isActive('panning') ||
-            (e.target as HTMLElement).parentElement !== document.body
-        ) {
-            return;
-        }
-
-        switch (e.button) {
-            case 0: {
-                mode = Mode.Resurrect;
-                drawRect();
-                break;
-            }
-            case 2: {
-                mode = Mode.Kill;
-                drawRect();
-            }
-        }
-    });
-
-    on(canvas, ['mouseup', 'touchend', 'touchcancel'], () => {
-        mode = null;
-    });
-
-    on(canvas, ['mousemove', 'touchmove'], (e: MouseEvent) => {
-        drawRect(e.pageX, e.pageY);
-    });
-
-    const resize = (): void => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        drawRect();
-    };
-
-    panning.onZoomListeners.push(drawRect);
-    on(window, 'resize', resize);
-    resize();
-};
+        this.prevX = x;
+        this.prevY = y;
+    }
+}
