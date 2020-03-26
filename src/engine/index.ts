@@ -59,6 +59,12 @@ export const init = async (): Promise<void> => {
             callbacks: [(): void => life.toggle()]
         },
         {
+            name: 'next-generation',
+            description: 'Generate next generation',
+            binding: ['ArrowRight'],
+            callbacks: [(): void => life.nextGeneration()]
+        },
+        {
             name: 'increase-cell-size',
             description: 'Increase the cell-size',
             binding: ['Control', '+'],

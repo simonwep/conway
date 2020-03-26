@@ -15,6 +15,7 @@
 
 .list {
     @include flex(column);
+    will-change: transform;
     overflow: auto;
     flex-grow: 1;
 }

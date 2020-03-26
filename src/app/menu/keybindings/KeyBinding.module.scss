@@ -72,7 +72,7 @@
     }
 
     button {
-        @include font(600, 0.8em);
+        @include font(400, 0.8em);
         font-family: $font-family;
         position: absolute;
         padding: 0 1em;
