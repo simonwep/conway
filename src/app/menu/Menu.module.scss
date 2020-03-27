@@ -65,8 +65,8 @@
 }
 
 .pages {
-    @include height(30vh, 5em, 50em);
-    @include width(60vw, 20em, 50em);
+    @include height(60vh, 15em, 40em);
+    @include width(50vw, 20em, 55em);
     position: relative;
     overflow: hidden;
 

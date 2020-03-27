@@ -26,6 +26,6 @@ export default ({name}: Props): Element => {
     }
 
     return (
-        <div className="icon" dangerouslySetInnerHTML={{__html: svg}}/>
+        <div dangerouslySetInnerHTML={{__html: svg}}/>
     );
 };
