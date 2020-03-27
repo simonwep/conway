@@ -1,7 +1,7 @@
 import {ActorInstance}          from '../../lib/actor/actor.main';
-import {debounce}  from '../../lib/debounce';
-import {on}        from '../../lib/events';
-import {shortcuts} from '../../store';
+import {debounce}               from '../../lib/debounce';
+import {on}                     from '../../lib/events';
+import {shortcuts}              from '../../store';
 import {Engine, Transformation} from '../worker/main';
 
 export class PanningEvent extends Event {
@@ -15,9 +15,9 @@ export class PanningEvent extends Event {
 
 export class Panning extends EventTarget {
     private static readonly ZOOM_FACTOR = 1.5;
+    public readonly transformation: Transformation;
     private readonly canvas: HTMLCanvasElement;
     private readonly engine: ActorInstance<Engine>;
-    public readonly transformation: Transformation;
 
     constructor(canvas: HTMLCanvasElement, engine: ActorInstance<Engine>) {
         super();

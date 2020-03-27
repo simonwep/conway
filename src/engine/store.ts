@@ -1,5 +1,7 @@
 import {action, computed, observable} from 'mobx';
 import {ActorInstance}                from '../lib/actor/actor.main';
+import {download}                     from '../lib/download';
+import {formatDate}                   from '../lib/format-date';
 import {Engine}                       from './worker/main';
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -90,6 +92,12 @@ export class Life {
 
     public nextGeneration(): void {
         this.source!.commit('nextGeneration');
+    }
+
+    public downloadAsSVG(): void {
+        this.source!.call('convertToSvg').then(str => {
+            download(str, `life-${formatDate('DD-MM-YYYY')}.svg`);
+        });
     }
 
     @action

@@ -1,0 +1,33 @@
+.export {
+    @include flex(row, center, center);
+    height: 100%;
+
+    section {
+        @include flex(column, center);
+
+        > p {
+            margin: 1em;
+        }
+    }
+
+    button {
+        @include flex(row, center);
+        background: var(--c-primary);
+        padding: 0.75em 1em;
+        border-radius: 0.15em;
+        color: var(--c-text-secondary);
+        box-shadow: 0 0.1em 0.25em var(--c-primary);
+        transition: all 0.3s;
+
+        &:hover {
+            filter: brightness(1.05);
+            box-shadow: 0 0.1em 0.35em var(--c-primary);
+        }
+
+        svg {
+            @include size(1em);
+            margin-right: 0.75em;
+            fill: white;
+        }
+    }
+}

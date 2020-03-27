@@ -346,5 +346,40 @@ export class Engine {
             ctx.drawImage(shadowCanvas, 0, 0);
         }
     }
+
+    public convertToSvg(): string {
+        const {width, height, rows, cols, cellSize} = this.env;
+        const {data} = this.universe.imageData;
+        let path = '';
+
+        for (let row = 0; row < rows; row++) {
+            const offset = row * cols;
+            let lastCol = 0;
+            let moved = false;
+
+            for (let col = 0; col < cols; col++) {
+                const index = (offset + col) * 4;
+
+                if (
+                    data[index] === 255 &&
+                    data[index + 1] === 255 &&
+                    data[index + 1] === 255
+                ) {
+                    if (!moved) {
+                        path += `M${col * cellSize},${row * cellSize}`;
+                        moved = true;
+                    } else {
+                        path += `m${(col - lastCol) * cellSize},0`;
+                    }
+
+                    path += `h${cellSize}v${cellSize}h-${cellSize}v-${cellSize}`;
+                    lastCol = col;
+                }
+            }
+        }
+
+        const pathEl = `<path fill="black" d="${path}"/>`;
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">${pathEl}</svg>`;
+    }
 }
 

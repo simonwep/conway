@@ -1,6 +1,6 @@
 import {h, render} from 'preact';
-import {App} from './app/App';
-import {on}  from './lib/events';
+import {App}       from './app/App';
+import {on}        from './lib/events';
 import './styles/_global.scss';
 
 render(

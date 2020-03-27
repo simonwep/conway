@@ -1,8 +1,8 @@
 import {observer}                  from 'mobx-react';
 import {Component, h}              from 'preact';
 import {JSXInternal}               from 'preact/src/jsx';
-import {EventBindingArgs, off, on} from '../../../lib/events';
 import {eventPath}                 from '../../../lib/event-path';
+import {EventBindingArgs, off, on} from '../../../lib/events';
 import {bind, cn}                  from '../../../lib/preact-utils';
 import {prettyKeyCode}             from '../../../lib/pretty-key-code';
 import {shortcuts}                 from '../../../store';
@@ -81,7 +81,7 @@ export class KeyBinding extends Component<Props, State> {
                 }),
 
                 on(window, 'keyup', (e: KeyboardEvent) => {
-                    const index = keyNamesCopy.indexOf( prettyKeyCode(e));
+                    const index = keyNamesCopy.indexOf(prettyKeyCode(e));
 
                     if (~index) {
                         keyNamesCopy.splice(index, 1);

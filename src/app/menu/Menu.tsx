@@ -3,7 +3,7 @@ import {Component, h}    from 'preact';
 import {JSXInternal}     from 'preact/src/jsx';
 import {bind, cn}        from '../../lib/preact-utils';
 import {menu, shortcuts} from '../../store';
-import {Appearance}      from './appearance/Appearance';
+import {Export}          from './export/Export';
 import {KeyBindings}     from './keybindings/KeyBindings';
 import styles            from './Menu.module.scss';
 import Element = JSXInternal.Element;
@@ -18,9 +18,9 @@ export class Menu extends Component<Props, State> {
     state = {
         currentPage: 'Key Bindings'
     };
-    private readonly pages = new Map([
+    private readonly pages = new Map<string, Element>([
         ['Key Bindings', (<KeyBindings key={1}/>)],
-        ['Appearance', (<Appearance key={2}/>)]
+        ['Export', (<Export key={2}/>)]
     ]);
 
     /* eslint-disable @typescript-eslint/no-var-requires */
