@@ -91,14 +91,14 @@ impl Universe {
         let new_cols = cols + 2;
         let total_cells = new_cols * new_rows;
 
-        let source = if self.swap {
+        let current_source = if self.swap {
             &self.target
         } else {
             &self.source
         };
-        let mut new_source: Vec<bool> = (0..total_cells).map(|_| false).collect();
 
-        copy_2d(source, &mut new_source, self.cols, new_cols, 1, 1);
+        let mut new_source: Vec<bool> = (0..total_cells).map(|_| false).collect();
+        copy_2d(current_source, &mut new_source, self.cols, new_cols, 1, 1);
 
         self.swap = false;
         self.rows = new_rows;
@@ -221,6 +221,19 @@ impl Universe {
 
     pub fn image_size(&self) -> usize {
         self.image_data.len()
+    }
+
+    pub fn current_gen(&mut self) -> *const bool {
+        (if self.swap {
+            &self.target
+        } else {
+            &self.source
+        })
+        .as_ptr()
+    }
+
+    pub fn cell_count(&self) -> u32 {
+        (self.rows * self.cols) as u32
     }
 
     pub fn killed_cells(&self) -> u32 {

@@ -33,12 +33,7 @@ export class UniverseWrapper {
         );
     }
 
-    public static async new(
-        rows: number,
-        cols: number,
-        width: number,
-        height: number
-    ): Promise<UniverseWrapper> {
+    public static async new(rows: number, cols: number, width: number, height: number): Promise<UniverseWrapper> {
         const [{Universe}, wasm] = await Promise.all([
             import(/* webpackChunkName: "crate-wrapper" */ '../../crate/pkg'),
             import(/* webpackChunkName: "crate-wasm" */ '../../crate/pkg/index_bg.wasm')
@@ -51,12 +46,7 @@ export class UniverseWrapper {
         );
     }
 
-    public resize(
-        rows: number,
-        cols: number,
-        width: number,
-        height: number
-    ): void {
+    public resize(rows: number, cols: number, width: number, height: number): void {
         this.universe.resize(rows, cols);
         this.rows = rows;
         this.cols = cols;
@@ -88,6 +78,14 @@ export class UniverseWrapper {
 
     public nextGen(): void {
         this.universe.next_gen();
+    }
+
+    public currentGen(): Uint8Array {
+        return new Uint8Array(
+            this.wasm.memory.buffer,
+            this.universe.current_gen(),
+            this.universe.cell_count()
+        );
     }
 
     public setCell(x: number, y: number, state: boolean): void {

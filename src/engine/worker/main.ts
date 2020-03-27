@@ -349,22 +349,18 @@ export class Engine {
 
     public convertToSvg(): string {
         const {width, height, rows, cols, cellSize} = this.env;
-        const {data} = this.universe.imageData;
+        const cells = this.universe.currentGen();
         let path = '';
 
         for (let row = 0; row < rows; row++) {
-            const offset = row * cols;
+            const offset = (row + 1) * (cols + 2);
             let lastCol = 0;
             let moved = false;
 
             for (let col = 0; col < cols; col++) {
-                const index = (offset + col) * 4;
+                const index = offset + col;
 
-                if (
-                    data[index] === 255 &&
-                    data[index + 1] === 255 &&
-                    data[index + 1] === 255
-                ) {
+                if (cells[index]) {
                     if (!moved) {
                         path += `M${col * cellSize},${row * cellSize}`;
                         moved = true;
