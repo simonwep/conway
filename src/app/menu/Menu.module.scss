@@ -61,7 +61,6 @@
 
 .content {
     @include flex(row);
-    padding: 1em;
 }
 
 .pages {
@@ -75,6 +74,7 @@
         transition: all 0.15s;
         position: absolute;
         overflow: hidden;
+        padding: 1em;
         opacity: 0;
 
         &.openPage {
@@ -86,7 +86,8 @@
 
 .navigation {
     @include flex(column);
-    padding-right: 1em;
+    border-right: 1px solid var(--c-secondary-bg);
+    padding: 1em;
 
     button {
         border-radius: 0.25em;

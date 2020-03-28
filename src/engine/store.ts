@@ -1,5 +1,6 @@
 import {action, computed, observable} from 'mobx';
 import {ActorInstance}                from '../lib/actor/actor.main';
+import {BinaryMap}                    from '../lib/bin-loader/BinaryMap';
 import {download}                     from '../lib/download';
 import {formatDate}                   from '../lib/format-date';
 import {Engine}                       from './worker/main';
@@ -97,6 +98,15 @@ export class Life {
     public downloadAsSVG(): void {
         this.source!.call('convertToSvg').then(str => {
             download(str, `life-${formatDate('DD-MM-YYYY')}.svg`);
+        });
+    }
+
+    public downloadAsCLife(): void {
+        this.source!.call('getCurrentState').then(value => {
+            const data = new BinaryMap();
+            data.set('cell-size', this.cellSize);
+            data.set('cells', value);
+            download(data.encode(), `life-${formatDate('DD-MM-YYYY')}.lbin`);
         });
     }
 

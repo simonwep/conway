@@ -377,5 +377,9 @@ export class Engine {
         const pathEl = `<path fill="black" d="${path}"/>`;
         return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">${pathEl}</svg>`;
     }
+
+    public getCurrentState(): Uint8Array {
+        return this.universe.currentGen();
+    }
 }
 

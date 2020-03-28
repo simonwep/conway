@@ -1,4 +1,6 @@
 import {Actor, ActorInstance, transfer} from '../lib/actor/actor.main';
+import {BinaryMap, Types}               from '../lib/bin-loader/BinaryMap';
+import {on}                             from '../lib/events';
 import {life, shortcuts}                from '../store';
 import {Draw}                           from './plugins/draw';
 import {Panning}                        from './plugins/panning';
@@ -49,6 +51,29 @@ export const init = async (): Promise<void> => {
     for (const req of engineMountListeners) {
         req(current);
     }
+
+    // Listen for dropped files
+    on(window, ['dragover', 'drop'], (ev: DragEvent) => {
+
+        if (ev.type === 'drop' && ev.dataTransfer) {
+            const {files} = ev.dataTransfer;
+
+            if (files.length > 0) {
+                files[0].arrayBuffer().then(value => {
+                    const map = BinaryMap.decode(
+                        new Uint8Array(value)
+                    );
+
+                    const cellSize = map.getDecoded('cell-size', Types.Number);
+                    if (cellSize !== null) {
+                        life.setCellSize(cellSize);
+                    }
+                });
+            }
+        }
+
+        ev.preventDefault();
+    });
 
     // Register keyboard-shortcuts
     shortcuts.registerAll([

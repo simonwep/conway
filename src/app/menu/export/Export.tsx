@@ -15,6 +15,11 @@ export class Export extends Component {
         life.downloadAsSVG();
     }
 
+    @bind
+    downloadAsLifeBin(): void {
+        life.downloadAsCLife();
+    }
+
     render(): Element {
 
         return (
@@ -23,6 +28,15 @@ export class Export extends Component {
                     <h2>As SVG</h2>
                     <p>Export the current state as pixel-perfect svg image.</p>
                     <button onClick={this.downloadAsSVG}>
+                        <Icon name="download"/>
+                        <p>Download</p>
+                    </button>
+                </section>
+
+                <section>
+                    <h2>As LBIN</h2>
+                    <p>Export as <code>.clife</code>-file.<br/>This file can be imported any time by dragging it onto the screen.</p>
+                    <button onClick={this.downloadAsLifeBin}>
                         <Icon name="download"/>
                         <p>Download</p>
                     </button>
