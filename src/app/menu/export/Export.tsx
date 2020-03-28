@@ -17,7 +17,7 @@ export class Export extends Component {
 
     @bind
     downloadAsLifeBin(): void {
-        life.downloadAsCLife();
+        life.downloadAsLBin();
     }
 
     render(): Element {

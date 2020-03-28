@@ -3,7 +3,8 @@ import {Universe} from '../../crate/pkg';
 export class UniverseWrapper {
 
     // Bitmap
-    public imageData: ImageData;
+    private height: number;
+    private width: number;
     private cols: number;
     private rows: number;
 
@@ -19,18 +20,12 @@ export class UniverseWrapper {
         universe: Universe,
         wasm: any
     ) {
+        this.height = height;
+        this.width = width;
         this.rows = rows;
         this.cols = cols;
         this.universe = universe;
         this.wasm = wasm;
-
-        this.imageData = new ImageData(
-            new Uint8ClampedArray(
-                this.wasm.memory.buffer,
-                this.universe.image_data(),
-                this.universe.image_size()
-            ), width, height
-        );
     }
 
     public static async new(rows: number, cols: number, width: number, height: number): Promise<UniverseWrapper> {
@@ -46,18 +41,22 @@ export class UniverseWrapper {
         );
     }
 
-    public resize(rows: number, cols: number, width: number, height: number): void {
-        this.universe.resize(rows, cols);
-        this.rows = rows;
-        this.cols = cols;
-
-        this.imageData = new ImageData(
+    public get imageData(): ImageData {
+        return new ImageData(
             new Uint8ClampedArray(
                 this.wasm.memory.buffer,
                 this.universe.image_data(),
                 this.universe.image_size()
-            ), width, height
+            ), this.width, this.height
         );
+    }
+
+    public resize(rows: number, cols: number, width: number, height: number): void {
+        this.universe.resize(rows, cols);
+        this.height = height;
+        this.width = width;
+        this.rows = rows;
+        this.cols = cols;
     }
 
     public free(): void {
@@ -86,6 +85,10 @@ export class UniverseWrapper {
             this.universe.current_gen(),
             this.universe.cell_count()
         );
+    }
+
+    public loadUnsafe(data: Uint8Array): void {
+        this.universe.load_unsafe(data);
     }
 
     public setCell(x: number, y: number, state: boolean): void {

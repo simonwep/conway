@@ -378,6 +378,10 @@ export class Engine {
         return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">${pathEl}</svg>`;
     }
 
+    public loadStateUnsafe(data: Uint8Array): void {
+        this.universe.loadUnsafe(data);
+    }
+
     public getCurrentState(): Uint8Array {
         return this.universe.currentGen();
     }

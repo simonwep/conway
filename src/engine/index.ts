@@ -65,8 +65,14 @@ export const init = async (): Promise<void> => {
                     );
 
                     const cellSize = map.getDecoded('cell-size', Types.Number);
+                    const data = map.getDecoded('cells', Types.Uint8Array);
+
                     if (cellSize !== null) {
                         life.setCellSize(cellSize);
+                    }
+
+                    if (data !== null) {
+                        engine.call('loadStateUnsafe', data);
                     }
                 });
             }

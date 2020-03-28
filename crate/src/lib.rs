@@ -11,6 +11,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub struct Universe {
     cols: usize,
     rows: usize,
+    invalidate: bool,
     source: Vec<bool>,
     target: Vec<bool>,
     image_data: Vec<u8>,
@@ -59,6 +60,7 @@ impl Universe {
 
         Universe {
             swap: false,
+            invalidate: false,
             survive_rules: 0b000001100,
             resurrect_rules: 0b000001000,
             killed_cells: 0,
@@ -177,7 +179,7 @@ impl Universe {
                 // Save pixel
                 let pixel_index = (image_data_offset + (col - 1)) * 4;
 
-                if cell != next {
+                if self.invalidate || cell != next {
                     match next {
                         true => {
                             self.resurrected_cells += 1;
@@ -213,6 +215,8 @@ impl Universe {
                 }
             }
         }
+
+        self.invalidate = false;
     }
 
     pub fn image_data(&self) -> *const u8 {
@@ -234,6 +238,20 @@ impl Universe {
 
     pub fn cell_count(&self) -> u32 {
         (self.rows * self.cols) as u32
+    }
+
+    pub fn load_unsafe(&mut self, data: &[u8]) {
+        let target = if self.swap {
+            &mut self.target
+        } else {
+            &mut self.source
+        };
+
+        for i in 0..data.len() {
+            target[i] = data[i] == 1;
+        }
+
+        self.invalidate = true;
     }
 
     pub fn killed_cells(&self) -> u32 {

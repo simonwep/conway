@@ -101,7 +101,7 @@ export class Life {
         });
     }
 
-    public downloadAsCLife(): void {
+    public downloadAsLBin(): void {
         this.source!.call('getCurrentState').then(value => {
             const data = new BinaryMap();
             data.set('cell-size', this.cellSize);
