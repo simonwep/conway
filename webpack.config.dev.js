@@ -11,7 +11,6 @@ const crate = path.resolve(__dirname, 'crate');
 const src = path.resolve(__dirname, 'src');
 const app = path.resolve(src, 'app');
 
-// TODO: Cache loader?
 module.exports = {
     mode: 'development',
     entry: './src/index.tsx',
@@ -75,7 +74,7 @@ module.exports = {
                             sourceMap: true,
                             importLoaders: 1,
                             modules: {
-                                localIdentName: '[name]-[hash:base64:5]'
+                                localIdentName: '[local]-[hash:base64:5]'
                             }
                         }
                     }
