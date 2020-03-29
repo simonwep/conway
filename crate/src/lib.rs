@@ -1,7 +1,6 @@
 extern crate console_error_panic_hook;
 extern crate wee_alloc;
-use crate::utils::{copy_2d, count, min_max, random_bool};
-use wasm_bindgen::__rt::core::cmp::max;
+use crate::utils::{copy_2d, count, random_bool};
 use wasm_bindgen::prelude::*;
 mod utils;
 
@@ -231,12 +230,13 @@ impl Universe {
         self.resurrected_cells = 0;
         self.killed_cells = 0;
 
-        let (src, tar) = if self.swap {
+        let (tar, src) = if self.swap {
             (&mut self.target, &mut self.source)
         } else {
             (&mut self.source, &mut self.target)
         };
 
+        // TODO: cell-stats won't get updated
         for i in 0..data.len() {
             tar[i] = data[i] == 1;
 
@@ -248,16 +248,7 @@ impl Universe {
             }
         }
 
-        self.repaint();
-    }
-
-    pub fn repaint(&mut self) {
-        let source = if self.swap {
-            &self.target
-        } else {
-            &self.source
-        };
-
+        // Repaint / update pixels
         for row in 1..(self.rows - 1) {
             let image_data_offset = (row - 1) * (self.cols - 2);
             let middle = row * self.cols + 1;
@@ -267,7 +258,7 @@ impl Universe {
                 let cell_index = middle + col - 1;
 
                 self.image_data[pixel_index + 1] = 255;
-                match source[cell_index] {
+                match tar[cell_index] {
                     true => {
                         self.image_data[pixel_index] = 0;
                         self.image_data[pixel_index + 2] = 0;

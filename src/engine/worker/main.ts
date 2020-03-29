@@ -1,6 +1,6 @@
+import {Universe}                       from '../../../crate/pkg';
 import {Actor, ActorInstance, transfer} from '../../lib/actor/actor.main';
 import {actor}                          from '../../lib/actor/actor.worker';
-import {UniverseWrapper}                from '../wrapper';
 import {Graph}                          from './graph';
 
 export type Config = {
@@ -49,8 +49,10 @@ export class Engine {
     // Child-worker responsible for drawing the charts
     private readonly graphicalWorker: ActorInstance<Graph>;
 
-    // Rust wrapper
-    private universe: UniverseWrapper;
+    // Universe wrapper and wasm module
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    private readonly universe: Universe;
+    private readonly wasm: any;
 
     // Currently requested frame.
     private activeAnimationFrame: number | null = null;
@@ -71,15 +73,29 @@ export class Engine {
     private resurrectRules = 0b000001000;
     private surviveRules = 0b000001100;
 
+    public get imageData(): ImageData {
+        return new ImageData(
+            new Uint8ClampedArray(
+                this.wasm.memory.buffer,
+                this.universe.image_data(),
+                this.universe.image_size()
+            ),
+            this.env.preScaleWidth,
+            this.env.preScaleHeight
+        );
+    }
+
     private constructor(
         canvas: OffscreenCanvas,
         env: Environment,
         graphicalWorker: ActorInstance<Graph>,
-        universe: UniverseWrapper
+        universe: Universe,
+        wasm: any
     ) {
 
         // Apply props
         this.env = env;
+        this.wasm = wasm;
         this.universe = universe;
         this.graphicalWorker = graphicalWorker;
 
@@ -120,6 +136,10 @@ export class Engine {
         canvas: OffscreenCanvas,
         config: Config
     ): Promise<Engine> {
+        const [{Universe}, wasm] = await Promise.all([
+            import(/* webpackChunkName: "crate-wrapper" */ '../../../crate/pkg'),
+            import(/* webpackChunkName: "crate-wasm" */ '../../../crate/pkg/index_bg.wasm')
+        ]);
 
         // Convert config to env-properties
         const env = Engine.configToEnv(config);
@@ -129,17 +149,15 @@ export class Engine {
                 {type: 'module'}
             )).create<Graph>('Graph'),
 
-            UniverseWrapper.new(
-                env.rows, env.cols,
-                env.preScaleWidth, env.preScaleHeight
-            )
+            Universe.new(env.rows, env.cols)
         ]);
 
         return new Engine(
             canvas,
             env,
             graphicalWorker,
-            universe
+            universe,
+            wasm
         );
     }
 
@@ -232,7 +250,7 @@ export class Engine {
     public nextGeneration(): number {
         const start = performance.now();
         this.generation++;
-        this.universe.nextGen();
+        this.universe.next_gen();
 
         this.redraw();
         return performance.now() - start;
@@ -273,17 +291,17 @@ export class Engine {
         const {universe} = this;
 
         this.graphicalWorker.commit('update',
-            universe.killedCells(),
-            universe.resurrectedCells()
+            universe.killed_cells(),
+            universe.resurrected_cells()
         );
 
-        this.shadowCtx.putImageData(universe.imageData, 0, 0);
+        this.shadowCtx.putImageData(this.imageData, 0, 0);
         this.ctx.drawImage(this.shadowCanvas, 0, 0);
     }
 
     public async updateConfig(config: Partial<Config>): Promise<void> {
         const {universe, canvas, shadowCanvas, ctx, running} = this;
-        const {rows, cols, preScaleWidth, preScaleHeight, scale, width, height} = (
+        const {rows, cols, scale, width, height} = (
             this.env = Engine.configToEnv({...this.env, ...config})
         );
 
@@ -300,11 +318,7 @@ export class Engine {
 
         // Pause and resize universe
         this.pause();
-        universe.resize(
-            rows, cols,
-            preScaleWidth,
-            preScaleHeight
-        );
+        universe.resize(rows, cols);
 
         // Redraw
         this.redraw();
@@ -318,7 +332,7 @@ export class Engine {
     public updateRuleset(resurrect: number, survive: number): void {
         this.resurrectRules = resurrect;
         this.surviveRules = survive;
-        this.universe.setRuleset(resurrect, survive);
+        this.universe.set_ruleset(resurrect, survive);
     }
 
     public setGraphCanvas(canvas: OffscreenCanvas): void {
@@ -327,18 +341,18 @@ export class Engine {
 
     public setCell(x: number, y: number, state: boolean): void {
         const {universe, shadowCtx, ctx, shadowCanvas} = this;
-        universe.setCell(x, y, state);
+        universe.set_cell(x, y, state);
 
         // Redraw
         if (!this.running) {
-            shadowCtx.putImageData(universe.imageData, 0, 0);
+            shadowCtx.putImageData(this.imageData, 0, 0);
             ctx.drawImage(shadowCanvas, 0, 0);
         }
     }
 
     public convertToSvg(): string {
         const {width, height, rows, cols, cellSize} = this.env;
-        const cells = this.universe.currentGen();
+        const cells = this.getCurrentGen();
         let path = '';
 
         for (let row = 0; row < rows; row++) {
@@ -368,12 +382,16 @@ export class Engine {
     }
 
     public loadStateUnsafe(data: Uint8Array): void {
-        this.universe.loadUnsafe(data);
+        this.universe.load_unsafe(data);
         this.redraw();
     }
 
-    public getCurrentState(): Uint8Array {
-        return this.universe.currentGen();
+    public getCurrentGen(): Uint8Array {
+        return new Uint8Array(
+            this.wasm.memory.buffer,
+            this.universe.current_gen(),
+            this.universe.cell_count()
+        );
     }
 
     public getGeneration(): number {

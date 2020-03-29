@@ -102,7 +102,7 @@ export class Life {
     }
 
     public downloadAsLBin(includeRules = true): void {
-        this.source!.call('getCurrentState').then(value => {
+        this.source!.call('getCurrentGen').then(value => {
             const data = new BinaryMap();
             data.set('cell-size', this.cellSize);
             data.set('cells', value);
