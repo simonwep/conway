@@ -28,12 +28,12 @@ export class Rules extends Component {
 
     @bind
     inverseSurviveRules(): void {
-        life.updateSurviveRules(~life.surviveRules);
+        life.updateSurviveRules(life.surviveRules ^ 0b111111111 );
     }
 
     @bind
     inverseResurrectRules(): void {
-        life.updateResurrectRules(~life.resurrectRules);
+        life.updateResurrectRules(life.resurrectRules ^ 0b111111111);
     }
 
     generateNumberedList(fn: UpdateRulesFunction, rules: number): Array<Element> {
