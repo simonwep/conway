@@ -64,11 +64,22 @@ export const init = async (): Promise<void> => {
                         new Uint8Array(value)
                     );
 
+                    // TODO: Find better way to load in a config
+                    const resurrectRules = map.getDecoded('resurrect-rules', Types.Number);
+                    const surviveRules = map.getDecoded('survive-rules', Types.Number);
                     const cellSize = map.getDecoded('cell-size', Types.Number);
                     const data = map.getDecoded('cells', Types.Uint8Array);
 
                     if (cellSize !== null) {
                         life.setCellSize(cellSize);
+                    }
+
+                    if (resurrectRules !== null) {
+                        life.setResurrectRules(resurrectRules);
+                    }
+
+                    if (surviveRules !== null) {
+                        life.setSurviveRules(surviveRules);
                     }
 
                     if (data !== null) {

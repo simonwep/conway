@@ -71,6 +71,7 @@
 
     .pageWrapper {
         @include position(0, 0, 0, 0);
+        @include flex(column, center);
         transition: all 0.15s;
         position: absolute;
         overflow: hidden;

@@ -15,25 +15,25 @@ export class Rules extends Component {
     @bind
     updateSurviveRules(index: number): () => void {
         return (): void => {
-            life.updateSurviveRules(life.surviveRules ^ (1 << index));
+            life.setSurviveRules(life.surviveRules ^ (1 << index));
         };
     }
 
     @bind
     updateResurrectRules(index: number): () => void {
         return (): void => {
-            life.updateResurrectRules(life.resurrectRules ^ (1 << index));
+            life.setResurrectRules(life.resurrectRules ^ (1 << index));
         };
     }
 
     @bind
     inverseSurviveRules(): void {
-        life.updateSurviveRules(life.surviveRules ^ 0b111111111 );
+        life.setSurviveRules(life.surviveRules ^ 0b111111111);
     }
 
     @bind
     inverseResurrectRules(): void {
-        life.updateResurrectRules(life.resurrectRules ^ 0b111111111);
+        life.setResurrectRules(life.resurrectRules ^ 0b111111111);
     }
 
     generateNumberedList(fn: UpdateRulesFunction, rules: number): Array<Element> {

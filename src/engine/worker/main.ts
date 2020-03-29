@@ -380,6 +380,12 @@ export class Engine {
 
     public loadStateUnsafe(data: Uint8Array): void {
         this.universe.loadUnsafe(data);
+
+        // Redraw
+        if (!this.running) {
+            this.shadowCtx.putImageData(this.universe.imageData, 0, 0);
+            this.ctx.drawImage(this.shadowCanvas, 0, 0);
+        }
     }
 
     public getCurrentState(): Uint8Array {

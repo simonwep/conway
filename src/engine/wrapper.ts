@@ -28,6 +28,16 @@ export class UniverseWrapper {
         this.wasm = wasm;
     }
 
+    public get imageData(): ImageData {
+        return new ImageData(
+            new Uint8ClampedArray(
+                this.wasm.memory.buffer,
+                this.universe.image_data(),
+                this.universe.image_size()
+            ), this.width, this.height
+        );
+    }
+
     public static async new(rows: number, cols: number, width: number, height: number): Promise<UniverseWrapper> {
         const [{Universe}, wasm] = await Promise.all([
             import(/* webpackChunkName: "crate-wrapper" */ '../../crate/pkg'),
@@ -38,16 +48,6 @@ export class UniverseWrapper {
             rows, cols, width, height,
             Universe.new(rows, cols),
             wasm
-        );
-    }
-
-    public get imageData(): ImageData {
-        return new ImageData(
-            new Uint8ClampedArray(
-                this.wasm.memory.buffer,
-                this.universe.image_data(),
-                this.universe.image_size()
-            ), this.width, this.height
         );
     }
 

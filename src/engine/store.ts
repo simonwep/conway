@@ -54,13 +54,13 @@ export class Life {
     }
 
     @action
-    public updateSurviveRules(bitMap: number): void {
+    public setSurviveRules(bitMap: number): void {
         this.surviveRules = bitMap;
         this.source!.commit('updateRuleset', this.resurrectRules, this.surviveRules);
     }
 
     @action
-    public updateResurrectRules(bitMap: number): void {
+    public setResurrectRules(bitMap: number): void {
         this.resurrectRules = bitMap;
         this.source!.commit('updateRuleset', this.resurrectRules, this.surviveRules);
     }
@@ -101,11 +101,17 @@ export class Life {
         });
     }
 
-    public downloadAsLBin(): void {
+    public downloadAsLBin(includeRules = true): void {
         this.source!.call('getCurrentState').then(value => {
             const data = new BinaryMap();
             data.set('cell-size', this.cellSize);
             data.set('cells', value);
+
+            if (includeRules) {
+                data.set('resurrect-rules', this.resurrectRules);
+                data.set('survive-rules', this.surviveRules);
+            }
+
             download(data.encode(), `life-${formatDate('DD-MM-YYYY')}.lbin`);
         });
     }

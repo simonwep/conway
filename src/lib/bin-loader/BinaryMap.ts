@@ -79,21 +79,6 @@ export class BinaryMap<V extends Uint8Array | string | number> extends Map<strin
         return sections;
     }
 
-    private static sizeOf(val: string | number | Uint8Array, space = 8): number {
-        if (val instanceof Uint8Array) {
-            return val.length;
-        }
-
-        switch (typeof val) {
-            case 'string': {
-                return val.length;
-            }
-            case 'number': {
-                return Math.floor(Math.log2(val) / space + 1);
-            }
-        }
-    }
-
     private static read(content: Uint8Array, offset: number): [number, Uint8Array] {
         const initialOffset = offset;
 
@@ -113,10 +98,13 @@ export class BinaryMap<V extends Uint8Array | string | number> extends Map<strin
         ];
     }
 
-    private static write(content: Uint8Array, target: Uint8Array, offset: number): number {
+    private static pack(content: Uint8Array): Uint8Array {
+        const sizeSpace = Math.ceil((Math.log2(content.length) + 1) / 7);
+        const target = new Uint8Array(sizeSpace + content.length);
 
         // Write size of content and the content itself
         let size = content.length;
+        let offset = 0;
         while (size) {
             const value = (size & 127);
             size = size >> 7;
@@ -126,28 +114,31 @@ export class BinaryMap<V extends Uint8Array | string | number> extends Map<strin
         }
 
         target.set(content, offset);
-        return offset + content.length;
+        return target;
+    }
+
+    private static concat(...arrays: Array<Uint8Array>): Uint8Array {
+        const length = arrays.reduce((pv, cv) => pv + cv.length, 0);
+        const target = new Uint8Array(length);
+
+        let offset = 0;
+        for (const array of arrays) {
+            target.set(array, offset);
+            offset += array.length;
+        }
+
+        return target;
     }
 
     public encode(): Uint8Array {
-        const entries = [...this.entries()];
+        let data = new Uint8Array();
 
-        // Calculate total size
-        let totalSize = 0;
-        for (const [key, value] of entries) {
-            const kl = BinaryMap.sizeOf(key);
-            const vl = BinaryMap.sizeOf(value);
-            totalSize += kl + vl +
-                BinaryMap.sizeOf(kl, 7) +
-                BinaryMap.sizeOf(vl, 7);
-        }
-
-        // Write data
-        let offset = 0;
-        const data = new Uint8Array(totalSize);
-        for (const [key, value] of entries) {
-            offset = BinaryMap.write(BinaryMap.toUint8Array(key), data, offset);
-            offset = BinaryMap.write(BinaryMap.toUint8Array(value), data, offset);
+        // Convert items to Uint8Arrays
+        for (const [key, value] of this.entries()) {
+            data = BinaryMap.concat(data,
+                BinaryMap.pack(BinaryMap.toUint8Array(key)),
+                BinaryMap.pack(BinaryMap.toUint8Array(value))
+            );
         }
 
         return data;

@@ -1,6 +1,7 @@
 import {h, render} from 'preact';
 import {App}       from './app/App';
 import {on}        from './lib/events';
+import './app/web-components/index';
 import './styles/_global.scss';
 
 render(

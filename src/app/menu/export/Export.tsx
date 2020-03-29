@@ -1,14 +1,21 @@
-import {observer}     from 'mobx-react';
-import {Component, h} from 'preact';
-import {JSXInternal}  from 'preact/src/jsx';
-import {bind}         from '../../../lib/preact-utils';
-import {life}         from '../../../store';
-import Icon           from '../../components/Icon';
-import styles         from './Export.module.scss';
+import {observer}                           from 'mobx-react';
+import {Component, createRef, h, RefObject} from 'preact';
+import {JSXInternal}                        from 'preact/src/jsx';
+import {bind}                               from '../../../lib/preact-utils';
+import {life}                               from '../../../store';
+import Icon                                 from '../../components/Icon';
+import styles                               from './Export.module.scss';
 import Element = JSXInternal.Element;
 
 @observer
 export class Export extends Component {
+    private readonly exportRuleSet: RefObject<CheckBoxElement>;
+
+    constructor() {
+        super();
+        this.exportRuleSet = createRef();
+    }
+
 
     @bind
     downloadAsSVG(): void {
@@ -17,7 +24,8 @@ export class Export extends Component {
 
     @bind
     downloadAsLifeBin(): void {
-        life.downloadAsLBin();
+        const exportRuleset = this.exportRuleSet.current?.checked;
+        life.downloadAsLBin(exportRuleset);
     }
 
     render(): Element {
@@ -36,10 +44,19 @@ export class Export extends Component {
                 <section>
                     <h2>As LBIN</h2>
                     <p>Export as <code>.clife</code>-file.<br/>This file can be imported any time by dragging it onto the screen.</p>
-                    <button onClick={this.downloadAsLifeBin}>
-                        <Icon name="download"/>
-                        <p>Download</p>
-                    </button>
+
+
+                    <div className={styles.downloadSection}>
+                        <div className={styles.option}>
+                            <check-box checked="true" ref={this.exportRuleSet}/>
+                            <p>Include ruleset</p>
+                        </div>
+
+                        <button onClick={this.downloadAsLifeBin}>
+                            <Icon name="download"/>
+                            <p>Download</p>
+                        </button>
+                    </div>
                 </section>
             </div>
         );

@@ -1,20 +1,19 @@
 .export {
     @include flex(row, center, space-evenly);
-    height: 100%;
+    margin: auto 0;
 
     section {
         @include flex(column, center);
-        max-height: 13em;
         height: 100%;
-        width: 40%;
 
         > h2 {
-            padding-bottom: 0.15em;
             border-bottom: 3px solid var(--c-secondary-bg);
+            padding-bottom: 0.15em;
         }
 
         > p {
-            margin: auto;
+            margin-bottom: auto;
+            padding: 1em 0;
             line-height: 1.25em;
             text-align: center;
         }
@@ -26,18 +25,30 @@
         padding: 0.75em 1em;
         border-radius: 0.15em;
         color: var(--c-text-secondary);
-        box-shadow: 0 0.05em 0.25em var(--c-primary);
         transition: all 0.3s;
 
         &:hover {
             filter: brightness(1.05);
-            box-shadow: 0 0.1em 0.35em var(--c-primary);
         }
 
         svg {
             @include size(1em);
             margin-right: 0.75em;
             fill: white;
+        }
+    }
+}
+
+.downloadSection {
+    @include flex(column);
+
+    .option {
+        @include flex(row, center);
+        font-size: 0.85em;
+        margin: 1em 0;
+
+        > p {
+            margin-left: 1em;
         }
     }
 }

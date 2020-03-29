@@ -1,0 +1,30 @@
+.checkbox {
+    @include inline-flex(row, center, center);
+    @include size(18px);
+    border: 1px solid rgba(black, 0.05);
+    background: var(--c-secondary-bg);
+    transition: all 0.175s;
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+
+    > svg {
+        @include size(70%);
+        stroke-width: 7.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke: var(--c-text-primary);
+        stroke-dashoffset: 100;
+        stroke-dasharray: 100;
+        transition: all 0.175s;
+        fill: none;
+    }
+
+    &[checked=true] {
+        background: var(--c-primary);
+
+        > svg {
+            stroke-dashoffset: 0;
+        }
+    }
+}

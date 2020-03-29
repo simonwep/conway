@@ -9,7 +9,7 @@
         "sourceMap": true,
         "lib": ["webworker", "esnext", "dom"],
         "module": "ESNext",
-        "target": "ESNext",
+        "target": "ES2019",
         "jsx": "react",
         "jsxFactory": "h"
     }
