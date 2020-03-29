@@ -1,6 +1,7 @@
 extern crate console_error_panic_hook;
 extern crate wee_alloc;
-use crate::utils::{copy_2d, random_bool};
+use crate::utils::{copy_2d, count, min_max, random_bool};
+use wasm_bindgen::__rt::core::cmp::max;
 use wasm_bindgen::prelude::*;
 mod utils;
 
@@ -73,8 +74,10 @@ impl Universe {
         }
     }
 
-    /// Resize this universe
     pub fn resize(&mut self, rows: usize, cols: usize) {
+        self.resurrected_cells = 0;
+        self.killed_cells = 0;
+
         // Create new image bit-map and copy current one into it
         let new_image_size = (rows * cols) * 4;
         let mut new_image_data: Vec<u8> = (0..new_image_size).map(|_| 255 as u8).collect();
@@ -102,6 +105,14 @@ impl Universe {
         let mut new_source: Vec<bool> = (0..total_cells).map(|_| false).collect();
         copy_2d(current_source, &mut new_source, self.cols, new_cols, 1, 1);
 
+        // Calculate difference of how many cells died / were added compared to the previous state
+        let prev_alive = count(current_source, true);
+        let now_alive = count(&new_source, true);
+
+        if now_alive < prev_alive {
+            self.killed_cells = prev_alive - now_alive;
+        }
+
         self.swap = false;
         self.rows = new_rows;
         self.cols = new_cols;
@@ -110,7 +121,6 @@ impl Universe {
         self.image_data = new_image_data;
     }
 
-    /// Calculates the next generation
     pub fn next_gen(&mut self) {
         let image_data = &mut self.image_data;
         self.resurrected_cells = 0;
@@ -217,12 +227,28 @@ impl Universe {
         }
     }
 
-    pub fn image_data(&self) -> *const u8 {
-        self.image_data.as_ptr()
-    }
+    pub fn load_unsafe(&mut self, data: &[u8]) {
+        self.resurrected_cells = 0;
+        self.killed_cells = 0;
 
-    pub fn image_size(&self) -> usize {
-        self.image_data.len()
+        let (src, tar) = if self.swap {
+            (&mut self.target, &mut self.source)
+        } else {
+            (&mut self.source, &mut self.target)
+        };
+
+        for i in 0..data.len() {
+            tar[i] = data[i] == 1;
+
+            if tar[i] != src[i] {
+                match tar[i] {
+                    true => self.resurrected_cells += 1,
+                    false => self.killed_cells += 1,
+                }
+            }
+        }
+
+        self.repaint();
     }
 
     pub fn repaint(&mut self) {
@@ -255,6 +281,14 @@ impl Universe {
         }
     }
 
+    pub fn image_data(&self) -> *const u8 {
+        self.image_data.as_ptr()
+    }
+
+    pub fn image_size(&self) -> usize {
+        self.image_data.len()
+    }
+
     pub fn current_gen(&mut self) -> *const bool {
         (if self.swap {
             &self.target
@@ -266,20 +300,6 @@ impl Universe {
 
     pub fn cell_count(&self) -> u32 {
         (self.rows * self.cols) as u32
-    }
-
-    pub fn load_unsafe(&mut self, data: &[u8]) {
-        let target = if self.swap {
-            &mut self.target
-        } else {
-            &mut self.source
-        };
-
-        for i in 0..data.len() {
-            target[i] = data[i] == 1;
-        }
-
-        self.repaint();
     }
 
     pub fn killed_cells(&self) -> u32 {

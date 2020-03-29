@@ -25,6 +25,18 @@ pub fn floor_to(val: usize, factor: usize) -> usize {
     val - val % factor
 }
 
+pub fn count<T: std::cmp::PartialOrd>(vec: &Vec<T>, pred: T) -> u32 {
+    let mut counter = 0;
+
+    for val in vec.iter() {
+        if *val == pred {
+            counter += 1;
+        }
+    }
+
+    counter
+}
+
 /// Copies values from a source-vector into the target vector without
 /// losing the aspect-ration defined by old_cols and new_cols.
 /// factor is used in case the vector contains value-pairs and, in case of

@@ -111,6 +111,9 @@ export class Engine {
         // Clear canvas and initialize js-universe
         this.shadowCtx.fillStyle = '#fff';
         this.shadowCtx.fillRect(0, 0, width, height);
+
+        // Draw initial state
+        this.redraw();
     }
 
     public static async create(
@@ -227,22 +230,11 @@ export class Engine {
     }
 
     public nextGeneration(): number {
-        const {ctx, shadowCtx, shadowCanvas, universe, env} = this;
-        const {width, height} = env;
         const start = performance.now();
         this.generation++;
+        this.universe.nextGen();
 
-        // Transfer previous changes to graph-worker
-        this.graphicalWorker.commit('update',
-            universe.killedCells(),
-            universe.resurrectedCells()
-        );
-
-        // Draw bitmap
-        universe.nextGen();
-        shadowCtx.putImageData(universe.imageData, 0, 0);
-
-        ctx.drawImage(shadowCanvas, 0, 0, width, height);
+        this.redraw();
         return performance.now() - start;
     }
 
@@ -252,20 +244,6 @@ export class Engine {
         }
 
         this.fpsLimit = limit;
-    }
-
-    public getGeneration(): number {
-        return this.generation;
-    }
-
-    public getFrameRate(): number {
-        let total = 0;
-
-        for (let i = 0; i < Engine.FPS_BUFFER; i++) {
-            total += this.fpsBuffer[i];
-        }
-
-        return ~~(1000 / (total / Engine.FPS_BUFFER));
     }
 
     public transform(t: Transformation): void {
@@ -291,8 +269,20 @@ export class Engine {
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
+    private redraw(): void {
+        const {universe} = this;
+
+        this.graphicalWorker.commit('update',
+            universe.killedCells(),
+            universe.resurrectedCells()
+        );
+
+        this.shadowCtx.putImageData(universe.imageData, 0, 0);
+        this.ctx.drawImage(this.shadowCanvas, 0, 0);
+    }
+
     public async updateConfig(config: Partial<Config>): Promise<void> {
-        const {universe, canvas, shadowCanvas, shadowCtx, ctx, running} = this;
+        const {universe, canvas, shadowCanvas, ctx, running} = this;
         const {rows, cols, preScaleWidth, preScaleHeight, scale, width, height} = (
             this.env = Engine.configToEnv({...this.env, ...config})
         );
@@ -317,8 +307,7 @@ export class Engine {
         );
 
         // Redraw
-        shadowCtx.putImageData(universe.imageData, 0, 0);
-        ctx.drawImage(shadowCanvas, 0, 0);
+        this.redraw();
 
         // Auto-play if simulation was active
         if (running) {
@@ -380,16 +369,25 @@ export class Engine {
 
     public loadStateUnsafe(data: Uint8Array): void {
         this.universe.loadUnsafe(data);
-
-        // Redraw
-        if (!this.running) {
-            this.shadowCtx.putImageData(this.universe.imageData, 0, 0);
-            this.ctx.drawImage(this.shadowCanvas, 0, 0);
-        }
+        this.redraw();
     }
 
     public getCurrentState(): Uint8Array {
         return this.universe.currentGen();
+    }
+
+    public getGeneration(): number {
+        return this.generation;
+    }
+
+    public getFrameRate(): number {
+        let total = 0;
+
+        for (let i = 0; i < Engine.FPS_BUFFER; i++) {
+            total += this.fpsBuffer[i];
+        }
+
+        return ~~(1000 / (total / Engine.FPS_BUFFER));
     }
 }
 
