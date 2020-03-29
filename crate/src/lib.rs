@@ -1,3 +1,4 @@
+extern crate console_error_panic_hook;
 extern crate wee_alloc;
 use crate::utils::{copy_2d, random_bool};
 use wasm_bindgen::prelude::*;
@@ -11,7 +12,6 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub struct Universe {
     cols: usize,
     rows: usize,
-    invalidate: bool,
     source: Vec<bool>,
     target: Vec<bool>,
     image_data: Vec<u8>,
@@ -26,6 +26,7 @@ pub struct Universe {
 impl Universe {
     /// Creates a new game-of-life universe
     pub fn new(mut rows: usize, mut cols: usize) -> Universe {
+        console_error_panic_hook::set_once();
         // Bit-map with (r, g, b, a) values
         let image_size = (rows * cols) * 4;
         let mut image_data: Vec<u8> = (0..image_size).map(|_| 255 as u8).collect();
@@ -60,7 +61,6 @@ impl Universe {
 
         Universe {
             swap: false,
-            invalidate: false,
             survive_rules: 0b000001100,
             resurrect_rules: 0b000001000,
             killed_cells: 0,
@@ -179,7 +179,7 @@ impl Universe {
                 // Save pixel
                 let pixel_index = (image_data_offset + (col - 1)) * 4;
 
-                if self.invalidate || cell != next {
+                if cell != next {
                     match next {
                         true => {
                             self.resurrected_cells += 1;
@@ -215,8 +215,6 @@ impl Universe {
                 }
             }
         }
-
-        self.invalidate = false;
     }
 
     pub fn image_data(&self) -> *const u8 {
@@ -225,6 +223,36 @@ impl Universe {
 
     pub fn image_size(&self) -> usize {
         self.image_data.len()
+    }
+
+    pub fn repaint(&mut self) {
+        let source = if self.swap {
+            &self.target
+        } else {
+            &self.source
+        };
+
+        for row in 1..(self.rows - 1) {
+            let image_data_offset = (row - 1) * (self.cols - 2);
+            let middle = row * self.cols + 1;
+
+            for col in 1..(self.cols - 1) {
+                let pixel_index = (image_data_offset + (col - 1)) * 4;
+                let cell_index = middle + col - 1;
+
+                self.image_data[pixel_index + 1] = 255;
+                match source[cell_index] {
+                    true => {
+                        self.image_data[pixel_index] = 0;
+                        self.image_data[pixel_index + 2] = 0;
+                    }
+                    false => {
+                        self.image_data[pixel_index] = 255;
+                        self.image_data[pixel_index + 2] = 255;
+                    }
+                };
+            }
+        }
     }
 
     pub fn current_gen(&mut self) -> *const bool {
@@ -251,7 +279,7 @@ impl Universe {
             target[i] = data[i] == 1;
         }
 
-        self.invalidate = true;
+        self.repaint();
     }
 
     pub fn killed_cells(&self) -> u32 {
