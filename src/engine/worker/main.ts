@@ -2,6 +2,7 @@ import {Universe}                       from '../../../crate/pkg';
 import {Actor, ActorInstance, transfer} from '../../lib/actor/actor.main';
 import {actor}                          from '../../lib/actor/actor.worker';
 import {Graph}                          from './graph';
+import {imageDataToSvg}                 from './main.utils';
 
 export type Config = {
     width: number;
@@ -350,35 +351,12 @@ export class Engine {
         }
     }
 
-    public convertToSvg(): string {
-        const {width, height, rows, cols, cellSize} = this.env;
-        const cells = this.getCurrentGen();
-        let path = '';
-
-        for (let row = 0; row < rows; row++) {
-            const offset = (row + 1) * (cols + 2);
-            let lastCol = 0;
-            let moved = false;
-
-            for (let col = 0; col < cols; col++) {
-                const index = offset + col;
-
-                if (cells[index]) {
-                    if (!moved) {
-                        path += `M${col * cellSize},${row * cellSize}`;
-                        moved = true;
-                    } else {
-                        path += `m${(col - lastCol) * cellSize},0`;
-                    }
-
-                    path += `h${cellSize}v${cellSize}h-${cellSize}v-${cellSize}`;
-                    lastCol = col;
-                }
-            }
-        }
-
-        const pathEl = `<path fill="black" d="${path}"/>`;
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">${pathEl}</svg>`;
+    public convertToSvg(inverse = false): string {
+        return imageDataToSvg(
+            this.imageData,
+            this.env.cellSize,
+            inverse
+        );
     }
 
     public load(data: Uint8Array, cols: number): void {

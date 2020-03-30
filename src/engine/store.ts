@@ -96,7 +96,10 @@ export class Life {
     }
 
     public downloadAsSVG(): void {
-        this.source!.call('convertToSvg').then(str => {
+        this.source!.call(
+            'convertToSvg',
+            matchMedia('(prefers-color-scheme: dark)').matches
+        ).then(str => {
             download(str, `life-${formatDate('DD-MM-YYYY')}.svg`);
         });
     }
@@ -105,7 +108,7 @@ export class Life {
         Promise.all([
             this.source!.call('getCurrentGen'),
             this.source!.call('getEnv')
-        ]).then(([cells, env])=>{
+        ]).then(([cells, env]) => {
             const data = new BinaryMap();
             data.set('cell-size', this.cellSize);
             data.set('cells', cells);
