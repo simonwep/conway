@@ -23,10 +23,10 @@ export class Graph {
     }
 
     public update(killed: number, resurrected: number): void {
+        this.alive += resurrected - killed;
+
         if (this.canvas) {
             this.render(killed, resurrected);
-        } else {
-            this.alive += resurrected - killed;
         }
     }
 
@@ -41,9 +41,6 @@ export class Graph {
 
         // Clear canvas
         ctx.clearRect(0, 0, width, height);
-
-        // Update count of cells alive
-        this.alive += resurrected - killed;
 
         // Update buffer and shift if full
         if (this.bufferOffset < buffer.length) {

@@ -112,7 +112,7 @@ impl Universe {
             self.killed_cells = prev_alive - now_alive;
         }
 
-        self.swap = false;
+        self.swap = false; // Un-swap arrays
         self.rows = new_rows;
         self.cols = new_cols;
         self.source = new_source;
@@ -230,23 +230,14 @@ impl Universe {
         self.resurrected_cells = 0;
         self.killed_cells = 0;
 
-        let (tar, src) = if self.swap {
+        let (src, tar) = if self.swap {
             (&mut self.target, &mut self.source)
         } else {
             (&mut self.source, &mut self.target)
         };
 
-        // TODO: cell-stats won't get updated
-        for i in 0..data.len() {
-            tar[i] = data[i] == 1;
-
-            if tar[i] != src[i] {
-                match tar[i] {
-                    true => self.resurrected_cells += 1,
-                    false => self.killed_cells += 1,
-                }
-            }
-        }
+        // Swap arrays
+        self.swap = !self.swap;
 
         // Repaint / update pixels
         for row in 1..(self.rows - 1) {
@@ -256,16 +247,26 @@ impl Universe {
             for col in 1..(self.cols - 1) {
                 let pixel_index = (image_data_offset + (col - 1)) * 4;
                 let cell_index = middle + col - 1;
+                let new_value = data[cell_index] == 1;
+                tar[cell_index] = new_value;
 
                 self.image_data[pixel_index + 1] = 255;
-                match tar[cell_index] {
+                match new_value {
                     true => {
                         self.image_data[pixel_index] = 0;
                         self.image_data[pixel_index + 2] = 0;
+
+                        if !src[cell_index] {
+                            self.resurrected_cells += 1;
+                        }
                     }
                     false => {
                         self.image_data[pixel_index] = 255;
                         self.image_data[pixel_index + 2] = 255;
+
+                        if src[cell_index] {
+                            self.killed_cells += 1;
+                        }
                     }
                 };
             }
