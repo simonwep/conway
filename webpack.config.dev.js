@@ -1,4 +1,4 @@
-const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
+const {WasmPackPlugin} = require('./config/WasmPackPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const WorkerPlugin = require('worker-plugin');
@@ -128,10 +128,8 @@ module.exports = {
         }),
 
         new WasmPackPlugin({
-            crateDirectory: crate,
-            extraArgs: '--target browser --mode normal',
-            args: '--log-level warn',
-            forceMode: 'production'
+            crate: crate,
+            mode: 'production'
         }),
 
         new CopyPlugin([{
@@ -141,8 +139,6 @@ module.exports = {
 
         new WorkerPlugin({
             globalObject: 'self'
-        }),
-
-        new webpack.HotModuleReplacementPlugin()
+        })
     ]
 };
