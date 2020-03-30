@@ -381,8 +381,8 @@ export class Engine {
         return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">${pathEl}</svg>`;
     }
 
-    public loadStateUnsafe(data: Uint8Array): void {
-        this.universe.load_unsafe(data);
+    public load(data: Uint8Array, cols: number): void {
+        this.universe.load(data, cols);
         this.redraw();
     }
 
@@ -392,6 +392,10 @@ export class Engine {
             this.universe.current_gen(),
             this.universe.cell_count()
         );
+    }
+
+    public getEnv(): Environment {
+        return this.env;
     }
 
     public getGeneration(): number {

@@ -226,7 +226,7 @@ impl Universe {
         }
     }
 
-    pub fn load_unsafe(&mut self, data: &[u8]) {
+    pub fn load(&mut self, data: &[u8], cols: usize) {
         self.resurrected_cells = 0;
         self.killed_cells = 0;
 
@@ -235,6 +235,13 @@ impl Universe {
         } else {
             (&mut self.source, &mut self.target)
         };
+
+        // Copy content
+        let source = Vec::from(data)
+            .iter()
+            .map(|v| *v == 1)
+            .collect::<Vec<bool>>();
+        copy_2d(&source, tar, cols + 2, self.cols, 1, 0);
 
         // Swap arrays
         self.swap = !self.swap;
@@ -247,11 +254,9 @@ impl Universe {
             for col in 1..(self.cols - 1) {
                 let pixel_index = (image_data_offset + (col - 1)) * 4;
                 let cell_index = middle + col - 1;
-                let new_value = data[cell_index] == 1;
-                tar[cell_index] = new_value;
 
                 self.image_data[pixel_index + 1] = 255;
-                match new_value {
+                match tar[cell_index] {
                     true => {
                         self.image_data[pixel_index] = 0;
                         self.image_data[pixel_index + 2] = 0;

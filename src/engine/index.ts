@@ -68,11 +68,12 @@ export const init = async (): Promise<void> => {
                     const resurrectRules = map.getDecoded('resurrect-rules', Types.Number);
                     const surviveRules = map.getDecoded('survive-rules', Types.Number);
                     const cellSize = map.getDecoded('cell-size', Types.Number);
-                    const data = map.getDecoded('cells', Types.Uint8Array);
+                    const cells = map.getDecoded('cells', Types.Uint8Array);
+                    const cols = map.getDecoded('cols', Types.Number);
 
-                    if (cellSize !== null) {
-                        life.setCellSize(cellSize);
-                    }
+                    // I assume the file is correct
+                    life.setCellSize(cellSize as number);
+                    engine.call('load', cells as Uint8Array, cols as number);
 
                     if (resurrectRules !== null) {
                         life.setResurrectRules(resurrectRules);
@@ -80,10 +81,6 @@ export const init = async (): Promise<void> => {
 
                     if (surviveRules !== null) {
                         life.setSurviveRules(surviveRules);
-                    }
-
-                    if (data !== null) {
-                        engine.call('loadStateUnsafe', data);
                     }
                 });
             }

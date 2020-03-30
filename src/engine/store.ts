@@ -102,10 +102,15 @@ export class Life {
     }
 
     public downloadAsLBin(includeRules = true): void {
-        this.source!.call('getCurrentGen').then(value => {
+        Promise.all([
+            this.source!.call('getCurrentGen'),
+            this.source!.call('getEnv')
+        ]).then(([cells, env])=>{
             const data = new BinaryMap();
             data.set('cell-size', this.cellSize);
-            data.set('cells', value);
+            data.set('cells', cells);
+            data.set('cols', env.cols);
+            data.set('rows', env.rows);
 
             if (includeRules) {
                 data.set('resurrect-rules', this.resurrectRules);
