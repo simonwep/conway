@@ -107,7 +107,7 @@ export class ActorInstance<T extends Record<any, any>> {
      * @param fn
      * @param args
      */
-    public async call<Func extends keyof T, Args = Parameters<T[Func]>>(fn: Func, ...args: Array<Args>): Promise<ReturnType<T[Func]>> {
+    public async call<Func extends keyof T>(fn: Func, ...args: Parameters<T[Func]>): Promise<ReturnType<T[Func]>> {
         return new Promise((resolve, reject) => {
             const [rawArgs, transferable] = resolveArguments(args);
             const id = requestIndex++;
@@ -130,7 +130,7 @@ export class ActorInstance<T extends Record<any, any>> {
      * Calls a function without expecting or returning its return-value.
      * It's faster than call since no promise needs to be fulfilled.
      */
-    public commit<Func extends keyof T, Args extends Parameters<T[Func]>>(fn: Func, ...args: Args): void {
+    public commit<Func extends keyof T>(fn: Func, ...args: Parameters<T[Func]>): void {
         const [rawArgs, transferable] = resolveArguments(args);
 
         // Send data to worker
