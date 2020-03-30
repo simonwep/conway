@@ -41,13 +41,15 @@ module.exports.WasmPackPlugin = class {
             const child = shell.exec(cmd, {async: true});
             child.on('close', () => this.done(crate));
         } else {
-            const child = shell.exec(cmd, {
-                silent: true,
-                async: true
-            });
+            shell.exec(cmd, {
+                silent: true
+            }, (code, _, stderr) => {
+                if (code) {
+                    console.error(stderr);
+                }
 
-            child.stderr.pipe(process.stderr);
-            child.on('close', () => this.done(crate));
+                this.done(crate);
+            });
         }
     }
 
@@ -68,7 +70,16 @@ module.exports.WasmPackPlugin = class {
         });
     }
 
+    compileAll() {
+        for (const crate of this.crates) {
+            this.compileRust(crate);
+        }
+    }
+
     apply(compiler) {
+
+        // Compile all at start
+        this.compileAll();
 
         // Ignore crates in watch mode
         compiler.hooks.watchRun.tapAsync(NAME, (watcher, callback) => {

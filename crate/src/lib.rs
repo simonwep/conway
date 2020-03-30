@@ -1,4 +1,3 @@
-extern crate console_error_panic_hook;
 extern crate wee_alloc;
 use crate::utils::{copy_2d, count, random_bool};
 use wasm_bindgen::prelude::*;
@@ -26,7 +25,6 @@ pub struct Universe {
 impl Universe {
     /// Creates a new game-of-life universe
     pub fn new(mut rows: usize, mut cols: usize) -> Universe {
-        console_error_panic_hook::set_once();
         // Bit-map with (r, g, b, a) values
         let image_size = (rows * cols) * 4;
         let mut image_data: Vec<u8> = (0..image_size).map(|_| 255 as u8).collect();
