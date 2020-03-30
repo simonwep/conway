@@ -95,11 +95,8 @@ export class Life {
         this.source!.commit('nextGeneration');
     }
 
-    public downloadAsSVG(): void {
-        this.source!.call(
-            'convertToSvg',
-            matchMedia('(prefers-color-scheme: dark)').matches
-        ).then(str => {
+    public downloadAsSVG(darkTheme: boolean): void {
+        this.source!.call('convertToSvg', darkTheme).then(str => {
             download(str, `life-${formatDate('DD-MM-YYYY')}.svg`);
         });
     }

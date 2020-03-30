@@ -10,16 +10,20 @@ import Element = JSXInternal.Element;
 @observer
 export class Export extends Component {
     private readonly exportRuleSet: RefObject<CheckBoxElement>;
+    private readonly exportDarkTheme: RefObject<CheckBoxElement>;
+    private readonly prefersDarkTheme = matchMedia('(prefers-color-scheme: dark)').matches;
 
     constructor() {
         super();
         this.exportRuleSet = createRef();
+        this.exportDarkTheme = createRef();
     }
 
 
     @bind
     downloadAsSVG(): void {
-        life.downloadAsSVG();
+        const darkTheme = this.exportDarkTheme.current?.checked;
+        life.downloadAsSVG(darkTheme);
     }
 
     @bind
@@ -35,16 +39,23 @@ export class Export extends Component {
                 <section>
                     <h2>As SVG</h2>
                     <p>Export the current state as pixel-perfect svg image.</p>
-                    <button onClick={this.downloadAsSVG}>
-                        <Icon name="download"/>
-                        <p>Download</p>
-                    </button>
+
+                    <div className={styles.downloadSection}>
+                        <div className={styles.option}>
+                            <check-box checked={this.prefersDarkTheme} ref={this.exportDarkTheme}/>
+                            <p>Dark theme</p>
+                        </div>
+
+                        <button onClick={this.downloadAsSVG}>
+                            <Icon name="download"/>
+                            <p>Download</p>
+                        </button>
+                    </div>
                 </section>
 
                 <section>
                     <h2>As LBIN</h2>
                     <p>Export as <code>.clife</code>-file.<br/>This file can be imported any time by dragging it onto the screen.</p>
-
 
                     <div className={styles.downloadSection}>
                         <div className={styles.option}>
