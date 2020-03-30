@@ -1,35 +1,40 @@
-import {observer}                           from 'mobx-react';
-import {Component, createRef, h, RefObject} from 'preact';
-import {JSXInternal}                        from 'preact/src/jsx';
-import {bind}                               from '../../../lib/preact-utils';
-import {life}                               from '../../../store';
-import Icon                                 from '../../components/Icon';
-import styles                               from './Export.module.scss';
+import {observer}                from 'mobx-react';
+import {Component, createRef, h} from 'preact';
+import {JSXInternal}             from 'preact/src/jsx';
+import {bind}                    from '../../../lib/preact-utils';
+import {life}                    from '../../../store';
+import Icon                      from '../../components/Icon';
+import styles                    from './Export.module.scss';
 import Element = JSXInternal.Element;
 
 @observer
 export class Export extends Component {
-    private readonly exportRuleSet: RefObject<CheckBoxElement>;
-    private readonly exportDarkTheme: RefObject<CheckBoxElement>;
     private readonly prefersDarkTheme = matchMedia('(prefers-color-scheme: dark)').matches;
 
-    constructor() {
-        super();
-        this.exportRuleSet = createRef();
-        this.exportDarkTheme = createRef();
-    }
+    private readonly lbinOptions = {
+        fpsLock: createRef<CheckBoxElement>(),
+        ruleSet: createRef<CheckBoxElement>(),
+        generation: createRef<CheckBoxElement>()
+    };
+
+    private readonly svgOptions = {
+        darkTheme: createRef<CheckBoxElement>()
+    };
 
 
     @bind
     downloadAsSVG(): void {
-        const darkTheme = this.exportDarkTheme.current?.checked;
-        life.downloadAsSVG(darkTheme);
+        const darkTheme = this.svgOptions.darkTheme.current?.checked;
+        life.exportAsSVG(!!darkTheme);
     }
 
     @bind
     downloadAsLifeBin(): void {
-        const exportRuleset = this.exportRuleSet.current?.checked;
-        life.downloadAsLBin(exportRuleset);
+        life.exportAsLBin({
+            ruleSet: !!this.lbinOptions.ruleSet.current?.checked,
+            generation: !!this.lbinOptions.generation.current?.checked,
+            fpsLock: !!this.lbinOptions.fpsLock.current?.checked
+        });
     }
 
     render(): Element {
@@ -42,7 +47,7 @@ export class Export extends Component {
 
                     <div className={styles.downloadSection}>
                         <div className={styles.option}>
-                            <check-box checked={this.prefersDarkTheme} ref={this.exportDarkTheme}/>
+                            <check-box checked={this.prefersDarkTheme} ref={this.svgOptions.darkTheme}/>
                             <p>Dark theme</p>
                         </div>
 
@@ -59,9 +64,23 @@ export class Export extends Component {
 
                     <div className={styles.downloadSection}>
                         <div className={styles.option}>
-                            <check-box checked="true" ref={this.exportRuleSet}/>
+                            <check-box checked="true" ref={this.lbinOptions.ruleSet}/>
                             <p>Include ruleset</p>
                         </div>
+
+                        <div className={styles.option}>
+                            <check-box checked="true" ref={this.lbinOptions.generation}/>
+                            <p>Include generation</p>
+                        </div>
+
+                        {
+                            life.fpsLimitation === null ? '' : (
+                                <div className={styles.option}>
+                                    <check-box checked="true" ref={this.lbinOptions.fpsLock}/>
+                                    <p>Include FPS-Lock</p>
+                                </div>
+                            )
+                        }
 
                         <button onClick={this.downloadAsLifeBin}>
                             <Icon name="download"/>

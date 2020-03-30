@@ -66,6 +66,11 @@ export class Life {
     }
 
     @action
+    public setGenerationCounter(newCount: number): void {
+        this.generation = newCount;
+    }
+
+    @action
     public setCellSize(size: number): void {
         this.cellSize = size;
 
@@ -95,13 +100,17 @@ export class Life {
         this.source!.commit('nextGeneration');
     }
 
-    public downloadAsSVG(darkTheme: boolean): void {
+    public exportAsSVG(darkTheme: boolean): void {
         this.source!.call('convertToSvg', darkTheme).then(str => {
             download(str, `life-${formatDate('DD-MM-YYYY')}.svg`);
         });
     }
 
-    public downloadAsLBin(includeRules = true): void {
+    public exportAsLBin({ruleSet, generation, fpsLock}: {
+        ruleSet: boolean;
+        generation: boolean;
+        fpsLock: boolean;
+    }): void {
         Promise.all([
             this.source!.call('getCurrentGen'),
             this.source!.call('getEnv')
@@ -112,12 +121,20 @@ export class Life {
             data.set('cols', env.cols);
             data.set('rows', env.rows);
 
-            if (includeRules) {
+            if (ruleSet) {
                 data.set('resurrect-rules', this.resurrectRules);
                 data.set('survive-rules', this.surviveRules);
             }
 
-            download(data.encode(), `life-${formatDate('DD-MM-YYYY')}.lbin`);
+            if (generation) {
+                data.set('generation', this.generation);
+            }
+
+            if (fpsLock && this.fpsLimitation !== null) {
+                data.set('fps-lock', this.fpsLimitation);
+            }
+
+            download(data.encode(), `life-${formatDate('DD-MM-YYYY')}.lb`);
         });
     }
 

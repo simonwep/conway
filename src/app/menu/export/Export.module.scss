@@ -8,12 +8,12 @@
 
         > h2 {
             border-bottom: 3px solid var(--c-secondary-bg);
-            padding-bottom: 0.15em;
+            padding-bottom: 0.25em;
         }
 
         > p {
             margin-bottom: auto;
-            padding: 1em 0;
+            padding: 1.5em 0;
             line-height: 1.25em;
             text-align: center;
         }
@@ -23,6 +23,7 @@
         @include flex(row, center);
         background: var(--c-primary);
         padding: 0.75em 1em;
+        margin-top: 0.75em;
         border-radius: 0.15em;
         color: var(--c-text-secondary);
         transition: all 0.3s;
@@ -45,7 +46,7 @@
     .option {
         @include flex(row, center);
         font-size: 0.85em;
-        margin: 1em 0;
+        margin-top: 0.5em;
 
         > p {
             margin-left: 1em;
