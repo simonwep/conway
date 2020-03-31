@@ -59,8 +59,8 @@ export class Export extends Component {
                 </section>
 
                 <section>
-                    <h2>As LBIN</h2>
-                    <p>Export as <code>.clife</code>-file.<br/>This file can be imported any time by dragging it onto the screen.</p>
+                    <h2>As LifeBIN</h2>
+                    <p>Export as <code>.lb</code>-file.<br/>This file can be imported any time by dragging it onto the screen.</p>
 
                     <div className={styles.downloadSection}>
                         <div className={styles.option}>
