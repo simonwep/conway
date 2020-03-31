@@ -1,0 +1,30 @@
+@mixin pseudo-icon-x($color: white, $size: 60%, $thickness: 2px) {
+    position: relative;
+
+    &::before,
+    &::after {
+        @include pseudo();
+        @include size($size, $thickness);
+        @include position(0, 0, 0, 0);
+        background: $color;
+        border-radius: $thickness;
+        margin: auto;
+    }
+
+    &::after {
+        transform: rotate(90deg);
+    }
+}
+
+@mixin pseudo-icon-minus($color: white, $width: 60%, $height: 2px) {
+    position: relative;
+
+    &::after {
+        @include pseudo();
+        @include size($height, $width);
+        @include position(0, 0, 0, 0);
+        background: $color;
+        border-radius: $height;
+        margin: auto;
+    }
+}

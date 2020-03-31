@@ -13,6 +13,7 @@
 }
 
 .smallBlock {
+    @include pseudo-icon-minus(var(--c-primary-bg), 8px);
     transform: scale(0.75);
 
     &:hover {
@@ -20,6 +21,10 @@
     }
 }
 
-.largeBlock:hover {
-    transform: scale(1.15);
+.largeBlock {
+    @include pseudo-icon-x(var(--c-primary-bg), 8px);
+
+    &:hover {
+        transform: scale(1.15);
+    }
 }
