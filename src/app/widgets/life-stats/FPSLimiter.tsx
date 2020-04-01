@@ -14,7 +14,7 @@ export class FPSLimiter extends Component {
         super();
 
         // TODO: Improve API
-        shortcuts.registerAll([
+        shortcuts.register([
             {
                 name: 'lock-unlock-fps',
                 description: 'Toggle FPS-lock',

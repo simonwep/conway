@@ -106,7 +106,7 @@ export const init = async (): Promise<void> => {
     });
 
     // Register keyboard-shortcuts
-    shortcuts.registerAll([
+    shortcuts.register([
         {
             name: 'play-pause',
             description: 'Pause / Resume Simulation',

@@ -144,34 +144,32 @@ export class KeyboardShortcuts {
     }
 
     @action
-    public register(
-        {
-            name,
-            description,
-            binding,
-            callbacks = [],
-            stateChange = []
-        }: KeyboardShortcutRegistration
-    ): void {
-        const existing = this.shortcuts.get(name);
+    public register(registration: KeyboardShortcutRegistration | Array<KeyboardShortcutRegistration>): void {
+        if (!Array.isArray(registration)) {
+            registration = [registration];
+        }
 
-        if (existing) {
-            throw new Error(`A shortcut with the name ${name} already exists`);
-        } else {
-            this.shortcuts.set(name, {
-                active: false,
+        for (const reg of registration) {
+            const {
+                name,
                 description,
                 binding,
-                callbacks,
-                stateChange
-            });
-        }
-    }
+                callbacks = [],
+                stateChange = []
+            } = reg;
 
-    @action
-    public registerAll(registrations: Array<KeyboardShortcutRegistration>): void {
-        for (const reg of registrations) {
-            this.register(reg);
+            const existing = this.shortcuts.get(name);
+            if (existing) {
+                throw new Error(`A shortcut with the name ${name} already exists`);
+            } else {
+                this.shortcuts.set(name, {
+                    active: false,
+                    description,
+                    binding,
+                    callbacks,
+                    stateChange
+                });
+            }
         }
     }
 
