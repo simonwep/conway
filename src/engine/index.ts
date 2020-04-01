@@ -44,8 +44,8 @@ export const init = async (): Promise<void> => {
     await current.call('play');
 
     // Drawing requires up-to-date data from how the canvas is transformed / scaled
-    const panning = new Panning(mainCanvas, current);
-    new Draw(panning, overlayCanvas, mainCanvas, current);
+    const panning = new Panning(mainCanvas, current, shortcuts);
+    new Draw(panning, overlayCanvas, mainCanvas, current, shortcuts, life);
 
     // Fire awaiting requests
     for (const req of engineMountListeners) {

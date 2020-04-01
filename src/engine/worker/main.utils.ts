@@ -50,5 +50,5 @@ export function imageDataToSvg(
         str += `<path fill="${color}" d="${d}"/>`;
     }
 
-    return `${str  }</svg>`;
+    return `${str}</svg>`;
 }

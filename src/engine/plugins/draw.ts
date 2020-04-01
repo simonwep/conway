@@ -1,8 +1,9 @@
-import {ActorInstance}   from '../../lib/actor/actor.main';
-import {on}              from '../../lib/events';
-import {life, shortcuts} from '../../store'; // TODO: Move to class-attribute
-import {Engine}          from '../worker/main';
-import {Panning}         from './panning';
+import {ActorInstance}     from '../../lib/actor/actor.main';
+import {on}                from '../../lib/events';
+import {KeyboardShortcuts} from '../../store/models/KeyboardShortcuts';
+import {Life}              from '../store'; // TODO: Move to class-attribute
+import {Engine}            from '../worker/main';
+import {Panning}           from './panning';
 
 enum Mode {
     Resurrect = 'Set',
@@ -15,6 +16,8 @@ export class Draw {
     private readonly canvas: HTMLCanvasElement;
     private readonly engine: ActorInstance<Engine>;
     private readonly ctx: CanvasRenderingContext2D;
+    private readonly shortcuts: KeyboardShortcuts;
+    private readonly life: Life;
     private mode: Mode | null = null;
     private prevX = 0;
     private prevY = 0;
@@ -23,10 +26,14 @@ export class Draw {
         panning: Panning,
         canvas: HTMLCanvasElement,
         mainCanvas: HTMLCanvasElement,
-        engine: ActorInstance<Engine>
+        engine: ActorInstance<Engine>,
+        shortcuts: KeyboardShortcuts,
+        life: Life
     ) {
         this.panning = panning;
         this.mainCanvas = mainCanvas;
+        this.shortcuts = shortcuts;
+        this.life = life;
         this.canvas = canvas;
         this.engine = engine;
         this.ctx = canvas.getContext('2d', {
@@ -46,13 +53,12 @@ export class Draw {
     }
 
     private bindListeners(): void {
-        const {mainCanvas, panning} = this;
+        const {mainCanvas, panning, shortcuts} = this;
 
         on(mainCanvas, ['mousedown', 'touchstart'], (e: MouseEvent) => {
 
             // Check if user is currently dragging stuff around or clicked another element
-            if (
-                shortcuts.isActive('panning') ||
+            if (shortcuts.isActive('panning') ||
                 (e.target as HTMLElement).parentElement !== document.body
             ) {
                 return;
@@ -89,7 +95,7 @@ export class Draw {
     }
 
     private redraw(x: number = this.prevX, y: number = this.prevY): void {
-        const {panning: {transformation}, canvas, ctx, mode, engine} = this;
+        const {panning: {transformation}, canvas, ctx, mode, engine, life} = this;
 
         // Total scale
         const scale = transformation.scale * life.cellSize;

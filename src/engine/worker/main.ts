@@ -59,6 +59,7 @@ export class Engine {
     private activeAnimationFrame: number | null = null;
 
     // env-data such as screen size, size of block etc.
+    private lastConf: Config;
     private env: Environment;
 
     // If simulation is running.
@@ -74,20 +75,9 @@ export class Engine {
     private resurrectRules = 0b000001000;
     private surviveRules = 0b000001100;
 
-    public get imageData(): ImageData {
-        return new ImageData(
-            new Uint8ClampedArray(
-                this.wasm.memory.buffer,
-                this.universe.image_data(),
-                this.universe.image_size()
-            ),
-            this.env.preScaleWidth,
-            this.env.preScaleHeight
-        );
-    }
-
     private constructor(
         canvas: OffscreenCanvas,
+        lastConf: Config,
         env: Environment,
         graphicalWorker: ActorInstance<Graph>,
         universe: Universe,
@@ -96,6 +86,7 @@ export class Engine {
 
         // Apply props
         this.env = env;
+        this.lastConf = lastConf;
         this.wasm = wasm;
         this.universe = universe;
         this.graphicalWorker = graphicalWorker;
@@ -133,6 +124,18 @@ export class Engine {
         this.redraw();
     }
 
+    public get imageData(): ImageData {
+        return new ImageData(
+            new Uint8ClampedArray(
+                this.wasm.memory.buffer,
+                this.universe.image_data(),
+                this.universe.image_size()
+            ),
+            this.env.preScaleWidth,
+            this.env.preScaleHeight
+        );
+    }
+
     public static async create(
         canvas: OffscreenCanvas,
         config: Config
@@ -155,6 +158,7 @@ export class Engine {
 
         return new Engine(
             canvas,
+            config,
             env,
             graphicalWorker,
             universe,
@@ -288,22 +292,10 @@ export class Engine {
         ctx.drawImage(shadowCanvas, 0, 0, width, height);
     }
 
-    private redraw(): void {
-        const {universe} = this;
-
-        this.graphicalWorker.commit('update',
-            universe.killed_cells(),
-            universe.resurrected_cells()
-        );
-
-        this.shadowCtx.putImageData(this.imageData, 0, 0);
-        this.ctx.drawImage(this.shadowCanvas, 0, 0);
-    }
-
-    public async updateConfig(config: Config): Promise<void> {
-        const {universe, canvas, shadowCanvas, ctx, running} = this;
+    public async updateConfig(config: Partial<Config>): Promise<void> {
+        const {universe, lastConf, canvas, shadowCanvas, ctx, running} = this;
         const {rows, cols, scale, width, height} = (
-            this.env = Engine.configToEnv(config)
+            this.env = Engine.configToEnv({...lastConf, ...config})
         );
 
         canvas.width = width;
@@ -388,6 +380,18 @@ export class Engine {
         }
 
         return ~~(1000 / (total / Engine.FPS_BUFFER));
+    }
+
+    private redraw(): void {
+        const {universe} = this;
+
+        this.graphicalWorker.commit('update',
+            universe.killed_cells(),
+            universe.resurrected_cells()
+        );
+
+        this.shadowCtx.putImageData(this.imageData, 0, 0);
+        this.ctx.drawImage(this.shadowCanvas, 0, 0);
     }
 }
 

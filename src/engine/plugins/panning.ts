@@ -1,7 +1,7 @@
 import {ActorInstance}          from '../../lib/actor/actor.main';
 import {debounce}               from '../../lib/debounce';
 import {on}                     from '../../lib/events';
-import {shortcuts}              from '../../store';
+import {KeyboardShortcuts}      from '../../store/models/KeyboardShortcuts';
 import {Engine, Transformation} from '../worker/main';
 
 export class PanningEvent extends Event {
@@ -17,18 +17,25 @@ export class Panning extends EventTarget {
     private static readonly ZOOM_FACTOR = 1.5;
     public readonly transformation: Transformation;
     private readonly canvas: HTMLCanvasElement;
+    private readonly shortcuts: KeyboardShortcuts;
     private readonly engine: ActorInstance<Engine>;
 
-    constructor(canvas: HTMLCanvasElement, engine: ActorInstance<Engine>) {
+    constructor(
+        canvas: HTMLCanvasElement,
+        engine: ActorInstance<Engine>,
+        shortcuts: KeyboardShortcuts
+    ) {
         super();
         this.canvas = canvas;
         this.engine = engine;
+        this.shortcuts = shortcuts;
         this.transformation = {
             scale: 1,
             x: 0,
             y: 0
         };
 
+        // Register keyboard-shortcuts for this module
         shortcuts.register({
             name: 'panning',
             description: 'Drag with mouse',
@@ -86,7 +93,7 @@ export class Panning extends EventTarget {
         });
 
         on(canvas, 'mousedown', (e: MouseEvent): void => {
-            if (shortcuts.isActive('panning')) {
+            if (this.shortcuts.isActive('panning')) {
                 dragging = true;
                 sx = e.pageX;
                 sy = e.pageY;
