@@ -76,7 +76,9 @@ export class Life {
 
         // Sync with worker
         this.source!.commit('updateConfig', {
-            cellSize: size
+            cellSize: size,
+            width: window.innerWidth,
+            height: window.innerHeight
         });
     }
 

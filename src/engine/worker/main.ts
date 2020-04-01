@@ -300,10 +300,10 @@ export class Engine {
         this.ctx.drawImage(this.shadowCanvas, 0, 0);
     }
 
-    public async updateConfig(config: Partial<Config>): Promise<void> {
+    public async updateConfig(config: Config): Promise<void> {
         const {universe, canvas, shadowCanvas, ctx, running} = this;
         const {rows, cols, scale, width, height} = (
-            this.env = Engine.configToEnv({...this.env, ...config})
+            this.env = Engine.configToEnv(config)
         );
 
         canvas.width = width;

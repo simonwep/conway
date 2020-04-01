@@ -1,6 +1,6 @@
 import {ActorInstance}   from '../../lib/actor/actor.main';
 import {on}              from '../../lib/events';
-import {life, shortcuts} from '../../store';
+import {life, shortcuts} from '../../store'; // TODO: Move to class-attribute
 import {Engine}          from '../worker/main';
 import {Panning}         from './panning';
 
@@ -95,9 +95,12 @@ export class Draw {
         const scale = transformation.scale * life.cellSize;
         const roundedScale = Math.round(scale);
 
-        // Relative transformation of each pixel
-        const ox = (transformation.x % scale);
-        const oy = (transformation.y % scale);
+        // Relative transformation of each pixel and
+        // add canvas-margin to transformation which is the amount of remaining pixels
+        // which couldn't be filled with cells.
+        const {height, width} = canvas;
+        const ox = (transformation.x + (width % life.cellSize) / 2) % scale;
+        const oy = (transformation.y + (height % life.cellSize) / 2) % scale;
 
         // Resolve coordinates in current space
         const rx = Math.floor((x - ox) / scale);
