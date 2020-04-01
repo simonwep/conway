@@ -19,5 +19,6 @@ export function prettyKeyCode(e: KeyboardEvent): string {
         value = words.join(' ');
     }
 
-    return value;
+    // Always use uppercase-variant to prevent confusions caused by shift / caps-lock keys
+    return value.toUpperCase();
 }

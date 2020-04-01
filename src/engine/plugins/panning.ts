@@ -39,7 +39,7 @@ export class Panning extends EventTarget {
         shortcuts.register({
             name: 'panning',
             description: 'Drag with mouse',
-            binding: ['Control']
+            binding: ['CONTROL']
         });
 
         shortcuts.onChange('panning', state => {

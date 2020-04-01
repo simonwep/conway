@@ -31,7 +31,7 @@ export class Menu extends Component<Props, State> {
         shortcuts.register({
             name: 'open-menu',
             description: 'Show this menu',
-            binding: ['Escape'],
+            binding: ['ESCAPE'],
             callbacks: [(): void => menu.open ? menu.hide() : menu.show()]
         });
     }

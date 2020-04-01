@@ -110,25 +110,25 @@ export const init = async (): Promise<void> => {
         {
             name: 'play-pause',
             description: 'Pause / Resume Simulation',
-            binding: ['Space'],
+            binding: ['SPACE'],
             callbacks: [(): void => life.toggle()]
         },
         {
             name: 'next-generation',
             description: 'Generate next generation',
-            binding: ['Arrow Right'],
+            binding: ['ARROW RIGHT'],
             callbacks: [(): void => life.nextGeneration()]
         },
         {
             name: 'increase-cell-size',
             description: 'Increase the cell-size',
-            binding: ['Control', '+'],
+            binding: ['CONTROL', '+'],
             callbacks: [(): void => life.increaseCellSize()]
         },
         {
             name: 'decrease-cell-size',
             description: 'Decrease the cell-size',
-            binding: ['Control', '-'],
+            binding: ['CONTROL', '-'],
             callbacks: [(): void => life.decreaseCellSize()]
         }
     ]);

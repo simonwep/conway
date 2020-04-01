@@ -18,7 +18,7 @@ export class FPSLimiter extends Component {
             {
                 name: 'lock-unlock-fps',
                 description: 'Toggle FPS-lock',
-                binding: ['l'], // TODO: Make it non-case-sensitive
+                binding: ['L'],
                 callbacks: [(): void => {
                     life.setFPSLimitation(
                         life.fpsLimitation === null ? 30 : null
@@ -28,13 +28,13 @@ export class FPSLimiter extends Component {
             {
                 name: 'increase-lock-fps',
                 description: 'Increase locked FPS',
-                binding: ['Shift', 'O'],
+                binding: ['SHIFT', 'O'],
                 callbacks: [(): void => this.input.current?.increaseLimit()]
             },
             {
                 name: 'decrease-lock-fps',
                 description: 'Decrease locked FPS',
-                binding: ['Shift', 'L'],
+                binding: ['SHIFT', 'L'],
                 callbacks: [(): void => this.input.current?.decreaseLimit()]
             }
         ]);
