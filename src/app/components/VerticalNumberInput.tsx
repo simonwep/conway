@@ -25,8 +25,16 @@ type State = {
     value: number | null;
 };
 
+type UpdateData = Pick<MouseEvent, 'shiftKey'> &
+    Pick<MouseEvent, 'ctrlKey'>;
+
 @observer
 export class VerticalNumberInput extends Component<Props, State> {
+
+    private static DEFAULT_UPDATE: UpdateData = {
+        shiftKey: false,
+        ctrlKey: false
+    };
 
     public static defaultProps = {
         increase: (<button className={styles.arrowUp}/>),
@@ -52,12 +60,12 @@ export class VerticalNumberInput extends Component<Props, State> {
     }
 
     @bind
-    increaseLimit(e: MouseEvent): void {
+    increaseLimit(e: UpdateData = VerticalNumberInput.DEFAULT_UPDATE): void {
         this.updateLimit(e, this.props.step);
     }
 
     @bind
-    decreaseLimit(e: MouseEvent): void {
+    decreaseLimit(e: UpdateData = VerticalNumberInput.DEFAULT_UPDATE): void {
         this.updateLimit(e, -this.props.step);
     }
 
@@ -73,7 +81,7 @@ export class VerticalNumberInput extends Component<Props, State> {
     }
 
     @bind
-    updateLimit(event: MouseEvent, value: number): void {
+    updateLimit(event: UpdateData, value: number): void {
         const {ctrlKey, shiftKey} = event;
         const {state, props} = this;
         let next = state.value;
