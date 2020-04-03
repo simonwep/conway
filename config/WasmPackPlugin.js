@@ -5,14 +5,20 @@ const path = require('path');
 const NAME = 'WasmPackPlugin';
 module.exports.WasmPackPlugin = class {
 
-    constructor({crate = [], mode = 'production', debug = false}) {
+    constructor(
+        {
+            crate = [],
+            mode = 'production',
+            debug = false
+        }
+    ) {
         this.watchpack = new Watchpack();
         this.crates = (Array.isArray(crate) ? crate : [crate]);
         this.compiling = false;
         this.recompile = true;
         this.debug = debug;
         this.mode = mode;
-        this.mount();
+        this.mounted = false;
     }
 
     done(crate) {
@@ -54,6 +60,11 @@ module.exports.WasmPackPlugin = class {
     }
 
     mount() {
+        if (this.mounted) {
+            return;
+        }
+
+        this.mounted = true;
         this.watchpack.watch(
             [], this.crates.map(v => path.join(v, 'src'))
         );
@@ -77,6 +88,10 @@ module.exports.WasmPackPlugin = class {
     }
 
     apply(compiler) {
+
+        if (!this.mounted && compiler.options.mode === 'development') {
+            this.mount();
+        }
 
         // Compile all at start
         this.compileAll();

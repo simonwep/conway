@@ -1,7 +1,7 @@
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
+const {WasmPackPlugin} = require('./config/WasmPackPlugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
@@ -130,10 +130,8 @@ module.exports = {
         }),
 
         new WasmPackPlugin({
-            crateDirectory: crate,
-            extraArgs: '--target browser --mode normal',
-            args: '--log-level warn',
-            forceMode: 'production'
+            crate: crate,
+            mode: 'production'
         }),
 
         new WorkerPlugin({
