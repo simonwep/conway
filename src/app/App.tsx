@@ -29,7 +29,7 @@ export class App extends Component<Props, State> {
     }
 
     render(_: Props, {canvasInitialized}: State): Element {
-        return (
+        return canvasInitialized ? (
             <div>
                 <LifeStats/>
                 <Controls/>
@@ -37,8 +37,7 @@ export class App extends Component<Props, State> {
                 <Graph/>
                 <CellSize/>
                 <Menu/>
-                {!canvasInitialized ? <LoadingOverlay onLoaded={this.onLoaded}/> : ''}
             </div>
-        );
+        ) : <LoadingOverlay onLoaded={this.onLoaded}/>;
     }
 }

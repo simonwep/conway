@@ -9,14 +9,6 @@ import {Config, Engine}                 from './worker/main';
 // Engine instance
 export let engine: ActorInstance<Engine>;
 
-// Async way to retrieve the engine as soon as possible
-const engineMountListeners: Array<(engine: ActorInstance<Engine>) => void> = [];
-export const getEngine = async (): Promise<typeof engine> => {
-    return new Promise(resolve => {
-        engineMountListeners.push(resolve);
-    });
-};
-
 // Called only once to mount the canvas
 export const init = async (): Promise<void> => {
 
@@ -46,11 +38,6 @@ export const init = async (): Promise<void> => {
     // Drawing requires up-to-date data from how the canvas is transformed / scaled
     const panning = new Panning(mainCanvas, current, shortcuts);
     new Draw(panning, overlayCanvas, mainCanvas, current, shortcuts, life);
-
-    // Fire awaiting requests
-    for (const req of engineMountListeners) {
-        req(current);
-    }
 
     // Listen for dropped files
     /* eslint-disable no-console */

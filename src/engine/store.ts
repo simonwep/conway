@@ -1,6 +1,6 @@
 import {action, computed, observable} from 'mobx';
 import {serialize}                    from 'nason';
-import {ActorInstance}                from '../lib/actor/actor.main';
+import {ActorInstance, transfer}      from '../lib/actor/actor.main';
 import {download}                     from '../lib/download';
 import {formatDate}                   from '../lib/format-date';
 import {Engine}                       from './worker/main';
@@ -40,6 +40,10 @@ export class Life {
     @action
     public setEngine(engine: ActorInstance<Engine>): void {
         this.source = engine;
+    }
+
+    public registerGraphicCanvas(canvas: OffscreenCanvas): void {
+        this.source!.commit('setGraphCanvas', transfer(canvas));
     }
 
     @action
@@ -117,7 +121,7 @@ export class Life {
         ]).then(([cells, env]) => {
             const data = serialize({
                 cells,
-                cellSize: this.cellSize,
+                cellSize: env.cellSize,
                 cols: env.cols,
                 rows: env.rows,
                 rules: ruleSet ? {

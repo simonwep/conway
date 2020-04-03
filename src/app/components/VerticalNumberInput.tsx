@@ -31,11 +31,6 @@ type UpdateData = Pick<MouseEvent, 'shiftKey'> &
 @observer
 export class VerticalNumberInput extends Component<Props, State> {
 
-    private static DEFAULT_UPDATE: UpdateData = {
-        shiftKey: false,
-        ctrlKey: false
-    };
-
     public static defaultProps = {
         increase: (<button className={styles.arrowUp}/>),
         decrease: (<button className={styles.arrowDown}/>),
@@ -49,7 +44,10 @@ export class VerticalNumberInput extends Component<Props, State> {
         shiftKey: 5,
         ctrlKey: 10
     };
-
+    private static DEFAULT_UPDATE: UpdateData = {
+        shiftKey: false,
+        ctrlKey: false
+    };
     state = {
         value: 0
     };
