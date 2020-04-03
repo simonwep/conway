@@ -1,4 +1,5 @@
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
@@ -149,6 +150,7 @@ module.exports = {
             from: 'assets'
         }]),
 
-        new CleanWebpackPlugin()
+        new CleanWebpackPlugin(),
+        // new BundleAnalyzerPlugin()
     ]
 };

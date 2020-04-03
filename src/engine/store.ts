@@ -1,6 +1,6 @@
 import {action, computed, observable} from 'mobx';
+import {serialize}                    from 'nason';
 import {ActorInstance}                from '../lib/actor/actor.main';
-import {BinaryMap}                    from '../lib/bin-loader/BinaryMap';
 import {download}                     from '../lib/download';
 import {formatDate}                   from '../lib/format-date';
 import {Engine}                       from './worker/main';
@@ -115,26 +115,20 @@ export class Life {
             this.source!.call('getCurrentGen'),
             this.source!.call('getEnv')
         ]).then(([cells, env]) => {
-            const data = new BinaryMap();
-            data.set('cell-size', this.cellSize);
-            data.set('cells', cells);
-            data.set('cols', env.cols);
-            data.set('rows', env.rows);
+            const data = serialize({
+                cells,
+                cellSize: this.cellSize,
+                cols: env.cols,
+                rows: env.rows,
+                rules: ruleSet ? {
+                    resurrect: this.resurrectRules,
+                    survive: this.surviveRules
+                } : null,
+                generation: generation ? this.generation : null,
+                fpsLock: fpsLock && this.fpsLimitation !== null ? this.fpsLimitation : null
+            });
 
-            if (ruleSet) {
-                data.set('resurrect-rules', this.resurrectRules);
-                data.set('survive-rules', this.surviveRules);
-            }
-
-            if (generation) {
-                data.set('generation', this.generation);
-            }
-
-            if (fpsLock && this.fpsLimitation !== null) {
-                data.set('fps-lock', this.fpsLimitation);
-            }
-
-            download(data.encode(), `life-${formatDate('DD-MM-YYYY')}.lb`);
+            download(data, `life-${formatDate('DD-MM-YYYY')}.lb`);
         });
     }
 

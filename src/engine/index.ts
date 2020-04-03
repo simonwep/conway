@@ -1,5 +1,5 @@
+import {deserialize}                    from 'nason';
 import {Actor, ActorInstance, transfer} from '../lib/actor/actor.main';
-import {BinaryMap, Types}               from '../lib/bin-loader/BinaryMap';
 import {on}                             from '../lib/events';
 import {life, shortcuts}                from '../store';
 import {Draw}                           from './plugins/draw';
@@ -61,37 +61,23 @@ export const init = async (): Promise<void> => {
             if (files.length > 0) {
                 files[0].arrayBuffer().then(value => {
                     try {
-                        const map = BinaryMap.decode(
-                            new Uint8Array(value)
-                        );
-
-                        // TODO: Find better way to load in a config
-                        const resurrectRules = map.getDecoded('resurrect-rules', Types.Number);
-                        const surviveRules = map.getDecoded('survive-rules', Types.Number);
-                        const generation = map.getDecoded('generation', Types.Number);
-                        const cellSize = map.getDecoded('cell-size', Types.Number);
-                        const fpsLock = map.getDecoded('fps-lock', Types.Number);
-                        const cells = map.getDecoded('cells', Types.Uint8Array);
-                        const cols = map.getDecoded('cols', Types.Number);
+                        const data = deserialize(new Uint8Array(value)) as any;
 
                         // I assume the file is correct
-                        life.setCellSize(cellSize as number);
-                        engine.call('load', cells as Uint8Array, cols as number);
+                        life.setCellSize(data.cellSize);
+                        engine.call('load', data.cells, data.cols);
 
-                        if (generation !== null) {
-                            life.setGenerationCounter(generation);
+                        if (data.generation !== null) {
+                            life.setGenerationCounter(data.generation);
                         }
 
-                        if (fpsLock !== null) {
-                            life.setFPSLimitation(fpsLock);
+                        if (data.fpsLock !== null) {
+                            life.setFPSLimitation(data.fpsLock);
                         }
 
-                        if (resurrectRules !== null) {
-                            life.setResurrectRules(resurrectRules);
-                        }
-
-                        if (surviveRules !== null) {
-                            life.setSurviveRules(surviveRules);
+                        if (data.rules) {
+                            life.setResurrectRules(data.rules.resurrect);
+                            life.setSurviveRules(data.rules.survive);
                         }
 
                         life.pause();
