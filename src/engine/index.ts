@@ -49,6 +49,7 @@ export const init = async (): Promise<void> => {
             if (files.length > 0) {
                 files[0].arrayBuffer().then(value => {
                     try {
+                        /* eslint-disable @typescript-eslint/no-explicit-any */
                         const data = deserialize(new Uint8Array(value)) as any;
 
                         // I assume the file is correct

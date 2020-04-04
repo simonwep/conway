@@ -64,19 +64,19 @@ export class Export extends Component {
 
                     <div className={styles.downloadSection}>
                         <div className={styles.option}>
-                            <check-box checked="true" ref={this.lbinOptions.ruleSet}/>
+                            <check-box checked={true} ref={this.lbinOptions.ruleSet}/>
                             <p>Include ruleset</p>
                         </div>
 
                         <div className={styles.option}>
-                            <check-box checked="true" ref={this.lbinOptions.generation}/>
+                            <check-box checked={true} ref={this.lbinOptions.generation}/>
                             <p>Include generation</p>
                         </div>
 
                         {
                             life.fpsLimitation === null ? '' : (
                                 <div className={styles.option}>
-                                    <check-box checked="true" ref={this.lbinOptions.fpsLock}/>
+                                    <check-box checked={true} ref={this.lbinOptions.fpsLock}/>
                                     <p>Include FPS-Lock</p>
                                 </div>
                             )
