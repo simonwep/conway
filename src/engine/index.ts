@@ -1,5 +1,6 @@
 import {deserialize}                    from 'nason';
 import {Actor, ActorInstance, transfer} from '../lib/actor/actor.main';
+import {decompressBooleanArray}         from '../lib/bool-array-utils';
 import {on}                             from '../lib/events';
 import {life, shortcuts}                from '../store';
 import {Draw}                           from './plugins/draw';
@@ -52,7 +53,7 @@ export const init = async (): Promise<void> => {
 
                         // I assume the file is correct
                         life.setCellSize(data.cellSize);
-                        engine.call('load', data.cells, data.cols);
+                        engine.call('load', decompressBooleanArray(data.cells), data.cols);
 
                         if (data.generation !== null) {
                             life.setGenerationCounter(data.generation);

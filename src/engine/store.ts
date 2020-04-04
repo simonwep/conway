@@ -1,6 +1,7 @@
 import {action, computed, observable} from 'mobx';
 import {serialize}                    from 'nason';
 import {ActorInstance, transfer}      from '../lib/actor/actor.main';
+import {compressBooleanArray}         from '../lib/bool-array-utils';
 import {download}                     from '../lib/download';
 import {formatDate}                   from '../lib/format-date';
 import {Engine}                       from './worker/main';
@@ -120,7 +121,7 @@ export class Life {
             this.source!.call('getEnv')
         ]).then(([cells, env]) => {
             const data = serialize({
-                cells,
+                cells: compressBooleanArray(cells),
                 cellSize: env.cellSize,
                 cols: env.cols,
                 rows: env.rows,
