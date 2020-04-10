@@ -16,7 +16,7 @@ export class KeyBindings extends Component {
 
                 <div className={styles.header}>
                     <h3>Action</h3>
-                    <h3>Shortcut</h3>
+                    <h3>Shortcut <small>(click to edit)</small></h3>
                 </div>
 
                 <div className={styles.list}>
