@@ -126,10 +126,11 @@ export class KeyBinding extends Component<Props, State> {
         return (
             <div className={cn(styles.keyBinding, {
                 [styles.recording]: recording
-            })} onClick={this.toggleState}>
+            })}>
                 <p>{shortcut.description}</p>
 
-                <div className={styles.keys}>
+                <div className={styles.keys}
+                     onClick={this.toggleState}>
                     <span>{keys}</span>
                     <button>
                         {recording ? 'Update' : 'Edit Shortcut'}
