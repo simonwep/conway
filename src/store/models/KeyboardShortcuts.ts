@@ -138,9 +138,31 @@ export class KeyboardShortcuts {
         return matched;
     }
 
+    public isBindingAvailableFor(name: string, binding: Array<string>): boolean {
+        const target = this.getShortcut(name);
+
+        // Check if binding is already in use
+        for (const shortcut of this.shortcuts.values()) {
+            if (
+                shortcut !== target &&
+                shortcut.binding.every(v => binding.includes(v))
+            ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     @action
-    public updateBinding(name: string, binding: Array<string>): void {
+    public updateBinding(name: string, binding: Array<string>): boolean {
+        if (!this.isBindingAvailableFor(name, binding)) {
+            return false;
+        }
+
+        // Update
         this.getShortcut(name).binding = binding;
+        return true;
     }
 
     @action

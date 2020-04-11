@@ -1,5 +1,5 @@
 import {observer}                  from 'mobx-react';
-import {Component, h}              from 'preact';
+import {Component, createRef, h}   from 'preact';
 import {JSXInternal}               from 'preact/src/jsx';
 import {eventPath}                 from '../../../lib/event-path';
 import {EventBindingArgs, off, on} from '../../../lib/events';
@@ -16,6 +16,7 @@ type Props = {
 };
 
 type State = {
+    errored: boolean;
     recording: boolean;
     keyNames: Array<string>;
     listener: Array<EventBindingArgs>;
@@ -23,7 +24,10 @@ type State = {
 
 @observer
 export class KeyBinding extends Component<Props, State> {
+    private inputElement = createRef();
+
     state = {
+        errored: false,
         recording: false,
         keyNames: [] as Array<string>,
         listener: [] as Array<EventBindingArgs>
@@ -35,23 +39,36 @@ export class KeyBinding extends Component<Props, State> {
     }
 
     @bind
+    checkBinding(binding: Array<string>): void {
+        this.setState({
+            errored: !shortcuts.isBindingAvailableFor(
+                this.props.shortcut.name,
+                binding
+            )
+        });
+    }
+
+    @bind
     toggleState(): void {
         const {recording} = this.state;
         let {listener} = this.state;
 
         if (recording) {
-            shortcuts.unlock();
-
-            // Unbind listeners
-            for (const args of listener) {
-                off(...args);
-            }
 
             // Apply update
-            shortcuts.updateBinding(
+            const updated = shortcuts.updateBinding(
                 this.props.shortcut.name,
                 this.state.keyNames
             );
+
+            if (updated) {
+                shortcuts.unlock();
+
+                // Unbind listeners
+                for (const args of listener) {
+                    off(...args);
+                }
+            }
         } else {
             shortcuts.lock();
             let keyNamesCopy = [...this.state.keyNames];
@@ -59,7 +76,6 @@ export class KeyBinding extends Component<Props, State> {
 
             // Bind listeners
             listener = [
-
                 on(window, 'keydown', (e: KeyboardEvent) => {
                     const key = prettyKeyCode(e);
 
@@ -70,7 +86,7 @@ export class KeyBinding extends Component<Props, State> {
 
                         init = false;
                         keyNamesCopy.push(key);
-
+                        this.checkBinding(keyNamesCopy);
                         this.setState({
                             keyNames: [...keyNamesCopy]
                         });
@@ -95,7 +111,7 @@ export class KeyBinding extends Component<Props, State> {
                 on(window, 'click', (e: MouseEvent) => {
                     const path = eventPath(e);
 
-                    if (!path.includes(this.base as HTMLElement)) {
+                    if (!path.includes(this.inputElement.current as HTMLElement)) {
                         this.toggleState();
                     }
                 }),
@@ -109,12 +125,13 @@ export class KeyBinding extends Component<Props, State> {
 
         this.setState({
             listener,
+            errored: false,
             recording: !recording
         });
     }
 
     render(): Element {
-        const {recording, keyNames} = this.state;
+        const {errored, recording, keyNames} = this.state;
         const {shortcut} = this.props;
         const keys = (recording ? keyNames : shortcut.binding).map(value => {
 
@@ -129,12 +146,19 @@ export class KeyBinding extends Component<Props, State> {
             })}>
                 <p>{shortcut.description}</p>
 
-                <div className={styles.keys}
-                     onClick={this.toggleState}>
-                    <span>{keys}</span>
-                    <button>
-                        {recording ? 'Update' : 'Edit Shortcut'}
-                    </button>
+                <div className={styles.keysWrapper}>
+                    <div className={styles.keys}
+                         onClick={this.toggleState}
+                         ref={this.inputElement}>
+                        <span>{keys}</span>
+                        <button className={cn({
+                            [styles.hidden]: errored
+                        })}>
+                            {recording ? 'Update' : 'Edit Shortcut'}
+                        </button>
+                    </div>
+
+                    {errored ? <p className={styles.errorText}>This shortcut is already in use</p> : ''}
                 </div>
             </div>
         );
