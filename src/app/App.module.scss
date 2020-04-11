@@ -1,0 +1,8 @@
+.contentWrapper {
+    transition: all 0.3s;
+
+    &.hidden {
+        pointer-events: none;
+        opacity: 0;
+    }
+}

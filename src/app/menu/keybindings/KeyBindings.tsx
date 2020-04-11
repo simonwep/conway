@@ -14,7 +14,7 @@ export class KeyBindings extends Component {
         return (
             <div className={styles.keyBindings}>
 
-                <p class={styles.disableHint}>Shortcuts are disabled while this panel is visible.</p>
+                <p className={styles.disableHint}>Shortcuts are disabled while this panel is visible.</p>
 
                 <div className={styles.header}>
                     <h3>Action</h3>

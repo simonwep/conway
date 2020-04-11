@@ -1,6 +1,8 @@
 import {Component, h}   from 'preact';
 import {JSXInternal}    from 'preact/src/jsx';
-import {bind}           from '../lib/preact-utils';
+import {bind, cn}       from '../lib/preact-utils';
+import {shortcuts}      from '../store';
+import styles           from './App.module.scss';
 import {LoadingOverlay} from './LoadingOverlay';
 import {Menu}           from './menu/Menu';
 import {CellSize}       from './widgets/cell-size/CellSize';
@@ -13,13 +15,25 @@ import Element = JSXInternal.Element;
 type Props = {};
 type State = {
     canvasInitialized: boolean;
+    hideUI: boolean;
 };
 
 export class App extends Component<Props, State> {
 
     state = {
-        canvasInitialized: false
+        canvasInitialized: false,
+        hideUI: false
     };
+
+    constructor() {
+        super();
+        shortcuts.register({
+            name: 'toggle-ui',
+            description: 'Hide / Show the UI',
+            binding: ['F1'],
+            callbacks: [this.toggleUI]
+        });
+    }
 
     @bind
     onLoaded(): void {
@@ -28,14 +42,25 @@ export class App extends Component<Props, State> {
         });
     }
 
-    render(_: Props, {canvasInitialized}: State): Element {
+    @bind
+    toggleUI(): void {
+        this.setState({
+            hideUI: !this.state.hideUI
+        });
+    }
+
+    render(_: Props, {canvasInitialized, hideUI}: State): Element {
         return canvasInitialized ? (
             <div>
-                <LifeStats/>
-                <Controls/>
-                <Rules/>
-                <Graph/>
-                <CellSize/>
+                <div className={cn(styles.contentWrapper, {
+                    [styles.hidden]: hideUI
+                })}>
+                    <LifeStats/>
+                    <Controls/>
+                    <Rules/>
+                    <Graph/>
+                    <CellSize/>
+                </div>
                 <Menu/>
             </div>
         ) : <LoadingOverlay onLoaded={this.onLoaded}/>;
