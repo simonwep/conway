@@ -23,11 +23,11 @@ module.exports = {
 
     devServer: {
         port: 3008,
-        liveReload: false,
         disableHostCheck: true,
         historyApiFallback: true,
         stats: 'errors-only',
         host: '0.0.0.0',
+        quiet: true,
         hot: true
     },
 
@@ -62,19 +62,15 @@ module.exports = {
                 test: /\.module\.(scss|sass|css)$/,
                 include: app,
                 use: [
-                    {
-                        loader: 'style-loader',
-                        options: {
-                            hmr: true
-                        }
-                    },
+                    'css-hot-loader',
+                    'style-loader',
                     {
                         loader: 'css-loader',
                         options: {
                             sourceMap: true,
                             importLoaders: 1,
                             modules: {
-                                localIdentName: '[local]-[hash:base64:5]'
+                                localIdentName: '[name]__[hash:base64:5]'
                             }
                         }
                     }
@@ -84,12 +80,8 @@ module.exports = {
                 test: /\.(scss|sass|css)$/,
                 exclude: app,
                 use: [
-                    {
-                        loader: 'style-loader',
-                        options: {
-                            hmr: true
-                        }
-                    },
+                    'css-hot-loader',
+                    'style-loader',
                     {
                         loader: 'css-loader',
                         options: {

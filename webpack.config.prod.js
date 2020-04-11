@@ -81,7 +81,9 @@ module.exports = {
             {
                 test: /\.(js|ts|tsx)$/,
                 include: src,
-                use: 'ts-loader'
+                use: [
+                    'ts-loader'
+                ]
             }
         ]
     },
