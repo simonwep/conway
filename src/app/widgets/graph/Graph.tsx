@@ -12,8 +12,13 @@ export class Graph extends Component {
     private canvas = createRef<HTMLCanvasElement>();
 
     componentDidMount(): void {
-        const offscreenCanvas = (this.canvas.current as HTMLCanvasElement).transferControlToOffscreen();
-        life.registerGraphicCanvas(offscreenCanvas);
+        const canvas = (this.canvas.current as HTMLCanvasElement);
+        const offscreenCanvas = canvas.transferControlToOffscreen();
+
+        life.registerGraphicCanvas(
+            offscreenCanvas,
+            canvas.getBoundingClientRect()
+        );
     }
 
     render(): Element {

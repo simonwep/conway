@@ -3,14 +3,16 @@ import {Actor, ActorInstance, transfer} from '../../lib/actor/actor.main';
 import {actor}                          from '../../lib/actor/actor.worker';
 import {Graph}                          from './graph';
 import {imageDataToSvg}                 from './main.utils';
+import {hdpiSizeOf}                     from '../utils';
 
 export type Config = {
-    width: number;
-    height: number;
+    devicePixelRatio: number;
+    canvasRect: DOMRect;
     cellSize: number;
 };
 
 export type Environment = {
+    devicePixelRatio: number;
     width: number;
     height: number;
     cols: number;
@@ -167,7 +169,8 @@ export class Engine {
     }
 
     private static configToEnv(conf: Config): Environment {
-        const {width, height, cellSize} = conf;
+        const {cellSize, devicePixelRatio, canvasRect} = conf;
+        const [width, height] = hdpiSizeOf(canvasRect, devicePixelRatio);
 
         // Recalculate grid and canvas dimensions
         const realWidth = width - width % cellSize;
@@ -176,8 +179,9 @@ export class Engine {
         const rows = realHeight / cellSize;
 
         return {
-            width: realWidth,
-            height: realHeight,
+            devicePixelRatio,
+            width,
+            height,
             preScaleWidth: realWidth / cellSize,
             preScaleHeight: realHeight / cellSize,
             scale: cellSize,
@@ -208,10 +212,8 @@ export class Engine {
         this.running = true;
         const {fpsBuffer} = this;
 
-        // TODO: Use device-pixel-ratio
         let latestFrame = performance.now();
         let fpsBufferIndex = 0;
-
         const renderLoop = async (): Promise<void> => {
             const end = performance.now();
 
@@ -328,8 +330,16 @@ export class Engine {
         this.universe.set_ruleset(resurrect, survive);
     }
 
-    public setGraphCanvas(canvas: OffscreenCanvas): void {
-        this.graphicalWorker.commit('setCanvas', transfer(canvas));
+    public setGraphCanvas(
+        canvas: OffscreenCanvas,
+        canvasRect: DOMRect
+    ): void {
+        this.graphicalWorker.commit(
+            'setCanvas',
+            transfer(canvas),
+            this.env.devicePixelRatio,
+            canvasRect
+        );
     }
 
     public setCell(x: number, y: number, state: boolean): void {

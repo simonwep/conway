@@ -6,6 +6,7 @@ import {life, shortcuts}                from '../store';
 import {Draw}                           from './plugins/draw';
 import {Panning}                        from './plugins/panning';
 import {Config, Engine}                 from './worker/main';
+import {fullscreenCanvas}               from './utils';
 
 // Engine instance
 export let engine: ActorInstance<Engine>;
@@ -16,6 +17,8 @@ export const init = async (): Promise<void> => {
     // Grab canvases
     const overlayCanvas = document.getElementById('draw-overlay') as HTMLCanvasElement;
     const mainCanvas = document.getElementById('main-canvas') as HTMLCanvasElement;
+    fullscreenCanvas(overlayCanvas);
+    fullscreenCanvas(mainCanvas);
 
     // Prep offscreenCanvas
     const offscreenCanvas = mainCanvas.transferControlToOffscreen();
@@ -25,9 +28,9 @@ export const init = async (): Promise<void> => {
         './worker/main.ts',
         {type: 'module'}
     )).create<Engine>('Engine', transfer(offscreenCanvas), {
-        cellSize: 2,
-        width: window.innerWidth,
-        height: window.innerHeight
+        devicePixelRatio: window.devicePixelRatio,
+        canvasRect: mainCanvas.getBoundingClientRect(),
+        cellSize: 2
     } as Config);
 
     // Link to store

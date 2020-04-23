@@ -1,5 +1,6 @@
 import {actor}                       from '../../lib/actor/actor.worker';
 import {calculateMaximums, drawGrid} from './graph.utils';
+import {hdpiSizeOf}                  from '../utils';
 
 @actor()
 export class Graph {
@@ -14,7 +15,15 @@ export class Graph {
     private bufferOffset = 0;
     private alive = 0;
 
-    public setCanvas(canvas: OffscreenCanvas): void {
+    public setCanvas(
+        canvas: OffscreenCanvas,
+        devicePixelRatio: number,
+        canvasRect: DOMRect
+    ): void {
+        const [width, height] = hdpiSizeOf(canvasRect, devicePixelRatio);
+        canvas.width = width;
+        canvas.height = height;
+
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d', {
             antialias: false,

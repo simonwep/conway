@@ -43,8 +43,11 @@ export class Life {
         this.source = engine;
     }
 
-    public registerGraphicCanvas(canvas: OffscreenCanvas): void {
-        this.source!.commit('setGraphCanvas', transfer(canvas));
+    public registerGraphicCanvas(
+        canvas: OffscreenCanvas,
+        canvasRect: DOMRect
+    ): void {
+        this.source!.commit('setGraphCanvas', transfer(canvas), canvasRect);
     }
 
     @action

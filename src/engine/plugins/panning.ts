@@ -3,6 +3,7 @@ import {debounce}               from '../../lib/debounce';
 import {on}                     from '../../lib/events';
 import {KeyboardShortcuts}      from '../../store/models/KeyboardShortcuts';
 import {Engine, Transformation} from '../worker/main';
+import {fullscreenCanvas}       from '../utils';
 
 export class PanningEvent extends Event {
     public readonly transformation: Transformation;
@@ -105,11 +106,11 @@ export class Panning extends EventTarget {
         });
 
         on(window, 'resize', debounce((): void => {
+            fullscreenCanvas(this.canvas);
 
             // Update canvas living inside of the worker
             this.engine.commit('updateConfig', {
-                width: window.innerWidth,
-                height: window.innerHeight
+                canvasBCR: this.canvas.getBoundingClientRect()
             });
         }));
     }

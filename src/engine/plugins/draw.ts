@@ -3,6 +3,7 @@ import {on}                from '../../lib/events';
 import {KeyboardShortcuts} from '../../store/models/KeyboardShortcuts';
 import {Life}              from '../store'; // TODO: Move to class-attribute
 import {Engine}            from '../worker/main';
+import {fullscreenCanvas}  from '../utils';
 import {Panning}           from './panning';
 
 enum Mode {
@@ -49,7 +50,6 @@ export class Draw {
         canvas.style.pointerEvents = 'none';
 
         this.bindListeners();
-        this.fitToWindow();
     }
 
     private bindListeners(): void {
@@ -85,13 +85,8 @@ export class Draw {
             this.redraw(e.pageX, e.pageY);
         });
 
-        on(window, 'resize', () => this.fitToWindow());
+        on(window, 'resize', () => fullscreenCanvas(this.canvas));
         on(panning, 'panning', () => this.redraw());
-    }
-
-    private fitToWindow(): void {
-        this.canvas.height = window.innerHeight;
-        this.canvas.width = window.innerWidth;
     }
 
     private redraw(x: number = this.prevX, y: number = this.prevY): void {
