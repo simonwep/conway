@@ -40,7 +40,7 @@ export function drawGrid(
     const gradient = ctx.createRadialGradient(gx, gy, 0, gx, gy, Math.max(width, height) * 0.75);
 
     gradient.addColorStop(0, 'rgba(239,0,255,0.25)');
-    gradient.addColorStop(.5, 'rgba(131,0,255,0.5)');
+    gradient.addColorStop(0.5, 'rgba(131,0,255,0.5)');
     gradient.addColorStop(0.95, 'rgba(0,135,243,1)');
 
     ctx.strokeStyle = gradient;
@@ -57,7 +57,5 @@ export function drawGrid(
         ctx.lineTo(width, y);
     }
 
-    ctx.setTransform(1, 0, 0, 0.5, 0, 0.25 * height);
     ctx.stroke();
-    ctx.resetTransform();
 }

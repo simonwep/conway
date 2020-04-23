@@ -43,7 +43,7 @@ export class Life {
         this.source = engine;
     }
 
-    public registerGraphicCanvas(
+    public registerGraphCanvas(
         canvas: OffscreenCanvas,
         canvasRect: DOMRect
     ): void {

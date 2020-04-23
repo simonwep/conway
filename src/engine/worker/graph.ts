@@ -8,6 +8,7 @@ export class Graph {
     // Graph buffer
     private static GRAPH_PADDING = 10;
     private static BUFFER_SIZE = 250 * 3; // n * (killed, resurrected, alive)
+
     // Target canvas
     private canvas: OffscreenCanvas | null = null;
     private ctx: OffscreenCanvasRenderingContext2D | null = null;
@@ -21,8 +22,8 @@ export class Graph {
         canvasRect: DOMRect
     ): void {
         const [width, height] = hdpiSizeOf(canvasRect, devicePixelRatio);
-        canvas.width = width;
         canvas.height = height;
+        canvas.width = width;
 
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d', {

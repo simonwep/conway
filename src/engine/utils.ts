@@ -13,6 +13,4 @@ export function fullscreenCanvas(canvas: HTMLCanvasElement): void {
     const {innerWidth: w, innerHeight: h} = window;
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
-    canvas.height = h;
-    canvas.width = w;
 }

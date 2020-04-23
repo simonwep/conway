@@ -5,4 +5,8 @@
     right: 0;
     overflow: hidden;
     padding: 0;
+
+    > canvas {
+        @include size(182px, 381px);
+    }
 }

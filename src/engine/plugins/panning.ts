@@ -110,7 +110,7 @@ export class Panning extends EventTarget {
 
             // Update canvas living inside of the worker
             this.engine.commit('updateConfig', {
-                canvasBCR: this.canvas.getBoundingClientRect()
+                canvasRect: this.canvas.getBoundingClientRect()
             });
         }));
     }
