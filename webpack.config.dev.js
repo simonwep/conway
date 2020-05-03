@@ -6,6 +6,7 @@ const webpack = require('webpack');
 const pkg = require('./package');
 const path = require('path');
 
+const globalSCSS = path.resolve(__dirname, 'src/styles/_global.scss');
 const dist = path.resolve(__dirname, 'dist');
 const crate = path.resolve(__dirname, 'crate');
 const src = path.resolve(__dirname, 'src');
@@ -35,7 +36,8 @@ module.exports = {
         extensions: ['.ts', '.tsx', '.js', '.scss'],
         alias: {
             'react': 'preact/compat',
-            'react-dom': 'preact/compat'
+            'react-dom': 'preact/compat',
+            'mobx': path.join(__dirname, '/node_modules/mobx/lib/mobx.es6.js')
         }
     },
 
@@ -53,7 +55,10 @@ module.exports = {
                         loader: 'sass-loader',
                         options: {
                             sourceMap: true,
-                            prependData: '@import "src/styles/_global.scss";'
+                            prependData: '@import "src/styles/_variables.scss";',
+                            sassOptions: {
+                                includePaths: [globalSCSS]
+                            }
                         }
                     }
                 ]

@@ -61,7 +61,7 @@ export class Menu extends Component<Props, State> {
             const open = currentPage === name;
 
             navigation.push(
-                <button className={cn([styles.openTab, open])}
+                <button className={cn({[styles.openTab]: open})}
                         onClick={this.changeTab(name)}
                         key={name}>
                     {name}

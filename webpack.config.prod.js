@@ -1,5 +1,4 @@
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const {WasmPackPlugin} = require('./config/WasmPackPlugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
@@ -12,6 +11,7 @@ const webpack = require('webpack');
 const pkg = require('./package');
 const path = require('path');
 
+const globalSCSS = path.resolve(__dirname, 'src/styles/_global.scss');
 const dist = path.resolve(__dirname, 'dist');
 const crate = path.resolve(__dirname, 'crate');
 const src = path.resolve(__dirname, 'src');
@@ -32,7 +32,8 @@ module.exports = {
         extensions: ['.ts', '.tsx', '.js', '.scss'],
         alias: {
             'react': 'preact/compat',
-            'react-dom': 'preact/compat'
+            'react-dom': 'preact/compat',
+            'mobx': path.join(__dirname, '/node_modules/mobx/lib/mobx.es6.js')
         }
     },
 
@@ -49,7 +50,11 @@ module.exports = {
                     {
                         loader: 'sass-loader',
                         options: {
-                            prependData: '@import "src/styles/_global.scss";'
+                            sourceMap: true,
+                            prependData: '@import "src/styles/_variables.scss";',
+                            sassOptions: {
+                                includePaths: [globalSCSS]
+                            }
                         }
                     }
                 ]
@@ -97,9 +102,7 @@ module.exports = {
                     mangle: true,
                     keep_classnames: true
                 }
-            }),
-
-            new OptimizeCSSAssetsPlugin({})
+            })
         ]
     },
 
@@ -131,6 +134,7 @@ module.exports = {
             chunkFilename: 'css/[name].[hash:6].css'
         }),
 
+        new OptimizeCSSAssetsPlugin({}),
         new WasmPackPlugin({
             crate: crate,
             mode: 'production'
