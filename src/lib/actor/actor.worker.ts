@@ -1,5 +1,8 @@
 import {WorkerFunctionCall, WorkerFunctionCallReply, WorkerInstantiation, WorkerInstantiationReply} from './actor.main';
 
+// Tell TS that we're in a worker
+declare var self: DedicatedWorkerGlobalScope;
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type RegisteredClass = {
     constructor: any;
@@ -15,7 +18,7 @@ let instanceIndex = 0;
 const classes = new Map<string, RegisteredClass>();
 
 // Listen for messages
-self.addEventListener('message', async ev => {
+self.addEventListener('message', async (ev) => {
     const data = ev.data as (WorkerInstantiation | WorkerFunctionCall);
 
     switch (data.type) {
@@ -60,6 +63,7 @@ self.addEventListener('message', async ev => {
             }
 
             // Try to create an instance
+            // TODO: This is blocking!
             const {constructor, instantiationFunction} = classes.get(name) as RegisteredClass;
             const instance = instantiationFunction ?
                 await constructor[instantiationFunction](...args) :

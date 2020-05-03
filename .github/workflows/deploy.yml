@@ -8,7 +8,7 @@ jobs:
   deploy:
 
     runs-on: ubuntu-latest
-    
+
     env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -21,13 +21,24 @@ jobs:
         node-version: 13.x
         CI: true
     - run: |
+        # Install rust
+        cd ..
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh
-        chmod +x rustup.sh 
+        chmod +x rustup.sh
         ./rustup.sh -y
+
+        # Install wasm pack
         curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-        npm ci
+
+        # Build
+        cd conway
+        rm -rf package-lock.json
+        npm install # npm ci somehow doesn't work
         npm run build
+
+        # Deploy
+        cd ..
         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
         unzip -q awscliv2.zip
         sudo ./aws/install
-        aws s3 sync ./dist s3://conway.reinisch.io
+        aws s3 sync ./conway/dist s3://conway.reinisch.io

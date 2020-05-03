@@ -69,7 +69,9 @@ export class Menu extends Component<Props, State> {
             );
 
             pages.push(
-                <div className={cn(styles.pageWrapper, [styles.openPage, open])}
+                <div className={cn(styles.pageWrapper, {
+                    [styles.openPage]: open
+                })}
                      key={name}>
                     {page}
                 </div>

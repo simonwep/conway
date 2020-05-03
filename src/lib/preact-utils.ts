@@ -6,7 +6,7 @@ import {Component} from 'preact';
  * @param values
  */
 export function cn(...values: Array<string | {[key: string]: boolean}>): string {
-    let classNames: Array<string> = [];
+    const classNames: Array<string> = [];
 
     for (const item of values) {
         switch (typeof item) {

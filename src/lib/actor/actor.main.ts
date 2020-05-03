@@ -27,6 +27,7 @@ export type WorkerFunctionCallReply = {
 };
 
 const TRANSFER_KEY = Symbol('transfer.key');
+const targetOrigin = location.origin;
 
 /**
  * Wraps a value which shall be transferred to the worker.
