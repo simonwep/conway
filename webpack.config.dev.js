@@ -1,4 +1,4 @@
-const {WasmPackPlugin} = require('./config/WasmPackPlugin');
+const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const WorkerPlugin = require('worker-plugin');
@@ -125,8 +125,11 @@ module.exports = {
         }),
 
         new WasmPackPlugin({
-            crate: crate,
-            mode: 'production'
+            outDir: path.join(crate, 'pkg'),
+            crateDirectory: crate,
+            args: '--log-level error',
+            pluginLogLevel: 'error',
+            forceMode: 'release'
         }),
 
         new CopyPlugin([{
