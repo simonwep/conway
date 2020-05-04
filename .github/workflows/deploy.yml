@@ -42,3 +42,6 @@ jobs:
         unzip -q awscliv2.zip
         sudo ./aws/install
         aws s3 sync ./conway/dist s3://conway.reinisch.io
+        aws cloudfront create-invalidation \
+            --distribution-id E25SCWN1EQDYNU \
+            --paths "/*"
