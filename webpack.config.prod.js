@@ -97,10 +97,15 @@ module.exports = {
         minimize: true,
         minimizer: [
             new TerserPlugin({
+                extractComments: false,
+                parallel: true,
                 sourceMap: true,
                 terserOptions: {
+                    toplevel: true,
                     mangle: true,
-                    keep_classnames: true
+                    output: {
+                        comments: /^!/
+                    }
                 }
             })
         ]
