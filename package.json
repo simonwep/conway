@@ -17,8 +17,8 @@
     },
     "devDependencies": {
         "@types/webpack-env": "^1.15.2",
-        "@typescript-eslint/eslint-plugin": "^3.0.0",
-        "@typescript-eslint/parser": "^3.0.0",
+        "@typescript-eslint/eslint-plugin": "^2.34.0",
+        "@typescript-eslint/parser": "^2.34.0",
         "@wasm-tool/wasm-pack-plugin": "^1.3.1",
         "clean-webpack-plugin": "^3.0.0",
         "copy-webpack-plugin": "^6.0.1",
