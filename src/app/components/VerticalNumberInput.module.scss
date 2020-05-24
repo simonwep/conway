@@ -27,7 +27,7 @@
     &::before,
     &::after {
         @include pseudo();
-        @include size(4px, 65%);
+        @include size(65%, 4px);
         @include position(0, 0, 0, 0);
         background: var(--c-primary);
         border-radius: 50em;

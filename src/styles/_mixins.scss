@@ -4,7 +4,7 @@
     &::before,
     &::after {
         @include pseudo();
-        @include size($size, $thickness);
+        @include size($thickness, $size);
         @include position(0, 0, 0, 0);
         background: $color;
         border-radius: $thickness;
@@ -21,7 +21,7 @@
 
     &::after {
         @include pseudo();
-        @include size($height, $width);
+        @include size($width, $height);
         @include position(0, 0, 0, 0);
         background: $color;
         border-radius: $height;

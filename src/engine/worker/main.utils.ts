@@ -37,9 +37,9 @@ export function imageDataToSvg(
 
     // Inverse colors if wanted
     if (inverse) {
-        str += '<filter id="inverse">'
-            + '<feColorMatrix in="SourceGraphic" type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>'
-            + '</filter>';
+        str += '<filter id="inverse">' +
+            '<feColorMatrix in="SourceGraphic" type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>' +
+            '</filter>';
     }
 
     // Background

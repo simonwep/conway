@@ -37,7 +37,7 @@
         &::before,
         &::after {
             @include pseudo();
-            @include size(100%, 2px);
+            @include size(2px, 100%);
             top: 0;
             background: var(--c-text-primary);
             left: 50%;

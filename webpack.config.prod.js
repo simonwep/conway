@@ -158,10 +158,11 @@ module.exports = {
             skipWaiting: true
         }),
 
-        new CopyPlugin([{
-            context: 'src',
-            from: 'assets'
-        }]),
+        new CopyPlugin({
+            patterns: [
+                {context: 'src', from: 'assets'}
+            ]
+        }),
 
         new CleanWebpackPlugin()
         // new BundleAnalyzerPlugin()

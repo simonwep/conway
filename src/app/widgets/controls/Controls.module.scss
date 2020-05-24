@@ -6,7 +6,7 @@
     bottom: 0;
 
     > p {
-        @include size(1.5em, 2px);
+        @include size(2px, 1.5em);
         flex-shrink: 0;
         background: var(--c-primary);
         margin: 0 1em;
@@ -20,7 +20,7 @@
 
     &::before,
     &::after {
-        @include size(20px, 4px);
+        @include size(4px, 20px);
         position: absolute;
         top: 0;
         content: '';
@@ -75,18 +75,18 @@
 }
 
 .forwardBtn {
-    @include size(20px, 28px);
+    @include size(28px, 20px);
     transition: all 0.3s;
 
     > div {
-        @include size(20px, 14px);
+        @include size(14px, 20px);
         position: relative;
         transition: all 0.3s;
         display: inline-block;
 
         &::before,
         &::after {
-            @include size(14px, 3px);
+            @include size(3px, 14px);
             @include pseudo();
             @include position(0, 0, 0, 0);
             background: var(--c-primary);

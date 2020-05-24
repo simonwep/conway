@@ -7,6 +7,6 @@
     padding: 0;
 
     > canvas {
-        @include size(182px, 381px);
+        @include size(381px, 182px);
     }
 }

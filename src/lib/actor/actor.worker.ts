@@ -1,7 +1,7 @@
 import {WorkerFunctionCall, WorkerFunctionCallReply, WorkerInstantiation, WorkerInstantiationReply} from './actor.main';
 
 // Tell TS that we're in a worker
-declare var self: DedicatedWorkerGlobalScope;
+declare let self: DedicatedWorkerGlobalScope;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type RegisteredClass = {
@@ -18,7 +18,7 @@ let instanceIndex = 0;
 const classes = new Map<string, RegisteredClass>();
 
 // Listen for messages
-self.addEventListener('message', async (ev) => {
+self.addEventListener('message', async ev => {
     const data = ev.data as (WorkerInstantiation | WorkerFunctionCall);
 
     switch (data.type) {
