@@ -1,10 +1,10 @@
-import {ActorInstance}     from '../../lib/actor/actor.main';
-import {on}                from '../../lib/events';
-import {KeyboardShortcuts} from '../../store/models/KeyboardShortcuts';
-import {Life}              from '../store'; // TODO: Move to class-attribute
-import {Engine}            from '../worker/main';
-import {fullscreenCanvas}  from '../utils';
-import {Panning}           from './panning';
+import {ActorInstance}                from '../../lib/actor/actor.main';
+import {on}                           from '../../lib/events';
+import {KeyboardShortcuts}            from '../../store/models/KeyboardShortcuts';
+import {Life}                         from '../store'; // TODO: Move to class-attribute
+import {Engine}                       from '../worker/main';
+import {fullscreenCanvas, hdpiSizeOf} from '../utils';
+import {Panning}                      from './panning';
 
 enum Mode {
     Resurrect = 'Set',
@@ -49,7 +49,17 @@ export class Draw {
         // should still be able to interact with.
         canvas.style.pointerEvents = 'none';
 
+        this.resize();
         this.bindListeners();
+    }
+
+    private resize() {
+        const {canvas} = this;
+        fullscreenCanvas(canvas);
+
+        const [width, height] = hdpiSizeOf(canvas.getBoundingClientRect(), devicePixelRatio);
+        canvas.height = height;
+        canvas.width = width;
     }
 
     private bindListeners(): void {
@@ -82,10 +92,10 @@ export class Draw {
         });
 
         on(mainCanvas, ['mousemove', 'touchmove'], (e: MouseEvent) => {
-            this.redraw(e.pageX, e.pageY);
+            this.redraw(e.pageX * devicePixelRatio, e.pageY * devicePixelRatio);
         });
 
-        on(window, 'resize', () => fullscreenCanvas(this.canvas));
+        on(window, 'resize', () => this.resize());
         on(panning, 'panning', () => this.redraw());
     }
 
