@@ -103,6 +103,7 @@ module.exports = {
                 parallel: true,
                 sourceMap: true,
                 terserOptions: {
+                    keep_classnames: true,
                     toplevel: true,
                     mangle: true,
                     output: {
