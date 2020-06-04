@@ -11,7 +11,7 @@ render(
 
 /* eslint-disable no-console */
 if (env.NODE_ENV === 'production') {
-    console.log(`[INFO] Launching app v${env.VERSION}`);
+    console.log(`[INFO] Launching app build ${env.BUILD}`);
 
     navigator.serviceWorker.register(
         '/service-worker.js'

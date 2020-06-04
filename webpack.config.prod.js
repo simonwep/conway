@@ -7,6 +7,7 @@ const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const WorkerPlugin = require('worker-plugin');
+const {execSync} = require('child_process');
 const webpack = require('webpack');
 const pkg = require('./package');
 const path = require('path');
@@ -16,6 +17,7 @@ const dist = path.resolve(__dirname, 'dist');
 const crate = path.resolve(__dirname, 'crate');
 const src = path.resolve(__dirname, 'src');
 const app = path.resolve(src, 'app');
+const build = execSync('git rev-list --count master').toString('utf-8');
 
 module.exports = {
     mode: 'production',
@@ -115,7 +117,7 @@ module.exports = {
         new webpack.DefinePlugin({
             'env': {
                 'NODE_ENV': JSON.stringify('production'),
-                'VERSION': JSON.stringify(pkg.version)
+                'BUILD': JSON.stringify(build)
             }
         }),
 

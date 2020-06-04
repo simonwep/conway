@@ -53,7 +53,7 @@ export class Draw {
         this.bindListeners();
     }
 
-    private resize() {
+    private resize(): void {
         const {canvas} = this;
         fullscreenCanvas(canvas);
 
