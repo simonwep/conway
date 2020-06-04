@@ -10,13 +10,11 @@
 
 <p align="center">
   <a href="https://github.com/Simonwep/conways/actions"><img
-     alt="Build Status"
-     src="https://img.shields.io/github/workflow/status/Simonwep/conway/CI?style=flat-square"/></a>
-  <img alt="Current version"
-       src="https://img.shields.io/github/tag/Simonwep/conway.svg?color=3498DB&label=version&style=flat-square">
+     alt="Deployment Status"
+     src="https://github.com/Simonwep/conway/workflows/Deployment/badge.svg"/></a>
   <a href="https://github.com/sponsors/Simonwep"><img
      alt="Support me"
-     src="https://img.shields.io/badge/github-support-3498DB.svg?style=popout-square"></a>
+     src="https://img.shields.io/badge/github-support-3498DB.svg"></a>
 </p>
 
 
