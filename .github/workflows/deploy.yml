@@ -41,7 +41,7 @@ jobs:
         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
         unzip -q awscliv2.zip
         sudo ./aws/install
-        aws s3 sync ./conway/dist s3://conway.reinisch.io
+        aws s3 sync ./conway/dist s3://conway.reinisch.io --debug
 
         # Update content-type of wasm files
         aws s3 cp \
