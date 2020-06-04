@@ -44,7 +44,7 @@ export class Stats extends Component {
                             onClick={this.resetGenerationCounter}>
                         <Icon name="reset"/>
                     </button>
-                    <p>{life.generationCount}th Generation</p>
+                    <p>{life.generationCount.toLocaleString()}th Generation</p>
                 </section>
             </div>
         );

@@ -182,7 +182,10 @@ export class KeyboardShortcuts {
 
             const existing = this.shortcuts.get(name);
             if (existing) {
-                throw new Error(`A shortcut with the name ${name} already exists`);
+                /* eslint-disable no-console */
+                if (env.NODE_ENV === 'production') {
+                    console.warn(`A shortcut with the name ${name} already exists`);
+                }
             } else {
                 this.shortcuts.set(name, {
                     active: false,

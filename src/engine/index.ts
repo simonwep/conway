@@ -5,14 +5,19 @@ import {on}                             from '../lib/events';
 import {life, shortcuts}                from '../store';
 import {Draw}                           from './plugins/draw';
 import {Panning}                        from './plugins/panning';
-import {Config, Engine}                 from './worker/main';
 import {fullscreenCanvas}               from './utils';
+import {Config, Engine}                 from './worker/main';
 
 // Engine instance
 export let engine: ActorInstance<Engine>;
 
 // Called only once to mount the canvas
 export const init = async (): Promise<void> => {
+
+    // This module cannot get hot-reloaded
+    if (env.NODE_ENV === 'development') {
+        module.hot?.decline();
+    }
 
     // Grab canvases
     const overlayCanvas = document.getElementById('draw-overlay') as HTMLCanvasElement;
