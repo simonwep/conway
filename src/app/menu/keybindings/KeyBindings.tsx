@@ -4,11 +4,10 @@ import {JSXInternal}  from 'preact/src/jsx';
 import {shortcuts}    from '../../../store';
 import {KeyBinding}   from './KeyBinding';
 import styles         from './KeyBindings.module.scss';
-import Element = JSXInternal.Element;
 
 @observer
 export class KeyBindings extends Component {
-    render(): Element {
+    render(): JSXInternal.Element {
         const {list} = shortcuts;
 
         return (

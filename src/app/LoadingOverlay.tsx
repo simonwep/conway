@@ -3,7 +3,6 @@ import {JSXInternal}  from 'preact/src/jsx';
 import {init}         from '../engine';
 import {random}       from '../lib/random';
 import styles         from './LoadingOverlay.module.scss';
-import Element = JSXInternal.Element;
 
 const frames = [
     [
@@ -89,7 +88,7 @@ export class LoadingOverlay extends Component<Props, State> {
         });
     }
 
-    render(_: Props, {frameIndex, finish, randomTarget}: State): Element {
+    render(_: Props, {frameIndex, finish, randomTarget}: State): JSXInternal.Element {
         const frame = frames[frameIndex];
 
         const tiles = frame.map((cell, index) => {

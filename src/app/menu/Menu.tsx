@@ -6,7 +6,6 @@ import {menu, shortcuts} from '../../store';
 import {Export}          from './export/Export';
 import {KeyBindings}     from './keybindings/KeyBindings';
 import styles            from './Menu.module.scss';
-import Element = JSXInternal.Element;
 
 type Props = {};
 type State = {
@@ -18,7 +17,7 @@ export class Menu extends Component<Props, State> {
     state = {
         currentPage: 'Key Bindings'
     };
-    private readonly pages = new Map<string, Element>([
+    private readonly pages = new Map<string, JSXInternal.Element>([
         ['Key Bindings', (<KeyBindings key={1}/>)],
         ['Export', (<Export key={2}/>)]
     ]);
@@ -52,7 +51,7 @@ export class Menu extends Component<Props, State> {
         };
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         const {currentPage} = this.state;
         const navigation = [];
         const pages = [];

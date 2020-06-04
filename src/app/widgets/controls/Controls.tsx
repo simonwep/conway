@@ -6,7 +6,6 @@ import {life, menu}      from '../../../store';
 import Icon              from '../../components/Icon';
 import * as widgetStyles from '../widget.module.scss';
 import * as styles       from './Controls.module.scss';
-import Element = JSXInternal.Element;
 
 @observer
 export class Controls extends Component {
@@ -26,7 +25,7 @@ export class Controls extends Component {
         menu.show();
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         const {paused} = life;
 
         return (

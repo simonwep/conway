@@ -7,7 +7,6 @@ import {life}         from '../../../store';
 import {FPSLimiter}   from './FPSLimiter';
 import * as styles    from './LifeStats.module.scss';
 import {Stats}        from './Stats';
-import Element = JSXInternal.Element;
 
 @observer
 export class LifeStats extends Component {
@@ -18,7 +17,7 @@ export class LifeStats extends Component {
         life.offsetGenerationCounter();
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         return (
             <div className={styles.lifeStats}>
                 <FPSLimiter/>

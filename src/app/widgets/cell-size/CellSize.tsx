@@ -5,7 +5,6 @@ import {bind}                from '../../../lib/preact-utils';
 import {life}                from '../../../store';
 import {VerticalNumberInput} from '../../components/VerticalNumberInput';
 import styles                from './CellSize.module.scss';
-import Element = JSXInternal.Element;
 
 @observer
 export class CellSize extends Component {
@@ -15,7 +14,7 @@ export class CellSize extends Component {
         life.setCellSize(value);
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         return (
             <VerticalNumberInput
                 class={styles.cellSize}

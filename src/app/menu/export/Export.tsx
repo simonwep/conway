@@ -5,7 +5,6 @@ import {bind}                    from '../../../lib/preact-utils';
 import {life}                    from '../../../store';
 import Icon                      from '../../components/Icon';
 import styles                    from './Export.module.scss';
-import Element = JSXInternal.Element;
 
 @observer
 export class Export extends Component {
@@ -37,7 +36,7 @@ export class Export extends Component {
         });
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
 
         return (
             <div className={styles.export}>

@@ -5,7 +5,6 @@ import {cn}                      from '../../../lib/preact-utils';
 import {life}                    from '../../../store';
 import * as widgetStyles         from '../widget.module.scss';
 import * as styles               from './Graph.module.scss';
-import Element = JSXInternal.Element;
 
 @observer
 export class Graph extends Component {
@@ -21,7 +20,7 @@ export class Graph extends Component {
         );
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         return (
             <div className={cn(
                 widgetStyles.widget,

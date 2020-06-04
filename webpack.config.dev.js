@@ -3,7 +3,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const WorkerPlugin = require('worker-plugin');
 const webpack = require('webpack');
-const pkg = require('./package');
 const path = require('path');
 
 const globalSCSS = path.resolve(__dirname, 'src/styles/_global.scss');
@@ -14,7 +13,7 @@ const app = path.resolve(src, 'app');
 
 module.exports = {
     mode: 'development',
-    entry: './src/index.tsx',
+    entry: './src/index.js',
     devtool: 'inline-source-map',
 
     output: {
@@ -99,14 +98,7 @@ module.exports = {
             {
                 test: /\.(js|ts|tsx)$/,
                 include: src,
-                use: [
-                    {
-                        loader: 'ts-loader',
-                        options: {
-                            transpileOnly: true
-                        }
-                    }
-                ]
+                use: 'babel-loader'
             }
         ]
     },

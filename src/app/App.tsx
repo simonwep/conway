@@ -10,7 +10,6 @@ import {Controls}       from './widgets/controls/Controls';
 import {Graph}          from './widgets/graph/Graph';
 import {LifeStats}      from './widgets/life-stats/LifeStats';
 import {Rules}          from './widgets/rules/Rules';
-import Element = JSXInternal.Element;
 
 type Props = {};
 type State = {
@@ -49,7 +48,7 @@ export class App extends Component<Props, State> {
         });
     }
 
-    render(_: Props, {canvasInitialized, hideUI}: State): Element {
+    render(_: Props, {canvasInitialized, hideUI}: State): JSXInternal.Element {
         return canvasInitialized ? (
             <div>
                 <div className={cn(styles.contentWrapper, {

@@ -4,7 +4,6 @@ import {JSXInternal}             from 'preact/src/jsx';
 import {bind}                    from '../../../lib/preact-utils';
 import {life, shortcuts}         from '../../../store';
 import {VerticalNumberInput}     from '../../components/VerticalNumberInput';
-import Element = JSXInternal.Element;
 
 @observer
 export class FPSLimiter extends Component {
@@ -45,7 +44,7 @@ export class FPSLimiter extends Component {
         life.setFPSLimitation(value);
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         const {fpsLimitation} = life;
 
         return (

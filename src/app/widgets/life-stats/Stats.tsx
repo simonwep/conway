@@ -6,7 +6,6 @@ import {life}            from '../../../store';
 import Icon              from '../../components/Icon';
 import * as widgetStyles from '../widget.module.scss';
 import * as styles       from './Stats.module.scss';
-import Element = JSXInternal.Element;
 
 @observer
 export class Stats extends Component {
@@ -21,7 +20,7 @@ export class Stats extends Component {
         life.setFPSLimitation(life.fpsLimitation === null ? 30 : null);
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         const {fpsLimitation} = life;
 
         return (

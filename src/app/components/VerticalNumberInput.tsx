@@ -4,12 +4,11 @@ import {JSXInternal}     from 'preact/src/jsx';
 import {bind, cn}        from '../../lib/preact-utils';
 import * as widgetStyles from '../widgets/widget.module.scss';
 import * as styles       from './VerticalNumberInput.module.scss';
-import Element = JSXInternal.Element;
 
 type Props = {
     onChange: (nextValue: number) => number | boolean | null | void;
-    increase: Element;
-    decrease: Element;
+    increase: JSXInternal.Element;
+    decrease: JSXInternal.Element;
     class: string;
     baseValue: number | null;
     useValue: number | null | undefined;
@@ -109,7 +108,7 @@ export class VerticalNumberInput extends Component<Props, State> {
         });
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         const {increase, decrease, useValue, shiftKey, ctrlKey, wheelStep, step, min, max} = this.props;
         const value = useValue === undefined ? this.state.value : useValue;
         const minChange = Math.min(shiftKey, ctrlKey, wheelStep, step);

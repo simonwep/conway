@@ -18,7 +18,7 @@ const app = path.resolve(src, 'app');
 
 module.exports = {
     mode: 'production',
-    entry: './src/index.tsx',
+    entry: './src/index.js',
     devtool: 'source-map',
 
     output: {
@@ -85,9 +85,7 @@ module.exports = {
             {
                 test: /\.(js|ts|tsx)$/,
                 include: src,
-                use: [
-                    'ts-loader'
-                ]
+                use: 'babel-loader'
             }
         ]
     },

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {h}           from 'preact';
 import {JSXInternal} from 'preact/src/jsx';
-import Element = JSXInternal.Element;
 
 const icons = new Map();
 
@@ -18,7 +17,7 @@ type Props = {
     name: string;
 };
 
-export default ({name}: Props): Element => {
+export default ({name}: Props): JSXInternal.Element => {
     const svg = icons.get(name);
 
     if (!svg) {

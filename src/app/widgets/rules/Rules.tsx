@@ -5,7 +5,6 @@ import {bind, cn}        from '../../../lib/preact-utils';
 import {life}            from '../../../store';
 import * as widgetStyles from '../widget.module.scss';
 import * as styles       from './Rules.module.scss';
-import Element = JSXInternal.Element;
 
 type UpdateRulesFunction = (n: number) => () => void;
 
@@ -36,8 +35,8 @@ export class Rules extends Component {
         life.setResurrectRules(life.resurrectRules ^ 0b111111111);
     }
 
-    generateNumberedList(fn: UpdateRulesFunction, rules: number): Array<Element> {
-        return [...new Array(9)].map((_, index): Element => {
+    generateNumberedList(fn: UpdateRulesFunction, rules: number): Array<JSXInternal.Element> {
+        return [...new Array(9)].map((_, index): JSXInternal.Element => {
             return <button onClick={fn(index)}
                            key={index}
                            data-bit-index={index}
@@ -49,7 +48,7 @@ export class Rules extends Component {
         });
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         const {surviveRules, resurrectRules} = life;
         const surviveList = this.generateNumberedList(this.updateSurviveRules, surviveRules);
         const resurrectList = this.generateNumberedList(this.updateResurrectRules, resurrectRules);

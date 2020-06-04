@@ -5,6 +5,7 @@
         "outDir": "./dist/",
         "skipLibCheck": true,
         "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
         "noImplicitAny": true,
         "moduleResolution": "node",
         "sourceMap": true,

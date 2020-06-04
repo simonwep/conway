@@ -8,7 +8,6 @@ import {prettyKeyCode}             from '../../../lib/pretty-key-code';
 import {shortcuts}                 from '../../../store';
 import {KeyboardShortcut}          from '../../../store/models/KeyboardShortcuts';
 import styles                      from './KeyBinding.module.scss';
-import Element = JSXInternal.Element;
 
 type Props = {
     id: number;
@@ -130,7 +129,7 @@ export class KeyBinding extends Component<Props, State> {
         });
     }
 
-    render(): Element {
+    render(): JSXInternal.Element {
         const {errored, recording, keyNames} = this.state;
         const {shortcut} = this.props;
         const keys = (recording ? keyNames : shortcut.binding).map(value => {
