@@ -107,7 +107,7 @@ export class LoadingOverlay extends Component<Props, State> {
             <div className={styles.loadingOverlay}
                  data-finish={finish}>
                 <div>{tiles}</div>
-                <p className={styles.bottomText}>Build {env.BUILD} by Simon R.</p>
+                <p className={styles.bottomText}>Build from {env.BUILD} by Simon R.</p>
             </div>
         );
     }
